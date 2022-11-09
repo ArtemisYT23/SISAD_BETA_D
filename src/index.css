@@ -1,0 +1,47 @@
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+:root {
+  --navBarMinWidth: 4rem;
+  --iconSize: 1.5rem;
+  --primaryColor: #f68a20;
+  --lineColor: #a4a2a2;
+  --black: #404040;
+  --white: #fffbf8;
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+a {
+  color: var(--black);
+  text-decoration: none;
+  border: none !important;
+}
+
+body::-webkit-scrollbar {
+  width: 0.5rem;
+  background-color: var(--scroolColor);
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: var(--scroolColor);
+  border-radius: 0.2rem;
+}
+
+body::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:active {
+  background-color: var(--scroolColor);
+}
+
+@media screen and (min-width: 720px) {
+  body::-webkit-scrollbar {
+    background-color: var(--scroolColor);
+  }
+  body::-webkit-scrollbar-thumb {
+    background-color: var(--primaryColor);
+  }
+}
