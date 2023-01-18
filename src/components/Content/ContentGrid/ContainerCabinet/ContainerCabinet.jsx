@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
 import styled from "styled-components";
@@ -9,6 +9,7 @@ import { setCloseMenuContextGroup } from "../../../../redux/states/ActionCore";
 
 
 import LoadingSpinner from "../../../../utilities/LoadingSpinner";
+import Loader from "../../../../utilities/Loader";
 
 const ContainerCabinet = () => {
   const dispatch = useDispatch();
@@ -19,11 +20,15 @@ const ContainerCabinet = () => {
   );
   const { isLoadingCabinet } = cabinetCore;
   const { ContextGroup } = modalCore;
-  const { RolSesion } = userSesion;
+  const { RolSesion, OptionsTocken } = userSesion;
   const { selected, selectedView } = viewCore;
 
   const handleClick = (e) => {
-    dispatch(setCloseMenuContextGroup(true));
+    OptionsTocken.map((n, i) => {
+      if (n.id == "314e90cc-7f66-4d13-80ed-509c0b82283c") {
+        dispatch(setCloseMenuContextGroup(true));
+      }
+    });
   };
 
   const contextMenuRightClick = (e) => {
@@ -35,23 +40,14 @@ const ContainerCabinet = () => {
 
   const CloseContextCabinet = (context) => {
     if (context === true) {
-        dispatch(setCloseMenuContextGroup(false));
+      dispatch(setCloseMenuContextGroup(false));
     }
   };
 
+  
   return (
     <>
-      {RolSesion[2] == "Administrator" && ContextGroup ? (
-        <CabinetContext x={x} y={y} />
-      ) : (
-        <></>
-      )}
-
-      {RolSesion[2] == "Writer" && ContextGroup ? (
-        <CabinetContext x={x} y={y} />
-      ) : (
-        <></>
-      )}
+      {ContextGroup ? <CabinetContext x={x} y={y} /> : <></>}
 
       <DocumentContainer
         onClick={() => CloseContextCabinet(ContextGroup)}
@@ -67,14 +63,14 @@ const ContainerCabinet = () => {
 
         {selected === "" && selectedView != "list" ? (
           <>
-            {isLoadingCabinet ? <LoadingSpinner /> : <CabinetDefaultRender />}
+            {isLoadingCabinet ? <Loader /> : <CabinetDefaultRender />}
           </>
         ) : (
           <></>
         )}
 
         <Toaster
-          position="bottom-right"
+          position="top-right"
           toastOptions={{
             className: "",
             duration: 3500,
@@ -91,9 +87,18 @@ const ContainerCabinet = () => {
 
 export default ContainerCabinet;
 
-
 const DocumentContainer = styled.div`
-  padding-bottom: 2rem; 
+  padding-bottom: 2rem;
   display: flex;
   flex-wrap: wrap;
+  @media (max-width: 767px) {
+    width: 100%;
+    justify-content: space-around;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    overflow-y: scroll;
+    display: grid;
+    grid-template-columns: 130px 130px;
+  }
 `;

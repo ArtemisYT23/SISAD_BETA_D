@@ -1,10 +1,29 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Options } from "./Icons";
-import ElementIcon from "../../../../Aside/Search/icons";
+import ElementIcon from "../../../../../Styles/IconsResourse";
 import styled from "styled-components";
-import { setOpenModalCabinetUpdate, setOpenModalCabinetDelete } from "../../../../../redux/states/ActionCore";
-
+import {
+  setOpenModalCabinetUpdate,
+  setOpenModalCabinetDelete,
+  setOpenModalHistoryViewElement,
+} from "../../../../../redux/states/ActionCore";
+import {
+  getNameGlobalChange,
+  setSaveElementBreak,
+} from "../../../../../redux/states/Name";
+import {
+  setSelectedCabinetUpdateCore,
+  setSelectedCabinetCore,
+} from "../../../../../redux/states/Cabinet";
+import { setFilterFoldersCore } from "../../../../../redux/states/Folder";
+import { getMetadataByCabinet } from "../../../../../redux/states/Metadata";
+import { getTypeFileByCabinet } from "../../../../../redux/states/FileType";
+import { getIndexAllCabinetConfig } from "../../../../../redux/states/Indexes";
+import { getAllHistoryElementCore } from "../../../../../redux/states/History";
+import CabinetUpdate from "../../ContainerCabinet/ModalesCabinet/CabinetUpdate";
+import CabinetDelete from "../../ContainerCabinet/ModalesCabinet/CabinetDelete";
+import HistoryElement from "../../ContainerCabinet/ModalesCabinet/HistoryElement";
 
 const GridGroup = ({ element, name, description, groupId, id, fileTypes }) => {
   const dispatch = useDispatch();
@@ -14,14 +33,19 @@ const GridGroup = ({ element, name, description, groupId, id, fileTypes }) => {
 
   const Envio = (index, name) => {
     setShowMenu(false);
-    
+    dispatch(getNameGlobalChange(name));
+    dispatch(setSelectedCabinetCore(index));
+    dispatch(setFilterFoldersCore(index));
+    dispatch(getMetadataByCabinet(index));
   };
 
   const Enrutamiento = (path) => {
-    
+    dispatch(setSaveElementBreak(path));
   };
 
   const dropdownCabinet = (index) => {
+    dispatch(setSelectedCabinetUpdateCore(index));
+    dispatch(getTypeFileByCabinet(index));
     setShowMenu(!showMenu);
     const collection = document.getElementsByClassName("dropdown");
     for (let i = 0; i < collection.length; i++) {
@@ -41,37 +65,45 @@ const GridGroup = ({ element, name, description, groupId, id, fileTypes }) => {
     dispatch(setOpenModalCabinetDelete(true));
   };
 
-  const AbrilModalIndexCreated = (index) => {
-    
+  const AbrilModalIndexCreated = (name) => {
+    dispatch(getIndexAllCabinetConfig(name));
   };
 
-  const AbrilModalIndexCabinetFilter = (id) => {
-    
+  const AbriModalHistoryElement = (id, userId) => {
+    dispatch(setOpenModalHistoryViewElement(true));
+    dispatch(getAllHistoryElementCore(id, userId));
   };
 
   return (
-    <GridElemmentContainer id={id} onDoubleClick={() => {Envio(id, name), Enrutamiento(id)}}>
+    <GridElemmentContainer
+      id={id}
+      onDoubleClick={() => {
+        Envio(id, name), Enrutamiento(id);
+      }}
+    >
       {showMenu && (
         <Dropdown className="dropdown">
           <DropdownContent>
-            <DropdownItem onClick={() => {
-                AbrilModalIndexCreated(id), AbrilModalIndexCabinetFilter(name);
-              }}
-            >Configurar</DropdownItem>
+            <DropdownItem onClick={() => AbrilModalIndexCreated(id)}>
+              Configurar
+            </DropdownItem>
             <LineItem></LineItem>
             <DropdownItem onClick={() => AbrirModalActualizarCabinet(id)}>
               Renombrar
             </DropdownItem>
-            {/* <CabinetUpdate
-              id={id}
-              name={name}
-              description={description}
-              groupId={groupId}
-              fileTypes={fileTypes}
-            /> */}
+            <CabinetUpdate />
             <LineItem></LineItem>
-            <DropdownItem onClick={() => AbrirModalEliminarCabinet()}>Eliminar</DropdownItem>
-            {/* <CabinetDelete id={id} name={name} /> */}
+            <DropdownItem onClick={() => AbrirModalEliminarCabinet()}>
+              Eliminar
+            </DropdownItem>
+            <CabinetDelete />
+            <LineItem></LineItem>
+            <DropdownItem
+              onClick={() => AbriModalHistoryElement(id, RolSesion[0])}
+            >
+              Historial
+            </DropdownItem>
+            <HistoryElement />
           </DropdownContent>
         </Dropdown>
       )}
@@ -82,7 +114,7 @@ const GridGroup = ({ element, name, description, groupId, id, fileTypes }) => {
         </ContainerIcon>
       )}
 
-      {RolSesion[2] == "Writer" && (
+      {RolSesion[2] != "Administrator" && (
         <ContainerIcon onClick={() => dropdownCabinet(id)}>
           <Options x={20} y={20} fill={"#F68A20"} />
         </ContainerIcon>
@@ -94,9 +126,7 @@ const GridGroup = ({ element, name, description, groupId, id, fileTypes }) => {
         <></>
       )}
 
-      {RolSesion[2] == "Writer" ? <ElementIcon element={element} /> : <></>}
-
-      {RolSesion[2] == "Reader" ? <ElementIcon element={element} /> : <></>}
+      {RolSesion[2] != "Administrator" ? <ElementIcon element={element} /> : <></>}
 
       <ElementName>{name}</ElementName>
     </GridElemmentContainer>
@@ -128,8 +158,8 @@ const ContainerIcon = styled.div`
 const ElementName = styled.h4`
   color: var(--primaryColor);
   font-size: 0.8rem;
-  text-align:center;
-  overflow: hidden; 
+  text-align: center;
+  overflow: hidden;
 `;
 
 const Dropdown = styled.div`
@@ -164,5 +194,3 @@ const LineItem = styled.hr`
   width: 100%;
   background: #f68a20;
 `;
-
-

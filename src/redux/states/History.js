@@ -62,7 +62,7 @@ export const getAllHistoryElementCore = (resourseId, userId) => async(dispatch, 
         url: `${CoreServer}traceability/${userId}/${resourseId}`,
         method: "GET",
         headers: {
-            Authorization: `Bearer ${TockenUser?.token}`
+            Authorization: `Bearer ${TockenUser}`
         }
     }).then(function (response) {
         if(response.status == 200) {
@@ -97,7 +97,7 @@ export const getAllHistoryElementDocu = (resourseId, userId) => async(dispatch, 
         url: `${DocumentServer}traceability/${userId}/${resourseId}`,
         method: "GET",
         headers: {
-            Authorization: `Bearer ${TockenUser?.token}`
+            Authorization: `Bearer ${TockenUser}`
         }
     }).then(function (response) {
         if(response.status == 200) {
@@ -133,7 +133,7 @@ export const getAllHistoryUserCore = (user) => async(dispatch, getState) => {
         url: `${CoreServer}traceabilitybyuser/${user?.id}`,
         method: "GET",
         headers: {
-            Authorization: `Bearer ${TockenUser?.token}`
+            Authorization: `Bearer ${TockenUser}`
         }
     }).then(function (response) {
         dispatch(clearDataHistoryUserCore());
@@ -175,7 +175,7 @@ export const getAllHistoryUserDocu = (user) => async(dispatch, getState) => {
         url: `${DocumentServer}traceabilitybyuser/${user}`,
         method: "GET",
         headers: {
-            Authorization: `Bearer ${TockenUser?.token}`
+            Authorization: `Bearer ${TockenUser}`
         }
     }).then(function (response) {
         if(response.status == 200) {

@@ -5,11 +5,20 @@ import {
 } from "./View";
 import { setClearMemoryDataGroupCore } from "./Group";
 import { setClearDataCabinetCore } from "./Cabinet";
+import { clearDataFolder, clearFolderCabinet, setFolderChildCore } from "./Folder";
+import { setClearDataActiveDocumentary } from "./ActionDocumentary";
+import { setClearMemoryDataUserCore } from "./UserCore";
+import { setClearMemoryDataSesionUserCore } from "./UserSesion";
+import { setClearMemoryDataViewCore } from "./View";
+import { clearSelectionOptions } from "../states/OptionsMenu";
+import { clearDataIndexManagment } from "../states/Indexes";
+import { setCleanerModalCore } from "../states/ActionCore";
 
 const initialState = {
     breackcompGroup: null,
     breackcomp: null,
     breackcompFolder: null,
+    breackcompFolderChild: null,
     NameGlobalSelected: "",
     NameManagmentSelected: "",
     elementError: "",
@@ -25,8 +34,11 @@ const ADD_DATA_ELEMENT_SELECTED_CORE = "ADD_DATA_ELEMENT_SELECTED_CORE";
 const BREAK_CABINETS_ERROR = "BREAK_CABINETS_ERROR";
 const CLEAR_DATA_ELEMENT_SELECTED_CORE = "CLEAR_DATA_ELEMENT_SELECTED_CORE";
 const ADD_DATA_ELEMENT_FOLDER_SELECTED_CORE = "ADD_DATA_ELEMENT_FOLDER_SELECTED_CORE";
+const ADD_DATA_ELEMENT_FOLDER_ERROR = "ADD_DATA_ELEMENT_FOLDER_ERROR";
+const ADD_DATA_ELEMENT_FOLDER_CHILD_CORE = "ADD_DATA_ELEMENT_FOLDER_CHILD_CORE";
 const CLEAR_DATA_ELEMENT_FOLDER_SELECTED_CORE = "CLEAR_DATA_ELEMENT_FOLDER_SELECTED_CORE";
 const GET_NAME_ELEMENT_MANAGMENT_CHANGE = "GET_NAME_ELEMENT_MANAGMENT_CHANGE";
+const CLEAR_DATA_ELEMENT_FOLDER_CHILD_CORE = "CLEAR_DATA_ELEMENT_FOLDER_CHILD_CORE";
 
 export default function NameReducer(state = initialState, action) {
     switch (action.type) {
@@ -39,8 +51,11 @@ export default function NameReducer(state = initialState, action) {
         case BREAK_CABINETS_ERROR:
         case CLEAR_DATA_ELEMENT_SELECTED_CORE:
         case ADD_DATA_ELEMENT_FOLDER_SELECTED_CORE:
+        case ADD_DATA_ELEMENT_FOLDER_ERROR:
+        case ADD_DATA_ELEMENT_FOLDER_CHILD_CORE:
         case CLEAR_DATA_ELEMENT_FOLDER_SELECTED_CORE:
         case GET_NAME_ELEMENT_MANAGMENT_CHANGE:
+        case CLEAR_DATA_ELEMENT_FOLDER_CHILD_CORE:
             return action.payload;
         default:
             return state;
@@ -67,7 +82,7 @@ export const getNameGlobalChangeCleaner = () => async (dispatch, getState) => {
 };
 
 //name config documentary
-/*<------------------Guardar nombre de la seleccion de menun de managament----------------->*/
+/*<------------------Guardar nombre de la seleccion de menu de managament----------------->*/
 export const getNameManagmentChange = (name) => async (dispatch, getState) => {
     const { nameCore } = getState();
     dispatch({
@@ -134,17 +149,37 @@ export const setClearElementBreak = () => async (dispatch, getState) => {
     })
 }
 
-//guardar array para breakcomp de carpetas
-export const setSaveElementBreakFolder = (Data) => async (dispatch, getState) => {
-    const { nameCore } = getState();
+//guardar array para breakcomp de carpeta padre
+export const setSaveElementBreakFolder = (index) => async (dispatch, getState) => {
+    const { nameCore, folderCore } = getState();
+    const { folders } = folderCore;
+    const breackcompFolder = folders.find(folders => folders.id == index);
+
+    if (breackcompFolder == undefined) {
+        dispatch({
+            type: ADD_DATA_ELEMENT_FOLDER_ERROR,
+            payload: { ...nameCore, elementError: "El id no existe" }
+        });
+        return;
+    }
+
     dispatch({
         type: ADD_DATA_ELEMENT_FOLDER_SELECTED_CORE,
-        payload: { ...nameCore, breackcompFolder: Data }
+        payload: { ...nameCore, breackcompFolder }
+    })
+}
+
+//guardar array para breakcomp de carpeta hija
+export const setSaveElementBreackFolderChild = (Data) => async (dispatch, getState) => {
+    const { nameCore } = getState();
+    dispatch({
+        type: ADD_DATA_ELEMENT_FOLDER_CHILD_CORE,
+        payload: { ...nameCore, breackcompFolderChild: Data }
     })
 }
 
 
-//limpiar estado del breakcomp de carpetas
+//limpiar estado del breakcomp de carpetas padre
 export const setClearElementFolderBreak = () => async (dispatch, getState) => {
     const { nameCore } = getState();
     dispatch({
@@ -152,6 +187,16 @@ export const setClearElementFolderBreak = () => async (dispatch, getState) => {
         payload: { ...nameCore, breackcompFolder: null }
     })
 }
+
+//limpiar estado de breakcomp de carpeta hija
+export const setClearElementFolderChildBreak = () => async (dispatch, getState) => {
+    const { nameCore } = getState();
+    dispatch({
+        type: CLEAR_DATA_ELEMENT_FOLDER_CHILD_CORE,
+        payload: { ...nameCore, breackcompFolderChild: null }
+    })
+}
+
 
 //cierre de sesion global
 export const closeSesionCleaningState = () => async (dispatch, getState) => {
@@ -164,13 +209,31 @@ export const closeSesionCleaningState = () => async (dispatch, getState) => {
     dispatch(setSelectedSearchNullCore());
     dispatch(setClearMemoryDataGroupCore());
     dispatch(setClearDataCabinetCore());
+    dispatch(clearDataFolder());
+    dispatch(setClearDataActiveDocumentary());
+    dispatch(setClearMemoryDataUserCore());
+    dispatch(setClearMemoryDataSesionUserCore());
+    dispatch(setClearMemoryDataViewCore());
+    dispatch(setCleanerModalCore());
 }
 
+//Estados iniciales para documentary
 export const CleaningStateInitial = () => async (dispatch, getState) => {
     dispatch(setClearElementFolderBreak());
+    dispatch(setClearElementFolderChildBreak());
     dispatch(setClearElementBreak());
     dispatch(setClearElementGroupBreak());
     dispatch(getNameGlobalChangeCleaner());
     dispatch(setSelectedNullCore());
+    dispatch(clearFolderCabinet());
     dispatch(setSelectedSearchNullCore());
+    dispatch(setClearDataActiveDocumentary());
+    dispatch(setCleanerModalCore());
+    dispatch(setFolderChildCore());
+}
+
+//Estados iniciales para Managment
+export const CleaningStateManagment = () => async (dispatch, getState) => {
+    dispatch(clearSelectionOptions());
+    dispatch(clearDataIndexManagment());
 }

@@ -58,7 +58,7 @@ export const getFileAllDocument = (id) => async (dispatch, getState) => {
         const response = await axios({
             url: `${DocumentServer}filebydocument/${id}`,
             headers: {
-                Authorization: `Bearer ${TockenUser?.token}`
+                Authorization: `Bearer ${TockenUser}`
             }
         });
         if (response.status == 200) {
@@ -86,7 +86,7 @@ export const getFilesByFolderAll = (folderId) => async (dispatch, getState) => {
         const response = await axios({
             url: `${DocumentServer}filebyfolder/${folderId}`,
             headers: {
-                Authorization: `Bearer ${TockenUser?.token}`
+                Authorization: `Bearer ${TockenUser}`
             }
         });
         if (response.status == 200) {
@@ -154,7 +154,39 @@ export const setFilterFileByName = (name) => async (dispatch, getState) => {
         const response = await axios({
             url: `${DocumentServer}filebytext/${name}`,
             headers: {
-                Authorization: `Bearer ${TockenUser?.token}`
+                Authorization: `Bearer ${TockenUser}`
+            }
+        });
+        if (response.status == 200) {
+            dispatch({
+                type: GET_ALL_FILES_NAME_DATA_CORE,
+                payload: { ...filesCore, SearchFiles: response.data },
+            });
+            dispatch(setChangeSelectView("search"));
+            dispatch(setActiveLoadingFilesSearch(false));
+        }
+    } catch (error) {
+        console.log(error);
+        dispatch({
+            type: GET_ALL_FILES_NAME_DATA_ERRORS_CORE,
+            payload: { ...filesCore, SearchFiles: [] }
+        });
+    }
+}
+
+//buscar archivos por configuracion de filtros
+//filtrar a nivel de archivos
+export const setFilterFileConfiguration = (filterData) => async (dispatch, getState) => {
+    const { filesCore, sesion } = getState();
+    const { TockenUser } = sesion;
+    dispatch(setActiveLoadingFilesSearch(true));
+    try {
+        const response = await axios({
+            url: `${DocumentServer}filesbyfilterandtext`,
+            method: 'PUT',
+            data: filterData,
+            headers: {
+                Authorization: `Bearer ${TockenUser}`
             }
         });
         if (response.status == 200) {
@@ -203,7 +235,7 @@ export const getFileByDocumentFiles = ( documentId, fileFolder ) => async(dispat
         method: "PUT",
         data: fileFolder,
         headers: {
-            Authorization: `Bearer ${TockenUser?.token}`
+            Authorization: `Bearer ${TockenUser}`
         },
     }).then(function (response) {
         console.log(response.data);
@@ -231,7 +263,7 @@ export const getFilesUnitbyIdDocu = (index) => async (dispatch, getState) => {
     const response = await axios({
         url: `${DocumentServer}downloadfilebyid/${index}`,
         headers: {
-            Authorization: `Bearer ${TockenUser?.token}`
+            Authorization: `Bearer ${TockenUser}`
         }
     });
     console.log(response.status);

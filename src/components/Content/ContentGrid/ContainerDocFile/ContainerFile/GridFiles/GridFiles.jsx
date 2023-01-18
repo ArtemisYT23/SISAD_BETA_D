@@ -13,6 +13,7 @@ import {
 } from "../../../../../../redux/states/Files";
 import { getAllHistoryElementDocu } from "../../../../../../redux/states/History";
 import { setSelectedMetadataDocument } from "../../../../../../redux/states/Metadata";
+import FilesDelete from "../ModalesFile/FilesDelete";
 
 const GridFiles = ({
   element,
@@ -38,6 +39,7 @@ const GridFiles = ({
   };
 
   const dropdownCabinet = (index) => {
+    dispatch(setSelectedFileDocumentary(id));
     setShowMenu(!showMenu);
     const collection = document.getElementsByClassName("dropdown");
     for (let i = 0; i < collection.length; i++) {
@@ -63,7 +65,7 @@ const GridFiles = ({
             <DropdownContent>
               <DropdownItem onClick={() => DeleteFile()}>Eliminar</DropdownItem>
             </DropdownContent>
-            {/* <FileUploaderDelete /> */}
+            <FilesDelete />
           </Dropdown>
         )}
 
@@ -73,7 +75,7 @@ const GridFiles = ({
           </ContainerIcon>
         )}
 
-        {RolSesion[2] == "Writer" && (
+        {RolSesion[2] != "Administrator" && (
           <ContainerIcon onClick={() => dropdownCabinet(id)}>
             <Options x={20} y={20} fill={"#F68A20"} />
           </ContainerIcon>
@@ -82,9 +84,28 @@ const GridFiles = ({
         <ElementIcon element={element} />
 
         <ContainerDistint>
-          <DistintivoPDF>
-            <TypeFile>{extension}</TypeFile>
-          </DistintivoPDF>
+          {(() => {
+            switch (extension) {
+              case ".docx":
+                return (
+                  <DistintivoPDF color="#356be0">
+                    <TypeFile>{extension}</TypeFile>
+                  </DistintivoPDF>
+                );
+              case ".xlsx":
+                return (
+                  <DistintivoPDF color="green">
+                    <TypeFile>{extension}</TypeFile>
+                  </DistintivoPDF>
+                );
+              default:
+                return (
+                  <DistintivoPDF color="red">
+                    <TypeFile>{extension}</TypeFile>
+                  </DistintivoPDF>
+                );
+            }
+          })()}
         </ContainerDistint>
 
         <NumberOfElementChild>{fileTypeName}</NumberOfElementChild>
@@ -115,6 +136,7 @@ const ContainerIcon = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
+  cursor: pointer;
 `;
 
 const ContainerDistint = styled.div`
@@ -126,7 +148,7 @@ const ContainerDistint = styled.div`
 `;
 
 const DistintivoPDF = styled.div`
-  background: red;
+  background: ${(props) => props.color};
   width: 2.8rem;
   height: 1.5rem;
   border-radius: 0.5rem 0 0.5rem 0;

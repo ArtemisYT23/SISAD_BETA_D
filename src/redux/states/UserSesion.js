@@ -1,11 +1,13 @@
 import axios from "axios";
 import { SecurityServer } from "../../config/axios";
 import jwt_decode from "jwt-decode";
+import { getAllUserListSecurity } from "./UserCore";
 
 const initialState = {
     RolSesion: [],
     DataUser: {},
     SesionUser: {},
+    OptionsTocken: [],
     elementError: "",
 };
 
@@ -14,6 +16,7 @@ const SAVE_ROLL_USER_SECURITY = "SAVE_ROLL_USER_SECURITY";
 const GET_USER_INFO_DATA_SECURITY = "GET_USER_INFO_DATA_SECURITY";
 const GET_USER_SESION_SECURITY = "GET_USER_SESION_SECURITY";
 const SET_CLEAR_MEMORY_DATA_USERSESIONCORE = "SET_CLEAR_MEMORY_DATA_USERSESIONCORE";
+const SESION_OPTIONS_VALID = "SESION_OPTIONS_VALID";
 
 export default function UserSecurityReducer(state = initialState, action) {
     switch (action.type) {
@@ -21,6 +24,7 @@ export default function UserSecurityReducer(state = initialState, action) {
         case GET_USER_INFO_DATA_SECURITY:
         case GET_USER_SESION_SECURITY:
         case SET_CLEAR_MEMORY_DATA_USERSESIONCORE:
+        case SESION_OPTIONS_VALID:
             return action.payload;
         default:
             return state;
@@ -31,7 +35,7 @@ export default function UserSecurityReducer(state = initialState, action) {
 export const saveAllRolUserSecurity = () => async (dispatch, getState) => {
     const { userSesion, sesion } = getState();
     const { TockenUser } = sesion;
-    const token = TockenUser.token;
+    const token = TockenUser;
     const decoded = jwt_decode(token);
     // console.log(decoded);
     const TockenData = Object.values(decoded);
@@ -40,6 +44,10 @@ export const saveAllRolUserSecurity = () => async (dispatch, getState) => {
         type: SAVE_ROLL_USER_SECURITY,
         payload: { ...userSesion, RolSesion: TockenData }
     })
+    if (TockenData[2] == "Administrator") {
+        dispatch(getAllUserListSecurity());
+    }
+    dispatch(optionsValidateSecuritySesion());
 }
 
 //Obtener Informacion del usuario logeado 
@@ -51,7 +59,7 @@ export const getUserInformationSecurity = (id) => async (dispatch, getState) => 
         const res = await axios({
             url: `${SecurityServer}user/info/${id}`,
             headers: {
-                Authorization: `Bearer ${TockenUser?.token}`,
+                Authorization: `Bearer ${TockenUser}`,
             }
         })
         if (res.status == 200) {
@@ -74,7 +82,7 @@ export const getUserSesionSecurity = (id) => async (dispatch, getState) => {
         const res = await axios({
             url: `${SecurityServer}user/${id}`,
             headers: {
-                Authorization: `Bearer ${TockenUser?.token}`,
+                Authorization: `Bearer ${TockenUser}`,
             }
         })
         if (res.status == 200) {
@@ -88,6 +96,38 @@ export const getUserSesionSecurity = (id) => async (dispatch, getState) => {
     }
 }
 
+//guardar option del tocken para validar Accesos
+export const optionsValidateSecuritySesion = () => async (dispatch, getState) => {
+    const { userSesion } = getState();
+    const { RolSesion } = userSesion;
+    const OptionTocken = [];
+    const OptionUser = [];
+    const FinalOptions = [];
+    RolSesion.forEach((rol, i) => {
+        if (i == 3) {
+            OptionTocken.push(rol);
+        }
+    });
+
+    OptionTocken.forEach((obj, i) => {
+        const data = obj.split(",");
+        OptionUser.push(data);
+    });
+    console.log(OptionUser);
+
+    const result = OptionUser.forEach((info, i) => {
+        info.forEach((inf, i) => {
+            const infoData = inf.split("_");
+            const final = { id: infoData[0], name: infoData[1] };
+            FinalOptions.push(final);
+        });
+    });
+    dispatch({
+        type: SESION_OPTIONS_VALID,
+        payload: { ...userSesion, OptionsTocken: FinalOptions }
+    })
+}
+
 //limpiar estado del cabinetcore cierre de sesion 
 export const setClearMemoryDataSesionUserCore = () => async (dispatch, getState) => {
     const { userSesion } = getState();
@@ -98,6 +138,7 @@ export const setClearMemoryDataSesionUserCore = () => async (dispatch, getState)
             RolSesion: [],
             DataUser: {},
             SesionUser: {},
+            OptionsTocken: [],
             elementError: "",
         }
     })

@@ -3,6 +3,7 @@ import { CoreServer } from "../../config/axios";
 import toast, { Toaster } from "react-hot-toast";
 import { setChangeSelectView } from "./View";
 import { getNameGlobalChange } from "./Name";
+import { getAllDeleteGroupRestored } from "../formData/ResourceData";
 
 const initialState = {
     groups: [],
@@ -19,6 +20,9 @@ const SELECTED_GROUP_CORE = "SELECTED_GROUP_CORE";
 const SELECTED_ERRORS_GROUP_CORE = "SELECTED_ERRORS_GROUP_CORE";
 const SET_CLEAR_MEMORY_DATA_GROUPCORE = "SET_CLEAR_MEMORY_DATA_GROUPCORE";
 const SET_ACTIVE_SPINNER_GROUP = "SET_ACTIVE_SPINNER_GROUP";
+const ORDER_GROUP_BY_ASC_CORE = "ORDER_GROUP_BY_ASC_CORE";
+const SELECTED_ERRORS_GROUP_UPDATE_CORE = "SELECTED_ERRORS_GROUP_UPDATE_CORE";
+const SELECTED_GROUP_UPDATE_CORE = "SELECTED_GROUP_UPDATE_CORE";
 
 export default function GroupReducer(state = initialState, action) {
     switch (action.type) {
@@ -28,7 +32,10 @@ export default function GroupReducer(state = initialState, action) {
       case SELECTED_GROUP_CORE:
       case SELECTED_ERRORS_GROUP_CORE:
       case SET_CLEAR_MEMORY_DATA_GROUPCORE:
+      case SELECTED_ERRORS_GROUP_UPDATE_CORE:
+      case SELECTED_GROUP_UPDATE_CORE:
       case SET_ACTIVE_SPINNER_GROUP:
+      case ORDER_GROUP_BY_ASC_CORE:
         return action.payload;
       default:
         return state;
@@ -44,7 +51,7 @@ export const getAllGroupsCore = () => async (dispatch, getState) => {
       url: `${CoreServer}group`,
       method: "GET",
       headers: {
-        Authorization: `Bearer ${TockenUser?.token}`
+        Authorization: `Bearer ${TockenUser}`
       }
     }).then(function (response) {
       if (response.status == 200) {
@@ -96,12 +103,6 @@ export const getAllGroupsCore = () => async (dispatch, getState) => {
     });
     dispatch(setChangeSelectView("group"));
   };
-
-  
-
-
-
-
   
   //Filtrar Grupo sin cambio de pantalla
   export const setSelectedGroupNotSelectedCore = id => async (dispatch, getState) => {
@@ -123,6 +124,41 @@ export const getAllGroupsCore = () => async (dispatch, getState) => {
     });
   };
   
+   //Filtrar Grupo sin cambio de pantalla
+   export const setSelectedGroupCoreUpdate = id => async (dispatch, getState) => {
+    const { groupCore } = getState();
+    const { groups } = groupCore;
+    const UpdateSelectedGroup = groups.find(groups => groups.id == id);
+  
+    if (UpdateSelectedGroup == undefined) {
+      dispatch({
+        type: SELECTED_ERRORS_GROUP_UPDATE_CORE,
+        payload: { ...groupCore, elementError: "El Id no existe" },
+      });
+      return;
+    }
+  
+    dispatch({
+      type: SELECTED_GROUP_UPDATE_CORE,
+      payload: { ...groupCore, UpdateSelectedGroup },
+    });
+  };
+
+  //Ordenar gabinetes en orden ascendente
+export const orderGroupByAscCore = () => async (dispatch, getState) => {
+  const { groupCore } = getState();
+  const { groups } = groupCore;
+  dispatch({
+    type: ORDER_GROUP_BY_ASC_CORE,
+    payload: {
+      ...groupCore, groups: groups.sort((a, b) => {
+        if (a.name.toLowerCase() < b.name.toLowerCase()) {
+          return -1;
+        }
+      })
+    }
+  })
+}
   
   //GUARDADO Y ACTUALIZACION DE ESTADOS
   /*<----------------------GRUPOS------------------------> */
@@ -135,7 +171,8 @@ export const getAllGroupsCore = () => async (dispatch, getState) => {
         method: "PUT",
         data: newGroup,
         headers: {
-          Authorization: `Bearer ${TockenUser?.token}`
+          "Content-Type": "Application/json",
+          Authorization: `Bearer ${TockenUser}`
         },
       })
         .then(function (response) {
@@ -143,7 +180,6 @@ export const getAllGroupsCore = () => async (dispatch, getState) => {
             toast.success('Grupo Creado.');
             dispatch(getAllGroupsCore());
           };
-          dispatch()
         }).catch(function (error) {
           console.log(error);
           toast.error('Grupo no Creado.');
@@ -162,7 +198,7 @@ export const getAllGroupsCore = () => async (dispatch, getState) => {
         data: UpdateGroup,
         headers: {
           "Content-Type": "Application/json",
-          Authorization: `Bearer ${TockenUser?.token}`
+          Authorization: `Bearer ${TockenUser}`
         },
       })
         .then(function (response) {
@@ -187,7 +223,7 @@ export const getAllGroupsCore = () => async (dispatch, getState) => {
         data: DeleteGroup,
         headers: {
           "Content-Type": "Application/json",
-          Authorization: `Bearer ${TockenUser?.token}`
+          Authorization: `Bearer ${TockenUser}`
         },
       })
         .then(function (response) {
@@ -195,6 +231,7 @@ export const getAllGroupsCore = () => async (dispatch, getState) => {
           if (response.status == 200) {
             toast.success('Grupo Eliminado');
             dispatch(getAllGroupsCore());
+            dispatch(getAllDeleteGroupRestored());
           };
         }).catch(function (error) {
           console.log(error);

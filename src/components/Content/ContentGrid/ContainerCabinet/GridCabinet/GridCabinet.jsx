@@ -24,6 +24,7 @@ import { getMetadataByCabinet } from "../../../../../redux/states/Metadata";
 import CabinetUpdate from "../ModalesCabinet/CabinetUpdate";
 import CabinetDelete from "../ModalesCabinet/CabinetDelete";
 import HistoryElement from "../ModalesCabinet/HistoryElement";
+import { Tooltip } from "@material-ui/core";
 
 const GridCabinet = ({
   element,
@@ -36,7 +37,10 @@ const GridCabinet = ({
   const dispatch = useDispatch();
   const [showMenu, setShowMenu] = useState(false);
   const { userSesion } = useSelector((store) => store);
-  const { RolSesion } = userSesion;
+  const { RolSesion, OptionsTocken } = userSesion;
+  const [update, setUpdate] = useState(false);
+  const [delet, setDelet] = useState(false);
+  const [inde, setInde] = useState(false);
 
   const Envio = (index, name) => {
     setShowMenu(false);
@@ -52,8 +56,23 @@ const GridCabinet = ({
 
   const dropdownCabinet = (index) => {
     dispatch(setSelectedCabinetUpdateCore(index));
-    dispatch(getTypeFileByCabinet(index));
     setShowMenu(!showMenu);
+
+    OptionsTocken.map((n, i) => {
+      //consultar indice
+      if (n.id == "2afc517d-7647-4933-a64a-d3f2bf1fb7ae") {
+        setInde(true);
+      }
+      //actualizar gabinete
+      if (n.id == "1f69e2c7-d7ab-42c5-90ac-40a541b8c9f3") {
+        setUpdate(true);
+      }
+      //eliminar gabinete
+      if (n.id == "f9db0e9e-e89e-4b5e-a83e-2b638ceed35c") {
+        setDelet(true);
+      }
+    });
+
     const collection = document.getElementsByClassName("dropdown");
     for (let i = 0; i < collection.length; i++) {
       collection[i].style.display = "none";
@@ -66,6 +85,7 @@ const GridCabinet = ({
 
   const AbrirModalActualizarCabinet = (id) => {
     dispatch(setOpenModalCabinetUpdate(true));
+    dispatch(getTypeFileByCabinet(id));
   };
 
   const AbrirModalEliminarCabinet = (id) => {
@@ -75,7 +95,6 @@ const GridCabinet = ({
   const AbrilModalIndexCreated = (name) => {
     dispatch(getIndexAllCabinetConfig(name));
   };
-
 
   const AbriModalHistoryElement = (id, userId) => {
     dispatch(setOpenModalHistoryViewElement(true));
@@ -92,57 +111,83 @@ const GridCabinet = ({
       {showMenu && (
         <Dropdown className="dropdown">
           <DropdownContent>
-            <DropdownItem onClick={() => AbrilModalIndexCreated(name)}>
-              Configurar
-            </DropdownItem>
-            <LineItem></LineItem>
-            <DropdownItem onClick={() => AbrirModalActualizarCabinet(id)}>
-              Renombrar
-            </DropdownItem>
-            <CabinetUpdate />
-            <LineItem></LineItem>
-            <DropdownItem onClick={() => AbrirModalEliminarCabinet(id)}>
-              Eliminar
-            </DropdownItem>
-            <CabinetDelete />
-            <LineItem></LineItem>
-            <DropdownItem
-              onClick={() => AbriModalHistoryElement(id, RolSesion[0])}
-            >
-              Historial
-            </DropdownItem>
-            <HistoryElement />
+            {inde ? (
+              <>
+                <DropdownItem onClick={() => AbrilModalIndexCreated(name)}>
+                  Configurar
+                </DropdownItem>
+              </>
+            ) : (
+              <></>
+            )}
+
+            {update ? (
+              <>
+                <LineItem></LineItem>
+                <DropdownItem onClick={() => AbrirModalActualizarCabinet(id)}>
+                  Renombrar
+                </DropdownItem>
+
+                <CabinetUpdate />
+              </>
+            ) : (
+              <></>
+            )}
+
+            {delet ? (
+              <>
+                <LineItem></LineItem>
+                <DropdownItem onClick={() => AbrirModalEliminarCabinet(id)}>
+                  Eliminar
+                </DropdownItem>
+                <CabinetDelete />
+                <LineItem></LineItem>
+              </>
+            ) : (
+              <></>
+            )}
+
+            {RolSesion[2] == "Administrator" && (
+              <>
+                <DropdownItem
+                  onClick={() => AbriModalHistoryElement(id, RolSesion[0])}
+                >
+                  Historial
+                </DropdownItem>
+                <HistoryElement />
+              </>
+            )}
           </DropdownContent>
         </Dropdown>
       )}
 
-      {RolSesion[2] == "Administrator" && (
+      <Tooltip title="Opciones">
         <ContainerIcon onClick={() => dropdownCabinet(id)}>
-          <Options x={20} y={20} fill={"#F68A20"} />
+          <Options x={19} y={19} fill={"#F68A20"} />
         </ContainerIcon>
-      )}
-
-      {RolSesion[2] == "Writer" && (
-        <ContainerIcon onClick={() => dropdownCabinet(id)}>
-          <Options x={20} y={20} fill={"#F68A20"} />
-        </ContainerIcon>
-      )}
-
-      {RolSesion[2] == "Administrator" ? (
+      </Tooltip>
+      <ContainerItem>
         <ElementIcon element={element} />
-      ) : (
-        <></>
-      )}
-
-      {RolSesion[2] == "Writer" ? <ElementIcon element={element} /> : <></>}
-
-      {RolSesion[2] == "Reader" ? <ElementIcon element={element} /> : <></>}
-
-      <ElementName>{name}</ElementName>
+        <br />
+        <ElementName>{name}</ElementName>
+      </ContainerItem>
     </GridElemmentContainer>
   );
 };
 export default GridCabinet;
+
+const ContainerItem = styled.div`
+  width: 100%;
+  height: 76%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  @media (max-width: 767px) {
+    width: 100%;
+    height: 76%;
+  }
+`;
 
 const GridElemmentContainer = styled.div`
   display: inline-flex;
@@ -155,6 +200,11 @@ const GridElemmentContainer = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
+  @media (max-width: 767px) {
+    width: 130px;
+    height: 140px;
+    margin: 0.5rem;
+  }
 `;
 
 const ContainerIcon = styled.div`
@@ -162,6 +212,8 @@ const ContainerIcon = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
+  cursor: pointer;
+  z-index: 2;
 `;
 
 const ElementName = styled.h4`

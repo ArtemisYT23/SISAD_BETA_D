@@ -1,44 +1,86 @@
+import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
-import { EditElement, DeleteElement } from "./icons";
+import { SearchFilter, EditElement, DeleteElement } from "./icons";
+import { setOpenModalConfigCreated } from "../../../../../redux/states/ActionConfig";
 import {
-  setOpenModalConfigCreated,
-  setOpenModalConfigUpdate,
-  setOpenModalConfigDelete,
-} from "../../../../../redux/states/ActionConfig";
-import { setSelectedIndexes } from "../../../../../redux/states/Indexes";
+  setSelectedIndexes,
+  setSelectedIndexesUpdate,
+} from "../../../../../redux/states/Indexes";
 import IndexCreated from "../ModalesIndex/IndexCreated";
 import IndexUpdate from "../ModalesIndex/IndexUpdate";
 import IndexDelete from "../ModalesIndex/IndexDelete";
 import LoadingSpinner from "../../../../../utilities/LoadingSpinner";
+import { Tooltip } from "@material-ui/core";
 
 const IndexContainer = () => {
   const dispatch = useDispatch();
-  const { cabinetCore, indexCore } = useSelector((store) => store);
+  const { cabinetCore, indexCore, userSesion } = useSelector((store) => store);
+  const { OptionsTocken } = userSesion;
   const { UpdateSelectedCabinet } = cabinetCore;
   const { IndexConfig, isLoadingIndex } = indexCore;
+  const [term, setTerm] = useState("");
+  const [update, setUpdate] = useState(false);
+  const [delet, setDelet] = useState(false);
+  const [created, setCreated] = useState(false);
+
+  useEffect(() => {
+    OptionsTocken.map((n, i) => {
+      //crear indice
+      if (n.id == "7a102ffd-6911-4133-85a0-d5640c339780") {
+        setCreated(true);
+      }
+      //actualizar indice
+      if (n.id == "ec5c1dc3-a1c5-472b-ab63-80ed44e29eb0") {
+        setUpdate(true);
+      }
+      //eliminar indice
+      if (n.id == "65775d93-2a29-4a69-93e7-777690499564") {
+        setDelet(true);
+      }
+    });
+  }, []);
 
   const OpenModalIndexCreatedConfig = () => {
     dispatch(setOpenModalConfigCreated(true));
   };
 
   const OpenModalUpdateIndex = (id) => {
-    dispatch(setSelectedIndexes(id));
-    dispatch(setOpenModalConfigUpdate(true));
+    update ? dispatch(setSelectedIndexesUpdate(id)) : <></>;
   };
 
-  const OpenModalDeleteIndex = () => {
-    dispatch(setOpenModalConfigDelete(true));
+  const OpenModalDeleteIndex = (id) => {
+    delet ? dispatch(setSelectedIndexes(id)) : <></>;
   };
+
+  function searchingTerm(term) {
+    return function (x) {
+      return x.name.toLowerCase().includes(term) || !term;
+    };
+  }
 
   return (
     <ContainerIndex>
       <HeadersContainer>
         <ContainerButton>
-          <NewIndex onClick={(e) => OpenModalIndexCreatedConfig()}>
-            Nuevo
-          </NewIndex>
+          {created && (
+            <NewIndex onClick={(e) => OpenModalIndexCreatedConfig()}>
+              Nuevo
+            </NewIndex>
+          )}
+
+          {IndexConfig != "" && (
+            <>
+              <SearchUser
+                placeholder=" Buscar Usuario"
+                onChange={(e) => setTerm(e.target.value)}
+              />
+              <ButtonSearch>
+                <SearchFilter x={22} y={22} />
+              </ButtonSearch>
+            </>
+          )}
         </ContainerButton>
 
         <ContainerSelect>
@@ -65,7 +107,7 @@ const IndexContainer = () => {
               </tr>
 
               {IndexConfig ? (
-                IndexConfig.map((index, i) => (
+                IndexConfig.filter(searchingTerm(term)).map((index, i) => (
                   <tr key={i}>
                     <TD1>{i + 1}</TD1>
                     <TD1>{index.name}</TD1>
@@ -74,21 +116,25 @@ const IndexContainer = () => {
                     <TD1>{index.listName}</TD1>
                     <TD1>
                       <ContentOptions>
-                        <ContainerEdit>
-                          <ButtonOptions
+                        <Tooltip title="Editar">
+                          <ContainerEdit
                             onClick={() => OpenModalUpdateIndex(index.id)}
                           >
-                            <EditElement x={30} y={30} />
-                          </ButtonOptions>
-                        </ContainerEdit>
+                            <ButtonOptions>
+                              <EditElement x={30} y={30} />
+                            </ButtonOptions>
+                          </ContainerEdit>
+                        </Tooltip>
 
-                        <ContainerDelete
-                          onClick={() => OpenModalDeleteIndex(index.id)}
-                        >
-                          <ButtonOptions>
-                            <DeleteElement x={30} y={30} />
-                          </ButtonOptions>
-                        </ContainerDelete>
+                        <Tooltip title="Eliminar">
+                          <ContainerDelete
+                            onClick={() => OpenModalDeleteIndex(index.id)}
+                          >
+                            <ButtonOptions>
+                              <DeleteElement x={30} y={30} />
+                            </ButtonOptions>
+                          </ContainerDelete>
+                        </Tooltip>
                       </ContentOptions>
                     </TD1>
                   </tr>
@@ -142,6 +188,25 @@ const ContainerButton = styled.div`
   justify-content: flex-start;
 `;
 
+const SearchUser = styled.input`
+  width: 45%;
+  height: 2rem;
+  outline: none;
+  border: 1px solid #f68a20;
+  color: #5d5c5c;
+`;
+
+const ButtonSearch = styled.button`
+  padding: 0.5rem;
+  width: 2.2rem;
+  height: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #f68a20;
+  background: none;
+`;
+
 const NewIndex = styled.button`
   border: none;
   padding: 0.5rem;
@@ -154,6 +219,9 @@ const NewIndex = styled.button`
   font-size: 0.9rem;
   border-radius: 0.5rem 0.5rem;
   cursor: pointer;
+  &:disabled {
+    background-color: #c29a44;
+  }
 `;
 
 const ContainerSelect = styled.div`
@@ -187,7 +255,7 @@ const OptionsSelect = styled.option`
 `;
 
 const TableContainer = styled.div`
-  width: 100%;
+  width: 95%;
   display: flex;
   overflow: hidden;
 `;
@@ -227,6 +295,9 @@ const TD1 = styled.td`
 
 const ContentOptions = styled.div`
   display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
 `;
 
 const ContainerEdit = styled.div`

@@ -1,3 +1,4 @@
+import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { Modal, TextField } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -22,13 +23,14 @@ import {
   getGroupIdNullCabinetNew,
   setClearCabinetDataUpdate,
 } from "../../../../../../redux/formData/CabinetData";
+import { Tooltip } from "@material-ui/core";
 
 import LoadingSpinner from "../../../../../../utilities/LoadingSpinner";
 
 const useStyless = makeStyles((theme) => ({
   CabinetUpdate: {
     position: "absolute",
-    maxWidth: "450px",
+    width: "400px",
     height: "550px",
     backgroundColor: "white",
     border: "2px solid white",
@@ -37,7 +39,7 @@ const useStyless = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    overflowY: "scroll",
+    borderRadius: "13px",
   },
   textfield: {
     width: "100%",
@@ -50,9 +52,8 @@ const useStyless = makeStyles((theme) => ({
 const CabinetUpdate = () => {
   const styless = useStyless();
   const dispatch = useDispatch();
-  const { modalCore, groupCore, typeFileCore, cabinetData, cabinetCore } = useSelector(
-    (store) => store
-  );
+  const { modalCore, groupCore, typeFileCore, cabinetData, cabinetCore } =
+    useSelector((store) => store);
 
   const {
     idCabinet,
@@ -75,19 +76,21 @@ const CabinetUpdate = () => {
   }, [CabinetUpdate]);
 
   const handleChange = (value) => {
-    value != 0 ? dispatch(saveGroupIdSelected(value)) : dispatch(getGroupIdNullCabinetNew())
+    value != 0
+      ? dispatch(saveGroupIdSelected(value))
+      : dispatch(getGroupIdNullCabinetNew());
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const FormData = {
-        id: idCabinet,
-        name: nameCabinet,
-        description: descriptionCabinet,
-        onDay: onDay,
-        groupId: groupIdCabinet,
-        fileType: filetypeSelected
-    }
+      id: idCabinet,
+      name: nameCabinet,
+      description: descriptionCabinet,
+      onDay: onDay,
+      groupId: groupIdCabinet,
+      fileType: filetypeSelected,
+    };
     console.log(FormData);
     dispatch(UpdateCabinetCore(FormData, idCabinet, groupIdCabinet));
     abrirModalUpdateCabinet();
@@ -112,7 +115,7 @@ const CabinetUpdate = () => {
         <div align="center">
           <TitleModal>Gabinete {nameCabinet}</TitleModal>
         </div>
-
+        <br />
         <TextField
           value={nameCabinet}
           onChange={(e) => dispatch(saveNameCabinetSelected(e.target.value))}
@@ -139,19 +142,23 @@ const CabinetUpdate = () => {
         {isLoadingTypeFile ? (
           <LoadingSpinner />
         ) : (
-          <div className="ContainerSelectedChech">
+          <>
             {FilesCabinets != "" ? (
               <ContainerNameCheck>
                 {FilesCabinets ? (
                   FilesCabinets.map(({ fileTypeId, fileTypeName }, index) => (
-                    <div key={fileTypeId} className="NameCeldaCheck">
-                      <input
-                        className="InputCheck"
-                        type="checkbox"
-                        checked={true}
-                      />
-                      {fileTypeName}
-                    </div>
+                    <ContainerCeldaSelected>
+                      <ContainerCHeck>
+                        <InputCheck
+                          className="InputCheck"
+                          type="checkbox"
+                          checked={true}
+                        />
+                      </ContainerCHeck>
+                      <Tooltip title={fileTypeName}>
+                        <ContainerText>{fileTypeName}</ContainerText>
+                      </Tooltip>
+                    </ContainerCeldaSelected>
                   ))
                 ) : (
                   <></>
@@ -160,33 +167,38 @@ const CabinetUpdate = () => {
             ) : (
               <></>
             )}
-          </div>
+          </>
         )}
 
         <TitleArchive>Tipo de Archivo Nuevo</TitleArchive>
         {isLoadingTypeFile ? (
           <LoadingSpinner />
         ) : (
-          <div className="ContainerSelectedChech">
+          <>
             <ContainerNameCheck>
               {FilesNoCabinets ? (
                 FilesNoCabinets.map(({ fileTypeId, fileTypeName }, index) => (
-                  <div id={fileTypeId} className="NameCeldaCheck">
-                    <input
-                      onChange={ObtenerCabinet}
-                      type="checkbox"
-                      name="fileCabinet"
-                      value={fileTypeId}
-                      id={fileTypeId}
-                    />
-                    {fileTypeName}
-                  </div>
+                  <ContainerCeldaSelected>
+                    <ContainerCHeck>
+                      <input
+                        onChange={ObtenerCabinet}
+                        type="checkbox"
+                        name="fileCabinet"
+                        value={fileTypeId}
+                        id={fileTypeId}
+                      />
+                    </ContainerCHeck>
+
+                    <Tooltip title={fileTypeName}>
+                      <ContainerText>{fileTypeName}</ContainerText>
+                    </Tooltip>
+                  </ContainerCeldaSelected>
                 ))
               ) : (
                 <></>
               )}
             </ContainerNameCheck>
-          </div>
+          </>
         )}
         <br />
         <br />
@@ -222,11 +234,31 @@ const CabinetUpdate = () => {
 
   return (
     <div className={styless.container}>
-      <Modal open={CabinetUpdate} onClose={abrirModalUpdateCabinet}>
-        {Update}
-      </Modal>
+      <Modal open={CabinetUpdate}>{Update}</Modal>
     </div>
   );
 };
 
 export default CabinetUpdate;
+
+const ContainerCeldaSelected = styled.div`
+  width: 100%;
+  display: flex;
+  padding: 0.1rem;
+`;
+
+const ContainerCHeck = styled.div`
+  width: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ContainerText = styled.div`
+  width: 240px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+`;
+
+const InputCheck = styled.input``;

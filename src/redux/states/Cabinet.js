@@ -2,13 +2,17 @@ import axios from "axios";
 import { CoreServer } from "../../config/axios";
 import { setChangeSelectView } from "./View";
 import { setFilterGroupsCore } from "./Group";
+import { getAllDeleteCabinetRestored } from "../formData/ResourceData";
 import toast, { Toaster } from "react-hot-toast";
 
 const initialState = {
   cabinets: [],
+  cabinetFolder: [],
   isLoadingCabinet: false,
   SelectedCabinet: "",
   UpdateSelectedCabinet: "",
+  SearchCabinet: [],
+  isLoadingSearchCabinet: "",
   elementError: ""
 };
 
@@ -20,6 +24,11 @@ const ORDER_CABINET_BY_ASC_CORE = "ORDER_CABINET_BY_ASC_CORE";
 const SELECTED_CABINET_CORE = "SELECTED_CABINET_CORE";
 const SELECTED_ERRORS_CABINET_CORE = "SELECTED_ERRORS_CABINET_CORE";
 const CLEAR_DATA_CABINET_CORE = "CLEAR_DATA_CABINET_CORE";
+const SET_ACTIVE_SPINNER_SEARCH_CABINET = "SET_ACTIVE_SPINNER_SEARCH_CABINET";
+const GET_ALL_CABINET_NAME_DATA_CORE = "GET_ALL_CABINET_NAME_DATA_CORE";
+const GET_ALL_CABINET_NAME_DATA_ERRORS_CORE = "GET_ALL_CABINET_NAME_DATA_ERRORS_CORE";
+const GET_ALL_CABINET_FOLDER_FILTER = "GET_ALL_CABINET_FOLDER_FILTER";
+const GET_ALL_ERROR_CABINET_FOLDER_FILTER = "GET_ALL_ERROR_CABINET_FOLDER_FILTER";
 
 export default function CabinetReducer(state = initialState, action) {
   switch (action.type) {
@@ -30,6 +39,11 @@ export default function CabinetReducer(state = initialState, action) {
     case SELECTED_CABINET_CORE:
     case SELECTED_ERRORS_CABINET_CORE:
     case CLEAR_DATA_CABINET_CORE:
+    case SET_ACTIVE_SPINNER_SEARCH_CABINET:
+    case GET_ALL_CABINET_NAME_DATA_CORE:
+    case GET_ALL_CABINET_NAME_DATA_ERRORS_CORE:
+    case GET_ALL_CABINET_FOLDER_FILTER:
+    case GET_ALL_ERROR_CABINET_FOLDER_FILTER:
       return action.payload;
     default:
       return state;
@@ -44,7 +58,7 @@ export const getAllCabinetsCore = () => async (dispatch, getState) => {
   axios({
     url: `${CoreServer}cabinet`,
     headers: {
-      Authorization: `Bearer ${TockenUser?.token}`
+      Authorization: `Bearer ${TockenUser}`
     }
   }).then(function (response) {
     if (response.status == 200) {
@@ -52,6 +66,7 @@ export const getAllCabinetsCore = () => async (dispatch, getState) => {
         type: GET_CABINET_CORE,
         payload: { ...cabinetCore, cabinets: response.data },
       });
+      dispatch(getCabinetFolderResource());
       dispatch(setActiveLoadingSpinnerCabinet(false));
     }
   }).catch(function (error) {
@@ -89,6 +104,26 @@ export const setSelectedCabinetUpdateCore = id => async (dispatch, getState) => 
   const { cabinetCore } = getState();
   const { cabinets } = cabinetCore;
   const UpdateSelectedCabinet = cabinets.find(cabinets => cabinets.id == id);
+
+  if (UpdateSelectedCabinet == undefined) {
+    dispatch({
+      type: SELECTED_ERRORS_CABINET_CORE,
+      payload: { ...cabinetCore, elementError: "El Id no existe" },
+    });
+    return;
+  }
+
+  dispatch({
+    type: SELECTED_CABINET_CORE,
+    payload: { ...cabinetCore, UpdateSelectedCabinet },
+  });
+};
+
+//filtrar gabinete seleccionado para actualizar
+export const setSelectedCabinetNameUpdateCore = name => async (dispatch, getState) => {
+  const { cabinetCore } = getState();
+  const { cabinets } = cabinetCore;
+  const UpdateSelectedCabinet = cabinets.find(cabinets => cabinets.name == name);
 
   if (UpdateSelectedCabinet == undefined) {
     s
@@ -131,6 +166,72 @@ export const setActiveLoadingSpinnerCabinet = (bool) => async (dispatch, getStat
   })
 }
 
+
+//filtrar a nivel de gabinetes global
+export const setFilterCabinetsByName = (name) => async (dispatch, getState) => {
+  const { cabinetCore, sesion } = getState();
+  const { TockenUser } = sesion;
+  dispatch(setActiveLoadingSpinnerSearchCabinet(true));
+  try {
+    const response = await axios({
+      url: `${CoreServer}getcabinetbycabinet/${name}`,
+      headers: {
+        Authorization: `Bearer ${TockenUser?.token}`
+      }
+    });
+    if (response.status == 200) {
+      dispatch({
+        type: GET_ALL_CABINET_NAME_DATA_CORE,
+        payload: { ...cabinetCore, SearchCabinet: response.data },
+      });
+      dispatch(setChangeSelectView("search"));
+      dispatch(setActiveLoadingSpinnerSearchCabinet(false));
+    }
+  } catch (error) {
+    console.log(error);
+    dispatch({
+      type: GET_ALL_CABINET_NAME_DATA_ERRORS_CORE,
+      payload: { ...cabinetCore, SearchCabinet: [] }
+    });
+  }
+}
+
+
+//Listar gabinetes con sus carpetas para mostrar en arbol o asignacion de Recursos
+export const getCabinetFolderResource = () => async (dispatch, getState) => {
+  const { cabinetCore, sesion } = getState();
+  const { TockenUser } = sesion;
+  axios({
+    url: `${CoreServer}cabinetfolder`,
+    headers: {
+      Authorization: `Bearer ${TockenUser}`
+    }
+  }).then(function (response) {
+    if (response.status == 200) {
+      dispatch({
+        type: GET_ALL_CABINET_FOLDER_FILTER,
+        payload: { ...cabinetCore, cabinetFolder: response.data },
+      })
+    }
+  }).catch(function (error) {
+    console.log(error);
+    dispatch({
+      type: GET_ALL_ERROR_CABINET_FOLDER_FILTER,
+      payload: { ...cabinetCore, cabinetFolder: [] }
+    })
+  })
+}
+
+
+//carga de spinner para buscar gabinetes
+export const setActiveLoadingSpinnerSearchCabinet = (bool) => async (dispatch, getState) => {
+  const { cabinetCore } = getState();
+  dispatch({
+    type: SET_ACTIVE_SPINNER_SEARCH_CABINET,
+    payload: { ...cabinetCore, isLoadingSearchCabinet: bool }
+  })
+}
+
 /*<------------GABINETES--------------->*/
 //Guardar nuevo Gabinete y actualizar estado
 export const CreateCabinetNew = (newCabinet) =>
@@ -143,7 +244,7 @@ export const CreateCabinetNew = (newCabinet) =>
       data: newCabinet,
       headers: {
         "Content-Type": "Application/json",
-        Authorization: `Bearer ${TockenUser?.token}`
+        Authorization: `Bearer ${TockenUser}`
       },
     })
       .then(function (response) {
@@ -167,7 +268,7 @@ export const UpdateCabinetCore = (newGabi, id, groupId) => (dispatch, getState) 
     data: newGabi,
     headers: {
       "Content-Type": "Application/json",
-      Authorization: `Bearer ${TockenUser?.token}`
+      Authorization: `Bearer ${TockenUser}`
     },
   })
     .then(function (response) {
@@ -196,13 +297,14 @@ export const DeleteCabinetCore = (newGabi, id, groupId) => (dispatch, getState) 
     data: newGabi,
     headers: {
       "Content-Type": "Application/json",
-      Authorization: `Bearer ${TockenUser?.token}`
+      Authorization: `Bearer ${TockenUser}`
     },
   })
     .then(function (response) {
       if (response.status == 200) {
         toast.success('Gabinete Eliminado');
         dispatch(getAllCabinetsCore());
+        dispatch(getAllDeleteCabinetRestored());
         {
           groupId != "" && (
             dispatch(setFilterGroupsCore(groupId))
@@ -226,6 +328,8 @@ export const setClearDataCabinetCore = () => async (dispatch, getState) => {
       isLoadingCabinet: false,
       SelectedCabinet: "",
       UpdateSelectedCabinet: "",
+      SearchCabinet: [],
+      isLoadingSearchCabinet: "",
       elementError: ""
     }
   })

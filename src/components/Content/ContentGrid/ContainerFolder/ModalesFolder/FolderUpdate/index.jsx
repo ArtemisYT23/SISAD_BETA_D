@@ -1,3 +1,4 @@
+import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { Modal, TextField } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -19,19 +20,21 @@ import {
   saveFileTypeFolderSelectedUpdate,
   setClearFolderDataUpdate,
 } from "../../../../../../redux/formData/FolderData";
+import { Tooltip } from "@material-ui/core";
 
 const useStyless = makeStyles((theme) => ({
   FolderUpdate: {
     position: "absolute",
-    with: "450px",
+    width: "400px",
+    height: "495px",
     backgroundColor: "white",
     border: "2px solid white",
     boxShadow: theme.shadows[2],
-    padding: "16px 32px 24px",
+    padding: "14px 24px 20px",
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    overflowY: "scroll",
+    borderRadius: "13px",
   },
   textfield: {
     width: "100%",
@@ -76,8 +79,8 @@ const FolderUpdate = () => {
       name: nameUpdate,
       description: DescriptionUpdate,
       cabinetId: CabinetIdUpdate,
-      folderFileTypes: FileTypeUpdate
-    }
+      folderFileTypes: FileTypeUpdate,
+    };
     console.log(folderUpdate);
     dispatch(UpdateFolderCore(folderUpdate, idUpdate, CabinetIdUpdate));
     AbrirModalUpdateFolder();
@@ -100,7 +103,7 @@ const FolderUpdate = () => {
         <div align="center">
           <TitleModal>Actualizar {SelectedUpdateFolder?.name}</TitleModal>
         </div>
-
+        <br />
         <TextField
           value={nameUpdate}
           name="name"
@@ -121,21 +124,25 @@ const FolderUpdate = () => {
           className={styless.textfield}
         />
         <br />
+        <br />
         {FilesFolders != "" ? (
-          <TitleArchive>Tipo de Archivo Existente</TitleArchive>
+          <TitleArchive>Tipos de Archivo Existentes</TitleArchive>
         ) : (
           <TitleArchive>No tiene Archivos Configurados</TitleArchive>
         )}
-
-        <div className="ContainerSelectedChech">
+        <>
           {FilesFolders != "" ? (
             <ContainerNameCheck>
               {FilesFolders ? (
                 FilesFolders.map(({ fileTypeId, fileTypeName }, index) => (
-                  <div className="NameCeldaCheck">
-                    <input type="checkbox" checked />
-                    {fileTypeName}
-                  </div>
+                  <ContainerCeldaSelected>
+                    <ContainerCHeck>
+                      <InputCheck type="checkbox" checked />
+                    </ContainerCHeck>
+                    <Tooltip title={fileTypeName}>
+                      <ContainerText>{fileTypeName}</ContainerText>
+                    </Tooltip>
+                  </ContainerCeldaSelected>
                 ))
               ) : (
                 <></>
@@ -144,30 +151,34 @@ const FolderUpdate = () => {
           ) : (
             <></>
           )}
-        </div>
+        </>
         <br />
         <TitleArchive>Tipo de Archivo Nuevo</TitleArchive>
 
-        <div className="ContainerSelectedChech">
+        <>
           <ContainerNameCheck>
             {FilesNoSelected ? (
               FilesNoSelected.map(({ fileTypeId, fileTypeName }, index) => (
-                <div id={fileTypeId} className="NameCeldaCheck">
-                  <input
-                    onChange={ObtenerSelected}
-                    type="checkbox"
-                    name="subject"
-                    value={fileTypeId}
-                    id={fileTypeId}
-                  />
-                  {fileTypeName}
-                </div>
+                <ContainerCeldaSelected>
+                  <ContainerCHeck>
+                    <InputCheck
+                      onChange={ObtenerSelected}
+                      type="checkbox"
+                      name="subject"
+                      value={fileTypeId}
+                      id={fileTypeId}
+                    />
+                  </ContainerCHeck>
+                  <Tooltip title={fileTypeName}>
+                    <ContainerText>{fileTypeName}</ContainerText>
+                  </Tooltip>
+                </ContainerCeldaSelected>
               ))
             ) : (
               <></>
             )}
           </ContainerNameCheck>
-        </div>
+        </>
 
         <br />
 
@@ -188,11 +199,31 @@ const FolderUpdate = () => {
 
   return (
     <div className={styless.container}>
-      <Modal open={FolderUpdate} onClose={AbrirModalUpdateFolder}>
-        {UpdateFolder}
-      </Modal>
+      <Modal open={FolderUpdate}>{UpdateFolder}</Modal>
     </div>
   );
 };
 
 export default FolderUpdate;
+
+const ContainerCeldaSelected = styled.div`
+  width: 100%;
+  display: flex;
+  padding: 0.1rem;
+`;
+
+const ContainerCHeck = styled.div`
+  width: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ContainerText = styled.div`
+  width: 240px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+`;
+
+const InputCheck = styled.input``;

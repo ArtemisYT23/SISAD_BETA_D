@@ -2,14 +2,14 @@ import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { NotIndexContent } from "./Icons";
 import toast, { Toaster } from "react-hot-toast";
+import { setOpenModalConfigCreated } from "../../../../../redux/states/ActionConfig";
+import IndexCreated from "../ModalesIndex/IndexCreated";
 
 const IndexDefault = () => {
   const dispatch = useDispatch();
-  const { cabinetCore } = useSelector((store) => store);
-  const { SelectedCabinet } = cabinetCore;
-
+  
   const OpenConfigModalIndex = () => {
-    // dispatch(setOpenModalConfigCreated());
+    dispatch(setOpenModalConfigCreated(true));
   };
 
   return (
@@ -24,7 +24,7 @@ const IndexDefault = () => {
           </ButtonNewIndex>
         </ContainerButton>
 
-        {/* <IndexCreated/> */}
+        <IndexCreated/>
       </ContentColumn>
       <Toaster
         position="bottom-right"

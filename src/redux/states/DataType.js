@@ -1,11 +1,12 @@
 import axios from "axios";
 import { CoreServer } from "../../config/axios";
+import { getAllDeleteTypeDataRestored } from "../formData/ResourceData";
 import toast, { Toaster } from "react-hot-toast";
-import { setChangeSelectView } from "./View";
 
 const initialState = {
     TypeData: [],
-    SelectedTypeData: null,
+    isLoadingDataType: false,
+    SelectedTypeData: "",
     elementError: "",
 }
 
@@ -13,6 +14,7 @@ const GET_ALL_TYPEDATA_CONFIG = "GET_ALL_TYPEDATA_CONFIG";
 const GET_ALL_TYPEDATA_ERROR_CONFIG = "GET_ALL_TYPEDATA_ERROR_CONFIG";
 const SELECTED_ERRORS_TYPEDATA_CONFIG = "SELECTED_ERRORS_TYPEDATA_CONFIG";
 const SELECTED_TYPEDATA_CONFIG = "SELECTED_TYPEDATA_CONFIG";
+const SET_ACTIVE_SPINNER_DATATYPE = "SET_ACTIVE_SPINNER_DATATYPE";
 
 export default function TypeDataReducer(state = initialState, action) {
     switch (action.type) {
@@ -20,6 +22,7 @@ export default function TypeDataReducer(state = initialState, action) {
         case GET_ALL_TYPEDATA_ERROR_CONFIG:
         case SELECTED_ERRORS_TYPEDATA_CONFIG:
         case SELECTED_TYPEDATA_CONFIG:
+        case SET_ACTIVE_SPINNER_DATATYPE:
             return action.payload;
         default:
             return state;
@@ -30,18 +33,20 @@ export default function TypeDataReducer(state = initialState, action) {
 export const getTypeDataConfig = () => async (dispatch, getState) => {
     const { typeDataCore, sesion } = getState();
     const { TockenUser } = sesion;
+    dispatch(setActiveLoadingSpinnerTypeFile(true));
     axios({
         url: `${CoreServer}datatype`,
         method: "GET",
         headers: {
-            Authorization: `Bearer ${TockenUser?.token}`
+            Authorization: `Bearer ${TockenUser}`
         }
     }).then(function (response) {
-        if (response.status) {
+        if (response.status == 200) {
             dispatch({
                 type: GET_ALL_TYPEDATA_CONFIG,
                 payload: { ...typeDataCore, TypeData: response.data },
             });
+            dispatch(setActiveLoadingSpinnerTypeFile(false));
         }
     }).catch(function (error) {
         console.log(error);
@@ -52,7 +57,9 @@ export const getTypeDataConfig = () => async (dispatch, getState) => {
     })
 };
 
-//Guardar dato seleccionado filtro 1 a mucho
+
+
+//Guardar dato seleccionado para crud
 export const setSelectedTypeDataConfig = (id) => async (dispatch, getState) => {
     const { typeDataCore } = getState();
     const { TypeData } = typeDataCore;
@@ -69,8 +76,17 @@ export const setSelectedTypeDataConfig = (id) => async (dispatch, getState) => {
         type: SELECTED_TYPEDATA_CONFIG,
         payload: { ...typeDataCore, SelectedTypeData }
     });
-    dispatch(setChangeSelectView("typeData"));
 };
+
+
+//Carga de Spinner de DataType
+export const setActiveLoadingSpinnerTypeFile = (bool) => async (dispatch, getState) => {
+    const { typeDataCore } = getState();
+    dispatch({
+        type: SET_ACTIVE_SPINNER_DATATYPE,
+        payload: { ...typeDataCore, isLoadingDataType: bool }
+    })
+}
 
 /*<---------------Guardado de datos Managment crud----------------------->*/
 
@@ -84,7 +100,7 @@ export const CreatedTypeDataConfig = (newData) => async (dispatch, getState) => 
         data: newData,
         headers: {
             "Content-Type": "Application/json",
-            Authorization: `Bearer ${TockenUser?.token}`
+            Authorization: `Bearer ${TockenUser}`
         },
     }).then(function (response) {
         if (response.status == 200) {
@@ -107,7 +123,7 @@ export const UpdateTypeDataConfig = (UpdateData, id) => async (dispatch, getStat
         data: UpdateData,
         headers: {
             "Content-Type": "Application/json",
-            Authorization: `Bearer ${TockenUser?.token}`
+            Authorization: `Bearer ${TockenUser}`
         },
     })
         .then(function (response) {
@@ -131,11 +147,12 @@ export const DeleteTypeDataConfig = (DeleteData, id) => async (dispatch, getStat
         data: DeleteData,
         headers: {
             "Content-Type": "Application/json",
-            Authorization: `Bearer ${TockenUser?.token}`
+            Authorization: `Bearer ${TockenUser}`
         },
     }).then(function (response) {
         if (response.status == 200) {
             dispatch(getTypeDataConfig());
+            dispatch(getAllDeleteTypeDataRestored());
             toast.success('Tipo de Dato Eliminado');
         }
     }).catch(function (error) {

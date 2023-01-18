@@ -1,3 +1,4 @@
+import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { Modal, TextField } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -25,11 +26,13 @@ import {
 } from "../../../../../../redux/formData/CabinetData";
 import { CreateCabinetNew } from "../../../../../../redux/states/Cabinet";
 import { useDispatch, useSelector } from "react-redux";
+import { Tooltip } from "@material-ui/core";
 
 const useStyless = makeStyles((theme) => ({
   CabinetCreated: {
     position: "absolute",
     width: "400px",
+    height: "515px",
     backgroundColor: "white",
     border: "2px solid white",
     boxShadow: theme.shadows[2],
@@ -65,18 +68,20 @@ const CabinetCreated = () => {
   }, [CabinetCreated]);
 
   const handleChange = (value) => {
-    value != 0 ? dispatch(getGroupIdCabinetNew(value)) : dispatch(getGroupIdNullCabinetNew())
+    value != 0
+      ? dispatch(getGroupIdCabinetNew(value))
+      : dispatch(getGroupIdNullCabinetNew());
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const gabinetes = {
-        id: id,
-        name: name,
-        description: description,
-        groupId: groupId,
-        fileTypes: fileTypes
-    }
+      id: id,
+      name: name,
+      description: description,
+      groupId: groupId,
+      fileTypes: fileTypes,
+    };
     console.log(gabinetes);
     dispatch(CreateCabinetNew(gabinetes));
     abrirCerrarModal();
@@ -134,42 +139,48 @@ const CabinetCreated = () => {
         </Selected>
         <br />
         <br />
-        <TitleArchive>Tipo de Por defecto</TitleArchive>
+        <TitleArchive>Tipo Archivo Por defecto</TitleArchive>
         <ContainerCheckDefault>
           {TypeFileDefault && (
-            <NameCelda>
-              <input
-                type="checkbox"
-                checked={true}
-                value={TypeFileDefault?.id}
-              />
-              {TypeFileDefault?.name}
-            </NameCelda>
+            <ContainerCeldaSelected>
+              <ContainerCHeck>
+                <InputCheck
+                  type="checkbox"
+                  checked={true}
+                  value={TypeFileDefault?.id}
+                />
+              </ContainerCHeck>
+              <Tooltip title={TypeFileDefault?.name}>
+                <ContainerText>{TypeFileDefault?.name}</ContainerText>
+              </Tooltip>
+            </ContainerCeldaSelected>
           )}
         </ContainerCheckDefault>
-
+        <br />
         <TitleArchive>Tipo de Archivo</TitleArchive>
-        <div className="ContainerSelectedChech">
-          <ContainerNameCheck>
-            {fileTypeAll ? (
-              fileTypeAll.map(({ id, name }, index) => (
-                <NameCelda>
-                  <input
-                  onChange={ObtenerSelection}
+        <ContainerNameCheck>
+          {fileTypeAll ? (
+            fileTypeAll.map(({ id, name }, index) => (
+              <ContainerCeldaSelected>
+                <ContainerCHeck>
+                  <InputCheck
+                    onChange={ObtenerSelection}
                     className="InputCheck"
                     type="checkbox"
                     name="fileOptions"
                     value={id}
                     id={id}
                   />
-                  {name}
-                </NameCelda>
-              ))
-            ) : (
-              <></>
-            )}
-          </ContainerNameCheck>
-        </div>
+                </ContainerCHeck>
+                <Tooltip title={name}>
+                  <ContainerText>{name}</ContainerText>
+                </Tooltip>
+              </ContainerCeldaSelected>
+            ))
+          ) : (
+            <></>
+          )}
+        </ContainerNameCheck>
 
         <br />
         <br />
@@ -203,3 +214,25 @@ const CabinetCreated = () => {
 };
 
 export default CabinetCreated;
+
+const ContainerCeldaSelected = styled.div`
+  width: 100%;
+  display: flex;
+  padding: 0.1rem;
+`;
+
+const ContainerCHeck = styled.div`
+  width: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ContainerText = styled.div`
+  width: 240px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+`;
+
+const InputCheck = styled.input``;

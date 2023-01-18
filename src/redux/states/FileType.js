@@ -2,6 +2,8 @@ import axios from "axios";
 import { CoreServer } from "../../config/axios";
 import { getTypeDataConfig } from "./DataType";
 import { getListDataConfig } from "./List";
+import { getAllDeleteFileTypeRestored } from "../formData/ResourceData";
+import toast, { Toaster } from "react-hot-toast";
 
 const initialState = {
     TypeFile: [],
@@ -12,6 +14,8 @@ const initialState = {
     FilesNewFolder: [],
     FilesFolders: [],
     FilesNoSelected: [],
+    //acciones
+    SelectedTypeFile: "",
 }
 
 const GET_ALL_TYPE_FILE_CONFIG = "GET_ALL_TYPE_FILE_CONFIG";
@@ -26,6 +30,8 @@ const GET_FILETYPE_ALL_FOLDER_CONFIG = "GET_FILETYPE_ALL_FOLDER_CONFIG";
 const SELECTED_INDEX_CABINET_ERROR_CONFIG = "SELECTED_INDEX_CABINET_ERROR_CONFIG";
 const GET_FILETYPE_ALL_FOLDER_NO_SELECTED = "GET_FILETYPE_ALL_FOLDER_NO_SELECTED";
 const GET_FILETYPE_ALL_FOLDER_NO_SELECTED_ERRORS = "GET_FILETYPE_ALL_FOLDER_NO_SELECTED_ERRORS";
+const SELECTED_TYPEFILE_CONFIG = "SELECTED_TYPEFILE_CONFIG";
+const SELECTED_ERRORS_TYPE_FILE_CONFIG = "SELECTED_ERRORS_TYPE_FILE_CONFIG";
 
 //payload de tag de acciones
 export default function FileTypeReducer(state = initialState, action) {
@@ -42,6 +48,8 @@ export default function FileTypeReducer(state = initialState, action) {
         case SELECTED_INDEX_CABINET_ERROR_CONFIG:
         case GET_FILETYPE_ALL_FOLDER_NO_SELECTED:
         case GET_FILETYPE_ALL_FOLDER_NO_SELECTED_ERRORS:
+        case SELECTED_TYPEFILE_CONFIG:
+        case SELECTED_ERRORS_TYPE_FILE_CONFIG:
             return action.payload;
         default:
             return state;
@@ -53,11 +61,12 @@ export default function FileTypeReducer(state = initialState, action) {
 export const getTypeFileConfig = () => async (dispatch, getState) => {
     const { typeFileCore, sesion } = getState();
     const { TockenUser } = sesion;
+    dispatch(setActiveLoadingSpinnerTypeFile(true));
     axios({
         url: `${CoreServer}filetype`,
         method: "GET",
         headers: {
-            Authorization: `Bearer ${TockenUser?.token}`
+            Authorization: `Bearer ${TockenUser}`
         }
     }).then(function (response) {
         if (response.status == 200) {
@@ -68,6 +77,7 @@ export const getTypeFileConfig = () => async (dispatch, getState) => {
             dispatch(getTypeFileDefault());
             dispatch(getTypeDataConfig());
             dispatch(getListDataConfig());
+            dispatch(setActiveLoadingSpinnerTypeFile(false));
         }
     }).catch(function (error) {
         console.log(error);
@@ -87,7 +97,7 @@ export const getTypeFileDefault = () => async (dispatch, getState) => {
         url: `${CoreServer}defaultfiletype`,
         method: "GET",
         headers: {
-            Authorization: `Bearer ${TockenUser?.token}`
+            Authorization: `Bearer ${TockenUser}`
         }
     }).then(function (response) {
         if (response.status == 200) {
@@ -120,9 +130,9 @@ export const getTypeFileByCabinet = (id) => async (dispatch, getState) => {
     const { TockenUser } = sesion;
     try {
         const res = await axios({
-            url: `${CoreServer}CabinetFileType/GetAllBydCabinet/${id}`,
+            url: `${CoreServer}CabinetFileType/GetAllByCabinet/${id}`,
             headers: {
-                Authorization: `Bearer ${TockenUser?.token}`
+                Authorization: `Bearer ${TockenUser}`
             }
         });
         if (res.status == 200) {
@@ -145,7 +155,7 @@ export const getTypeFileByCabinetNoSelected = (id) => async (dispatch, getState)
         const res = await axios({
             url: `${CoreServer}getcabinetfiletypetoadd/${id}`,
             headers: {
-                Authorization: `Bearer ${TockenUser?.token}`
+                Authorization: `Bearer ${TockenUser}`
             }
         });
         if (res.status == 200) {
@@ -165,9 +175,9 @@ export const getTypeFileByFolderNew = (id) => async (dispatch, getState) => {
     const { TockenUser } = sesion;
     try {
         const res = await axios({
-            url: `${CoreServer}CabinetFileType/GetAllBydCabinet/${id}`,
+            url: `${CoreServer}CabinetFileType/GetAllByCabinet/${id}`,
             headers: {
-                Authorization: `Bearer ${TockenUser?.token}`
+                Authorization: `Bearer ${TockenUser}`
             }
         });
         if (res.status == 200) {
@@ -187,9 +197,9 @@ export const getTypeFileByFolderFolder = (id) => async (dispatch, getState) => {
     const { TockenUser } = sesion;
     try {
         const res = await axios({
-            url: `${CoreServer}FolderFileType/GetNamesBydFolder/${id}`,
+            url: `${CoreServer}FolderFileType/GetNamesByFolder/${id}`,
             headers: {
-                Authorization: `Bearer ${TockenUser?.token}`
+                Authorization: `Bearer ${TockenUser}`
             }
         });
         if (res.status == 200) {
@@ -207,6 +217,31 @@ export const getTypeFileByFolderFolder = (id) => async (dispatch, getState) => {
     }
 }
 
+//tipos de archivos existentes para carpeta
+export const getFileTypeByFolder = (id) => async (dispatch, getState) => {
+    const { typeFileCore, sesion } = getState();
+    const { TockenUser } = sesion;
+    try {
+        const res = await axios({
+            url: `${CoreServer}FolderFileType/GetNamesByFolder/${id}`,
+            headers: {
+                Authorization: `Bearer ${TockenUser}`
+            }
+        });
+        if (res.status == 200) {
+            dispatch({
+                type: GET_FILETYPE_ALL_FOLDER_CONFIG,
+                payload: { ...typeFileCore, FilesFolders: res.data }
+            });
+        }
+    } catch (error) {
+        dispatch({
+            type: SELECTED_INDEX_CABINET_ERROR_CONFIG,
+            payload: { ...typeFileCore, FilesFolders: [] }
+        });
+    }
+}
+
 //tipos de archivos existentes no seleccionados
 export const getTypeFileByFolderNoSelected = (id) => async (dispatch, getState) => {
     const { typeFileCore, sesion } = getState();
@@ -215,7 +250,7 @@ export const getTypeFileByFolderNoSelected = (id) => async (dispatch, getState) 
         const res = await axios({
             url: `${CoreServer}FolderFileType/getfolderfiletypetoadd/${id}`,
             headers: {
-                Authorization: `Bearer ${TockenUser?.token}`
+                Authorization: `Bearer ${TockenUser}`
             }
         });
         if (res.status == 200) {
@@ -232,3 +267,97 @@ export const getTypeFileByFolderNoSelected = (id) => async (dispatch, getState) 
         })
     }
 }
+
+//Filtrar Tipo de archivo seleccionado 
+export const setSelectedTypeFileConfig = (id) => async (dispatch, getState) => {
+    const { typeFileCore } = getState();
+    const { TypeFile } = typeFileCore;
+    const SelectedTypeFile = TypeFile.find(TypeFile => TypeFile.id == id);
+
+    if (SelectedTypeFile == undefined) {
+        dispatch({
+            type: SELECTED_ERRORS_TYPE_FILE_CONFIG,
+            payload: { ...typeFileCore, elementError: "El id no existe" },
+        });
+        return;
+    }
+    dispatch({
+        type: SELECTED_TYPEFILE_CONFIG,
+        payload: { ...typeFileCore, SelectedTypeFile }
+    });
+}
+
+
+
+
+
+/*<----------------------CRUD DE FILETYPE--------------------> */
+//Crear nuevo tipo de archivo
+export const CreatedTypeFileConfig = (newFile) => async (dispatch, getState) => {
+    const { sesion } = getState();
+    const { TockenUser } = sesion;
+    axios({
+        url: `${CoreServer}filetype`,
+        method: "PUT",
+        data: newFile,
+        headers: {
+            "Content-Type": "Application/json",
+            Authorization: `Bearer ${TockenUser}`
+        },
+    }).then(function (response) {
+        if (response.status == 200) {
+            dispatch(getTypeFileConfig());
+            toast.success('Tipo de Archivo Creado');
+        }
+    }).catch(function (error) {
+        console.log(error);
+        toast.error('Tipo de Archivo no Creado');
+    });
+};
+
+//Editar tipo de archivo y actualizar estado global 
+export const UpdateTypeFileConfig = (update, id) => async (dispatch, getState) => {
+    const { sesion } = getState();
+    const { TockenUser } = sesion;
+    axios({
+        url: `${CoreServer}filetype/${id}`,
+        method: "PUT",
+        data: update,
+        headers: {
+            "Content-Type": "Application/json",
+            Authorization: `Bearer ${TockenUser}`
+        },
+    }).then(function (response) {
+        if (response.status == 200) {
+            dispatch(getTypeFileConfig());
+            toast.success('Tipo de Archivo Actualizado');
+        }
+    }).catch(function (error) {
+        console.log(error);
+        toast.error('Tipo de Archivo no Actualizado');
+    });
+};
+
+//eliminar tipo de archivo y actualizar estado global
+export const DeleteTypeFileConfig = (update, id) => async (dispatch, getState) => {
+    const { sesion } = getState();
+    const { TockenUser } = sesion;
+    axios({
+        url: `${CoreServer}filetype/${id}`,
+        method: "DELETE",
+        data: update,
+        headers: {
+            "Content-Type": "Application/json",
+            Authorization: `Bearer ${TockenUser}`
+        },
+    }).then(function (response) {
+        if (response.status == 200) {
+            dispatch(getTypeFileConfig());
+            dispatch(getAllDeleteFileTypeRestored());
+            toast.success('Tipo de Archivo Eliminado');
+        }
+    }).catch(function (error) {
+        console.log(error);
+        toast.error('Tipo de Archivo no Eliminado');
+    });
+};

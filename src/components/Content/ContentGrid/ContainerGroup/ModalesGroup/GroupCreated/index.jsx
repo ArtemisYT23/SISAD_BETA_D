@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setOpenModalGroupCreated,
-  setCloseMenuContextGroup,
+  setCloseMenuContextMantentGroup,
 } from "../../../../../../redux/states/ActionCore";
 import { CreateGroupNew } from "../../../../../../redux/states/Group";
 import {
@@ -29,6 +29,7 @@ const useStyless = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     transform: "translate(-50%,-50%)",
+    borderRadius: "13px",
   },
   textfield: {
     width: "100%",
@@ -93,7 +94,7 @@ const GroupCreated = () => {
 
   const abrirCerrarModal = () => {
     dispatch(setOpenModalGroupCreated(false));
-    dispatch(setCloseMenuContextGroup(false));
+    dispatch(setCloseMenuContextMantentGroup(false));
     dispatch(setClearGroupDataNew());
   };
 

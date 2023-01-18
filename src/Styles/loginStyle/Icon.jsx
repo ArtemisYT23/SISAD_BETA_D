@@ -1,10 +1,10 @@
 import styled from "styled-components"
 
-function Icon({ color, children }) {
-  return <StyledIcon background={color}>{children}</StyledIcon>;
+function Icon({ color, children, url }) {
+  return <StyledIcon background={color} href={url}>{children}</StyledIcon>;
 }
 
-const StyledIcon = styled.div`
+const StyledIcon = styled.a`
   height: 3.5rem;
   width: 3.5rem;
   background: ${(props) => props.background};

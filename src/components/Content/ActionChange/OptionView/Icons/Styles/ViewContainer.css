@@ -1,0 +1,17 @@
+.GridViewInactive > path {
+    fill: #F68A20 !important;
+    stroke:#efc411;
+  }
+  
+  .GridView > path {
+      fill: #c4c4c4 !important;
+    }
+  
+  .TraditionalViewInactive > path {
+      fill: #F68A20 !important;
+      stroke:#efc411;
+  }
+  
+  .TraditionalView > path {
+      fill: #c4c4c4 !important;
+  }

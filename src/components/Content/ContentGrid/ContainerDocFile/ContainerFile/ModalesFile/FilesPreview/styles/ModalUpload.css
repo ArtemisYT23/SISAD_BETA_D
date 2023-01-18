@@ -1,0 +1,86 @@
+.titles{
+    font-size: 1.6rem;
+    display: flex;
+    justify-content: center;
+    color: #F68A20;
+}
+
+.form-one{
+    width: 90%;
+    height: 50%;
+    border: 1px solid #c4c4c4;
+}
+
+
+/* .form-one:focus{
+    outline: 1px solid #F68A20;
+} */
+
+.form-ones{
+    width: 90%;
+    height: 30%;
+    border: 1px solid #c4c4c4;
+}
+
+/* .form-ones:focus{
+    outline: 1px solid #F68A20;
+    border:none;
+} */
+
+.ContainerFluid{
+    justify-content: flex-end;
+    width: 97%;
+    display:flex;
+    margin: 1rem 0 0 0.8rem;
+ }
+
+.enviar{
+    border-radius: 2px;
+    border: none;
+    font-weight: 500;
+    font-size: 0.6rem;
+    background-color:#f68b20ab;
+    color: white;
+    width: 8rem;
+    height: 2.3rem;
+    margin: 0 0.5rem 0 0;
+}
+
+.enviar:hover{
+    background-color: #F68A20;
+}
+
+.can{
+    border-radius: 2px;
+    border: 1px solid #c4c4c4;
+    color: #c4c4c4;
+    font-weight: 500;
+    background-color: white;
+    font-size: 0.6rem;
+    width: 8rem;
+    height: 2.3rem;
+    margin: 0 1.2rem 0 0;
+}
+
+.can:hover{
+    color: #878383;
+}
+
+.ContentFile{
+    padding: 0.5rem 0 0 0;
+}
+
+.ContentFile > label {
+    color: #878383;
+
+}
+
+.ContentFile > select {
+    color: var(--primaryColor);
+    outline: none;
+    font-weight: bold;
+}
+
+.defaultOption{
+    text-align: center;
+}

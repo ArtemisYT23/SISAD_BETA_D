@@ -5,7 +5,7 @@ import { PublicRoutes } from "../models";
 export const AuthGuard = () => {
     const { sesion } = useSelector((store) => store);
     const { TockenUser } = sesion;
-    return TockenUser?.token ? <Outlet /> : <Navigate replace to={PublicRoutes.LOGIN} />;
+    return TockenUser ? <Outlet /> : <Navigate replace to={PublicRoutes.LOGIN} />;
 }
 
 export default AuthGuard;

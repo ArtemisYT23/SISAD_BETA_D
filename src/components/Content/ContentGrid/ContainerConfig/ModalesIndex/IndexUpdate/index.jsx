@@ -37,6 +37,7 @@ const useStyless = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
+    borderRadius: "13px",
   },
   textfield: {
     width: "100%",
@@ -105,19 +106,15 @@ const IndexUpdate = () => {
         minValue: minValueUpdate,
         maxValue: maxValueUpdate,
         xmlReference: xmlReferenceUpdate
-    }
-    dispatch(
-      setIndexCabinetUpdateConfig(formIndex, idUpdate, UpdateSelectedCabinet?.name)
+    };
+    console.log(formIndex);
+    dispatch(setIndexCabinetUpdateConfig(formIndex, idUpdate, UpdateSelectedCabinet?.name)
     );
     OpenModalUpdateIndex();
   };
 
   const handleChange = (value) => {
     dispatch(setListIdUpdateIndex(value));
-  };
-
-  const handleChangeIndex = (index) => {
-    // dispatch(setIndexbyCabinetCore(index));
   };
 
   const bodyIndexUpdate = (

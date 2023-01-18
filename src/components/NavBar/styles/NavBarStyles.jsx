@@ -2,14 +2,20 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 export const NavBarContainer = styled.div`
-    background-color: var(--white);
-    min-width: ${props => props.isActive ? "fit-Content" : "var(--navBarMinWidth)"};
-    height: 100vh;
-    position: sticky;
-    top: 0;
-    left: 0;
-    box-shadow: -0.5rem 0 1.5rem -0.75rem rgba(0, 0, 0, 0.5);
-    z-index: 1;
+  background-color: var(--white);
+  min-width: ${(props) =>
+    props.isActive ? "fit-Content" : "var(--navBarMinWidth)"};
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  left: 0;
+  box-shadow: -0.5rem 0 1.5rem -0.75rem rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  @media (max-width: 767px) {
+    width: 100%;
+    display: flex;
+    height: 60px;
+  }
 `;
 
 const separetorContainer = styled.div`
@@ -19,7 +25,7 @@ const separetorContainer = styled.div`
 
 export const LogoContainer = styled(separetorContainer)`
   position: relative;
-  background-image: url(${props => props.logo});
+  background-image: url(${(props) => props.logo});
   background-size: 50%;
   background-repeat: no-repeat;
   background-position: center;
@@ -32,6 +38,9 @@ export const LogoContainer = styled(separetorContainer)`
     position: absolute;
     bottom: 0;
   }
+  @media (max-width: 767px) {
+    display: none;
+  }
 `;
 
 export const NavLinkContainer = styled(Link)`
@@ -42,6 +51,9 @@ export const NavLinkContainer = styled(Link)`
   align-items: center;
   &:hover {
     background-color: rgba(196, 196, 196, 0.15);
+  }
+  @media (max-width: 767px) {
+    width: 120px;
   }
 `;
 

@@ -18,42 +18,64 @@ import { getAllHistoryElementCore } from "../../../../../redux/states/History";
 import {
   setSelectedFolderUpdateCore,
   setSelectedFolderCore,
+  setFilterFoldersFatherCore
 } from "../../../../../redux/states/Folder";
-import { getFilesByFolderAll } from "../../../../../redux/states/Files"
+import { getFilesByFolderAll } from "../../../../../redux/states/Files";
 import { setFilterDocumentDocu } from "../../../../../redux/states/Document";
 import { getTypeFileByFolderFolder } from "../../../../../redux/states/FileType";
-import { getIndexAllCabinetPreview } from "../../../../../redux/states/Indexes";
+import { getFilterIndexNameConfig } from "../../../../../redux/states/Indexes";
 import { setClearMetadataSelected } from "../../../../../redux/states/Metadata";
 import HistoryElement from "../../ContainerCabinet/ModalesCabinet/HistoryElement";
 import FolderUpdate from "../ModalesFolder/FolderUpdate";
 import FolderDelete from "../ModalesFolder/FolderDelete";
+import { Tooltip } from "@material-ui/core";
 
 const GridFolder = ({ element, name, description, id, cabinetId }) => {
   const dispatch = useDispatch();
   const [showMenu, setShowMenu] = useState(false);
-  const { userSesion } = useSelector((store) => store);
-  const { RolSesion } = userSesion;
+  const { userSesion, cabinetCore } = useSelector((store) => store);
+  const { RolSesion, OptionsTocken } = userSesion;
+  const { cabinets } = cabinetCore;
+  const [update, setUpdate] = useState(false);
+  const [delet, setDelet] = useState(false);
 
   const Envio = (index, name, cabinetId) => {
     setShowMenu(false);
+    // dispatch(getTypeFileByFolderFolder(index));
+    dispatch(setFilterFoldersFatherCore(index));
     dispatch(setFilterDocumentDocu(index));
     dispatch(setSelectedFolderCore(index));
     dispatch(getNameGlobalChange(name));
     dispatch(setSelectedSearchMetadataCore());
     dispatch(setCloseContextFolder(false));
-    dispatch(getIndexAllCabinetPreview(cabinetId));
-    dispatch(getFilesByFolderAll(index));
+    // dispatch(getFilesByFolderAll(index));
     dispatch(setClearMetadataSelected());
+    cabinets.forEach((cab, i) => {
+      if (cab.id === cabinetId) {
+        dispatch(getFilterIndexNameConfig(cab.name));
+      }
+    });
   };
 
-  const Enrutamiento = (name) => {
-    dispatch(setSaveElementBreakFolder(name));
+  const Enrutamiento = (index) => {
+    dispatch(setSaveElementBreakFolder(index));
   };
 
   const dropdownCabinet = (index) => {
     dispatch(setSelectedFolderUpdateCore(index));
-    dispatch(getTypeFileByFolderFolder(index));
     setShowMenu(!showMenu);
+
+    OptionsTocken.map((n, i) => {
+      //actualizar carpeta
+      if (n.id == "08d51e45-9699-4955-bd8c-c111bac8a0f4") {
+        setUpdate(true);
+      }
+      //eliminar carpeta
+      if (n.id == "0959912c-700e-484a-beab-147de142448f") {
+        setDelet(true);
+      }
+    });
+
     const collection = document.getElementsByClassName("dropdown");
     for (let i = 0; i < collection.length; i++) {
       collection[i].style.display = "none";
@@ -66,6 +88,7 @@ const GridFolder = ({ element, name, description, id, cabinetId }) => {
 
   const AbrirModalUpdateFolder = (id) => {
     dispatch(setOpenModalFolderUpdate(true));
+    dispatch(getTypeFileByFolderFolder(id));
   };
 
   const AbrirModalDeleteFolder = () => {
@@ -82,58 +105,84 @@ const GridFolder = ({ element, name, description, id, cabinetId }) => {
       <GridElemmentContainer
         id={id}
         onDoubleClick={() => {
-          Envio(id, name, cabinetId), Enrutamiento(name);
+          Envio(id, name, cabinetId), Enrutamiento(id);
         }}
       >
         {showMenu && (
           <Dropdown className="dropdown">
             <DropdownContent>
-              <DropdownItem
-                onClick={() => {
-                  AbrirModalUpdateFolder(id);
-                }}
-              >
-                Actualizar
-              </DropdownItem>
+              {update ? (
+                <>
+                  <DropdownItem
+                    onClick={() => {
+                      AbrirModalUpdateFolder(id);
+                    }}
+                  >
+                    Actualizar
+                  </DropdownItem>
 
-              <FolderUpdate />
-              <LineItem></LineItem>
-              <DropdownItem onClick={() => AbrirModalDeleteFolder()}>
-                Eliminar
-              </DropdownItem>
-              <FolderDelete />
+                  <FolderUpdate />
+                  <LineItem></LineItem>
+                </>
+              ) : (
+                <></>
+              )}
 
-              <LineItem></LineItem>
-              <DropdownItem
-                onClick={() => AbriModalHistoryElement(id, RolSesion[0])}
-              >
-                Detalles
-              </DropdownItem>
-              <HistoryElement />
+              {delet ? (
+                <>
+                  <DropdownItem onClick={() => AbrirModalDeleteFolder()}>
+                    Eliminar
+                  </DropdownItem>
+                  <FolderDelete />
+
+                  <LineItem></LineItem>
+                </>
+              ) : (
+                <></>
+              )}
+              {RolSesion[2] == "Administrator" && (
+                <>
+                  <DropdownItem
+                    onClick={() => AbriModalHistoryElement(id, RolSesion[0])}
+                  >
+                    Historial
+                  </DropdownItem>
+                  <HistoryElement />
+                </>
+              )}
             </DropdownContent>
           </Dropdown>
         )}
 
-        {RolSesion[2] == "Administrator" && (
+        <Tooltip title="Opciones">
           <ContainerIcon onClick={() => dropdownCabinet(id)}>
             <Options x={20} y={20} fill={"#F68A20"} />
           </ContainerIcon>
-        )}
+        </Tooltip>
 
-        {RolSesion[2] == "Writer" && (
-          <ContainerIcon onClick={() => dropdownCabinet(id)}>
-            <Options x={20} y={20} fill={"#F68A20"} />
-          </ContainerIcon>
-        )}
-
-        <ElementIcon element={element} />
-        <ElementName>{name}</ElementName>
+        <ContainerItem>
+          <ElementIcon element={element} />
+          <ElementName>{name}</ElementName>
+        </ContainerItem>
       </GridElemmentContainer>
     </>
   );
 };
 
 export default GridFolder;
+
+const ContainerItem = styled.div`
+  width: 100%;
+  height: 76%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  @media (max-width: 767px) {
+    width: 100%;
+    height: 76%;
+  }
+`;
 
 const GridElemmentContainer = styled.div`
   display: inline-flex;
@@ -146,6 +195,11 @@ const GridElemmentContainer = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
+  @media (max-width: 767px) {
+    width: 130px;
+    height: 140px;
+    margin: 0.5rem;
+  }
 `;
 
 const ContainerIcon = styled.div`
@@ -153,6 +207,7 @@ const ContainerIcon = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
+  cursor: pointer;
 `;
 
 const ElementName = styled.h4`

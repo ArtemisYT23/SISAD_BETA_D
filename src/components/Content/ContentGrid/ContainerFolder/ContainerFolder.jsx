@@ -17,10 +17,14 @@ const ContainerFolder = () => {
   const { folderCabinet } = folderCore;
   const { selected, selectedView } = viewCore;
   const { ContextFolder } = modalCore;
-  const { RolSesion } = userSesion;
+  const { RolSesion, OptionsTocken } = userSesion;
 
   const handleClick = (e) => {
-    dispatch(setCloseContextFolder(true));
+    OptionsTocken.map((n, i) => {
+      if (n.id == "fe8a04d3-3439-4253-81c2-17aec2474db0") {
+        dispatch(setCloseContextFolder(true));
+      }
+    });
   };
 
   const contextMenuRightClick = (e) => {
@@ -38,17 +42,12 @@ const ContainerFolder = () => {
 
   return (
     <>
-      {RolSesion[2] == "Administrator" && ContextFolder ? (
+      {ContextFolder ? (
         <FolderContext x={x} y={y} cabinetId={SelectedCabinet?.id} />
       ) : (
         <></>
       )}
 
-      {RolSesion[2] == "Writer" && ContextFolder ? (
-        <FolderContext x={x} y={y} cabinetId={SelectedCabinet?.id} />
-      ) : (
-        <></>
-      )}
 
       <DocumentContainer
         onClick={() => CloseContextFolder(ContextFolder)}
@@ -77,6 +76,8 @@ const ContainerFolder = () => {
           <></>
         )}
 
+        
+
         <Toaster
           position="bottom-right"
           toastOptions={{
@@ -99,4 +100,14 @@ const DocumentContainer = styled.div`
   padding-bottom: 2rem;
   display: flex;
   flex-wrap: wrap;
+  @media (max-width: 767px) {
+    width: 100%;
+    justify-content: space-around;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    overflow-y: scroll;
+    display: grid;
+    grid-template-columns: 130px 130px;
+  }
 `;

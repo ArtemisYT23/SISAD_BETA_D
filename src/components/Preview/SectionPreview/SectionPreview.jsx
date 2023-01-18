@@ -12,15 +12,22 @@ const SectionPreview = () => {
   const { historyResourceDocu } = historyCore;
   const { modalPreview } = modalDocumentary;
   const { SelectedFile, SelectedUrlFile } = filesCore;
-  const { IndexPreview } = indexCore;
+  const { IndexConfig } = indexCore;
   const { SelectedMetadata } = metaCore;
   const Option = ["N", "Tipo", "Recurso", "Accion", "Usuario", "Fecha"];
+  const [IndexVisual, setIndexVisual] = useState([]);
 
   useEffect(() => {
     if (modalPreview == false) {
       setSeguiment(false);
       setDetail(true);
     }
+    const IndexSort = IndexConfig.sort((a, b) => {
+      if (a.position < b.position) {
+        return -1;
+      }
+    });
+    setIndexVisual(IndexSort);
   }, [modalPreview]);
 
   const HistorySeguimentArchive = () => {
@@ -64,21 +71,48 @@ const SectionPreview = () => {
       {detail && (
         <>
           <br />
-          {SelectedUrlFile != "" && (
-            <div className="contenedor">
-              <iframe
-                frameBorder={10}
-                className="ContentPdf"
-                src={SelectedUrlFile}
-              />
-            </div>
-          )}
+          {(() => {
+            switch (SelectedFile?.extension) {
+              case ".docx":
+                return (
+                  <div className="contenedor">
+                    <iframe
+                      className="ContentPdf"
+                      src={`https://view.officeapps.live.com/op/embed.aspx?src=${SelectedUrlFile}`}
+                      frameborder="0"
+                    >
+                      {" "}
+                    </iframe>
+                  </div>
+                );
+              case ".xlsx":
+                return (
+                  <div className="contenedor">
+                    <iframe
+                      frameborder="0"
+                      className="ContentPdf"
+                      src={`https://view.officeapps.live.com/op/embed.aspx?src=${SelectedUrlFile}`}
+                    />
+                  </div>
+                );
+              default:
+                return (
+                  <div className="contenedor">
+                    <iframe
+                      frameborder="0"
+                      className="ContentPdf"
+                      src={SelectedUrlFile}
+                    />
+                  </div>
+                );
+            }
+          })()}
 
           <hr />
           <div className="father">
             <div className="uno">
-              {IndexPreview ? (
-                IndexPreview.map(({ id, name }) => (
+              {IndexVisual ? (
+                IndexVisual.map(({ id, name }) => (
                   <div className="Container-Celda-Meta">
                     <span key={id} className="title">
                       {name}
@@ -117,11 +151,17 @@ const SectionPreview = () => {
                 </div>
                 <div className="TableDataSeguiment">
                   <div className="ContentNameSeguiment">{index + 1}</div>
-                  <div className="ContentNameSeguiment">{histo.resourceType}</div>
-                  <div className="ContentNameSeguiment">{histo.resourceName}</div>
+                  <div className="ContentNameSeguiment">
+                    {histo.resourceType}
+                  </div>
+                  <div className="ContentNameSeguiment">
+                    {histo.resourceName}
+                  </div>
                   <div className="ContentNameSeguiment">{histo.optionName}</div>
                   <div className="ContentNameSeguiment">{histo.userName}</div>
-                  <div className="ContentNameSeguiment">{histo.dateOcurred}</div>
+                  <div className="ContentNameSeguiment">
+                    {histo.dateOcurred}
+                  </div>
                 </div>
               </div>
             ))

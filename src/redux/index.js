@@ -20,12 +20,30 @@ import IndexReducer from "./states/Indexes";
 import ListReducer from "./states/List";
 import TypeDataReducer from "./states/DataType";
 import MetadataReducer from "./states/Metadata";
+import MenuOptionsReducer from "./states/OptionsMenu";
+import UserCoreReducer from "./states/UserCore";
+import ModalSecurityReducer from "./states/ActionSecurity";
+import ProfileReducer from "./states/Profile";
+import PermisionReducer from "./states/Permision";
+import OptionResourceReducer from "./states/OptionResource";
+import ResourceCoreData from "./states/ResourceCore";
+
 
 //formData
 import GroupDataReducer from "../redux/formData/GroupData";
 import CabinetDataReducer from "../redux/formData/CabinetData";
 import FolderDataReducer from "../redux/formData/FolderData";
 import IndexDataReducer from "./formData/IndexData";
+import ListDataReducer from "../redux/formData/ListData";
+import ElementDataReducer from "../redux/formData/ElementData";
+import FileTypeDataReducer from "./formData/FileTypeData";
+import DataTypeDataReducer from "./formData/DataTypeData";
+import FileUploaderReducer from "./formData/FileData";
+import FileDataReducer from "./formData/FilesData";
+import UserDataReducer from "./formData/UserData";
+import ProfileDataReducer from "./formData/Profile";
+import ResourceDataReducer from "./formData/ResourceData";
+import FilterReducer from "./formData/FilterData";
 
 const rootReducer = combineReducers({
     sesion: SesionReducer,
@@ -50,9 +68,26 @@ const rootReducer = combineReducers({
     listCore: ListReducer,
     typeDataCore: TypeDataReducer,
     metaCore: MetadataReducer,
+    menuOptions: MenuOptionsReducer,
+    listDataNew: ListDataReducer,
+    elementDataNew: ElementDataReducer,
+    FileTypeData: FileTypeDataReducer,
+    DataTypeData: DataTypeDataReducer,
+    uploader: FileUploaderReducer,
+    filesData: FileDataReducer,
+    userCore: UserCoreReducer,
+    modalSecurity: ModalSecurityReducer,
+    changeUser: UserDataReducer,
+    profileCore: ProfileReducer,
+    permisionCore: PermisionReducer,
+    profileData: ProfileDataReducer,
+    optionCore: OptionResourceReducer,
+    dataResult: ResourceDataReducer,
+    resourceCore: ResourceCoreData,
+    filterData: FilterReducer,
 });
 
-export default function generateStore(){
+export default function generateStore() {
     const store = createStore(
         rootReducer,
         composeWithDevTools(applyMiddleware(thunk))

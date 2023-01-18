@@ -31,6 +31,7 @@ const useStyless = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
+    borderRadius: "13px",
   },
   textfield: {
     width: "100%",

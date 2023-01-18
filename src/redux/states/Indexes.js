@@ -1,6 +1,8 @@
 import axios from "axios";
 import { CoreServer } from "../../config/axios";
 import { setChangeSelectView } from "./View";
+import { getAllDeleteIndexRestored } from "../formData/ResourceData";
+import { setOpenModalConfigUpdate, setOpenModalConfigDelete } from "./ActionConfig";
 import toast, { Toaster } from "react-hot-toast";
 
 const initialState = {
@@ -8,6 +10,7 @@ const initialState = {
     IndexNames: [],
     IndexConfig: [],
     IndexPreview: [],
+    IndexPreviewManag: [],
     IndexSelected: "",
     isLoadingIndex: false,
 }
@@ -23,7 +26,10 @@ const GET_INDEX_BY_CABINET_FAILED_CONFIG = "GET_INDEX_BY_CABINET_FAILED_CONFIG";
 const SELECTED_INDEX_CORE = "SELECTED_INDEX_CORE";
 const SELECTED_ERRORS_INDEX_CORE = "SELECTED_ERRORS_INDEX_CORE";
 const GET_INDEX_FILTER_CABINET_CORE = "GET_INDEX_FILTER_CABINET_CORE";
-const GET_INDEX_FILTER_CABINET_FAILED ="GET_INDEX_FILTER_CABINET_FAILED";
+const GET_INDEX_FILTER_CABINET_FAILED = "GET_INDEX_FILTER_CABINET_FAILED";
+const SELECTED_ERRORS_INDEX_CORE_DELETE = "SELECTED_ERRORS_INDEX_CORE_DELETE";
+const SELECTED_INDEX_CORE_DELETE = "SELECTED_INDEX_CORE_DELETE";
+const CLEAR_INDEX_DATA_MANAGMENT = "CLEAR_INDEX_DATA_MANAGMENT";
 
 export default function IndexReducer(state = initialState, action) {
     switch (action.type) {
@@ -37,7 +43,10 @@ export default function IndexReducer(state = initialState, action) {
         case SELECTED_INDEX_CORE:
         case SELECTED_ERRORS_INDEX_CORE:
         case GET_INDEX_FILTER_CABINET_CORE:
+        case SELECTED_ERRORS_INDEX_CORE_DELETE:
+        case SELECTED_INDEX_CORE_DELETE:
         case GET_INDEX_FILTER_CABINET_FAILED:
+        case CLEAR_INDEX_DATA_MANAGMENT:
             return action.payload;
         default:
             return state;
@@ -52,10 +61,11 @@ export const getIndexCabinetAll = () => async (dispatch, getState) => {
         const res = await axios({
             url: `${CoreServer}index`,
             headers: {
-                Authorization: `Bearer ${TockenUser?.token}`
+                Authorization: `Bearer ${TockenUser}`
             }
         });
         if (res.status == 200) {
+            console.log(res.status);
             dispatch({
                 type: GET_CABINET_INDEX_CONFIG,
                 payload: { ...indexCore, Indexes: res.data }
@@ -78,7 +88,7 @@ export const getIndexCabinetGetAllConfig = () => async (dispatch, getState) => {
         const res = await axios({
             url: `${CoreServer}getallnamesdata`,
             headers: {
-                Authorization: `Bearer ${TockenUser?.token}`
+                Authorization: `Bearer ${TockenUser}`
             }
         });
         if (res.status == 200) {
@@ -128,6 +138,27 @@ export const getIndexAllCabinetConfig = (name) => async (dispatch, getState) => 
     }
 };
 
+//Filtrar indices por cada gabinete con selected desde managment
+export const getIndexAllCabinetManag = (name) => async (dispatch, getState) => {
+    const { indexCore } = getState();
+    const { IndexNames } = indexCore;
+    try {
+        dispatch({
+            type: GET_INDEX_DATA_CABINET_CORE,
+            payload: {
+                ...indexCore, IndexPreviewManag: IndexNames.filter(
+                    Index => Index.cabinetName == name)
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        dispatch({
+            type: GET_INDEX_BY_CABINET_FAILED_CONFIG,
+            payload: { ...indexCore, IndexPreviewManag: [] },
+        });
+    }
+};
+
 //filtrar indices x gabinete para preview
 export const getIndexAllCabinetPreview = (id) => async (dispatch, getState) => {
     const { indexCore } = getState();
@@ -149,26 +180,59 @@ export const getIndexAllCabinetPreview = (id) => async (dispatch, getState) => {
     }
 };
 
-//Filtrar de Indice seleccionado
+//Filtrar de Indice seleccionado para actualizar
+export const setSelectedIndexesUpdate = id => async (dispatch, getState) => {
+    const { indexCore } = getState();
+    const { Indexes } = indexCore;
+    const IndexSelected = Indexes.find(Indexes => Indexes.id == id);
+
+    if (IndexSelected == undefined) {
+        dispatch({
+            type: SELECTED_ERRORS_INDEX_CORE,
+            payload: { ...indexCore, elementError: "El Id no existe" },
+        });
+        return;
+    }
+
+    dispatch({
+        type: SELECTED_INDEX_CORE,
+        payload: { ...indexCore, IndexSelected },
+    });
+
+    dispatch(setOpenModalConfigUpdate(true));
+};
+
+//Filtrar de Indice seleccionado para eliminar
 export const setSelectedIndexes = id => async (dispatch, getState) => {
     const { indexCore } = getState();
     const { Indexes } = indexCore;
     const IndexSelected = Indexes.find(Indexes => Indexes.id == id);
-  
-    if (IndexSelected == undefined) {
-      dispatch({
-        type: SELECTED_ERRORS_INDEX_CORE,
-        payload: { ...indexCore, elementError: "El Id no existe" },
-      });
-      return;
-    }
-  
-    dispatch({
-      type: SELECTED_INDEX_CORE,
-      payload: { ...indexCore, IndexSelected },
-    });
-  };
 
+    if (IndexSelected == undefined) {
+        dispatch({
+            type: SELECTED_ERRORS_INDEX_CORE_DELETE,
+            payload: { ...indexCore, elementError: "El Id no existe" },
+        });
+        return;
+    }
+
+    dispatch({
+        type: SELECTED_INDEX_CORE_DELETE,
+        payload: { ...indexCore, IndexSelected },
+    });
+
+    dispatch(setOpenModalConfigDelete(true));
+};
+
+
+//limpiar estado de indices
+export const clearDataIndexManagment = () => async (dispatch, getState) => {
+    const { indexCore } = getState();
+    dispatch({
+        type: CLEAR_INDEX_DATA_MANAGMENT,
+        payload: { ...indexCore, IndexPreviewManag: [] }
+    })
+}
 
 
 /*<-------------------CRUD INDICES--------------------->*/
@@ -182,7 +246,7 @@ export const getIndexNameConfig = (Name) => async (dispatch, getState) => {
         const res = await axios({
             url: `${CoreServer}getallnamesdata`,
             headers: {
-                Authorization: `Bearer ${TockenUser?.token}`
+                Authorization: `Bearer ${TockenUser}`
             }
         });
         if (res.status == 200) {
@@ -236,7 +300,7 @@ export const setIndexCabinetCreatedConfig = (newIndex, Name) => async (dispatch,
         data: newIndex,
         headers: {
             "Content-Type": "Application/json",
-            Authorization: `Bearer ${TockenUser?.token}`
+            Authorization: `Bearer ${TockenUser}`
         },
     })
         .then(function (response) {
@@ -263,7 +327,7 @@ export const setIndexCabinetUpdateConfig = (updateIndex, id, Name) => async (dis
         data: updateIndex,
         headers: {
             "Content-Type": "Application/json",
-            Authorization: `Bearer ${TockenUser?.token}`
+            Authorization: `Bearer ${TockenUser}`
         },
     })
         .then(function (response) {
@@ -281,6 +345,8 @@ export const setIndexCabinetUpdateConfig = (updateIndex, id, Name) => async (dis
 
 //Eliminar Indice de gabinetey actualizar estado
 export const setIndexCabinetDeleteConfig = (deleteIndex, id, Name, cabinetId) => async (dispatch, getState) => {
+    console.log(id);
+    console.log(cabinetId);
     const { sesion } = getState();
     const { TockenUser } = sesion;
     axios({
@@ -289,7 +355,7 @@ export const setIndexCabinetDeleteConfig = (deleteIndex, id, Name, cabinetId) =>
         data: deleteIndex,
         headers: {
             "Content-Type": "Application/json",
-            Authorization: `Bearer ${TockenUser?.token}`
+            Authorization: `Bearer ${TockenUser}`
         },
     })
         .then(function (response) {
@@ -297,6 +363,7 @@ export const setIndexCabinetDeleteConfig = (deleteIndex, id, Name, cabinetId) =>
             if (response.status == 200) {
                 toast.success('Indice Eliminado');
                 dispatch(getIndexNameConfig(Name));
+                dispatch(getAllDeleteIndexRestored());
             }
         })
         .catch(function (error) {

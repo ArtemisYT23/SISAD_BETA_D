@@ -2,9 +2,9 @@ import styled from "styled-components";
 import { useDispatch } from "react-redux";
 import {
   setOpenModalCabinetCreated,
-  setOpenModalGroupCreated,
   setCloseMenuContextGroup,
 } from "../../../../../redux/states/ActionCore";
+import { setChangeSelectView } from "../../../../../redux/states/View";
 import { orderCabinetByAscCore } from "../../../../../redux/states/Cabinet";
 import GroupCreated from "../../ContainerGroup/ModalesGroup/GroupCreated";
 import CabinetCreated from "../ModalesCabinet/CabinetCreated";
@@ -35,7 +35,8 @@ const CabinetContext = ({ x, y }) => {
   };
 
   const AbrirModalGuardarGroup = () => {
-    dispatch(setOpenModalGroupCreated(true));
+    dispatch(setChangeSelectView("GroupMantent"));
+    dispatch(setCloseMenuContextGroup(false));
   };
 
   const OrderCabinetCore = () => {
@@ -49,7 +50,7 @@ const CabinetContext = ({ x, y }) => {
         onClick={() => AbrirModalGuardarGroup()}
         style={{ ...styles.div, ...styles.margin }}
       >
-        Crear Grupo
+        Grupos
       </div>
       <GroupCreated />
       <Line />

@@ -4,44 +4,43 @@ import { useDispatch, useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
 import GridDocument from "./GridDocument/GridDocument";
 import ContainerFile from "./ContainerFile/ContainerFile";
-import { setOpenModalDocumentCreated } from "../../../../redux/states/ActionDocumentary";
+import { setOpenModalMetadataCreated } from "../../../../redux/states/ActionDocumentary";
+import MetadataCreated from "./ModalesDocument/MetadataCreated";
 
 const ContainerDocuFile = () => {
   const dispatch = useDispatch();
-  const [isTrue, setIsTrue] = useState(true);
-  const { folderCore, cabinetCore, documentary, viewCore, userSesion } =
-    useSelector((store) => store);
+  const [isTrue, setIsTrue] = useState(false);
+  const { cabinetCore, documentary, viewCore, userSesion } = useSelector(
+    (store) => store
+  );
 
   const { DocumentFolder } = documentary;
   const { SelectedCabinet } = cabinetCore;
-  const { SelectedFolder } = folderCore;
   const { selected, selectedView } = viewCore;
-  const { RolSesion } = userSesion;
+  const { RolSesion, OptionsTocken } = userSesion;
 
   useEffect(() => {
-    if (RolSesion[2] == "Administrator") {
-      setIsTrue(false);
-    }
-    if (RolSesion[2] == "Writer") {
-      setIsTrue(false);
-    }
-  }, [RolSesion]);
+    OptionsTocken.map((n, i) => {
+      if (n.id == "d7b94891-28e4-40e9-9c6a-1878435612ec") {
+        setIsTrue(true);
+      }
+    });
+  }, []);
 
   const OpenModalDocumentCreated = () => {
-    dispatch(setOpenModalDocumentCreated(true));
+    dispatch(setOpenModalMetadataCreated(true));
   };
 
   return (
     <DocumentContainer>
       <ContainerThreeRegister>
         <ContainerCeldaAggDocument>
-          <AggButtonDocument
-            disabled={isTrue}
-            onClick={() => OpenModalDocumentCreated()}
-          >
-            Nuevo Documento
-          </AggButtonDocument>
-          {/* <DocumentCreated /> */}
+          {isTrue && (
+            <AggButtonDocument onClick={() => OpenModalDocumentCreated()}>
+              Nuevo Documento
+            </AggButtonDocument>
+          )}
+          <MetadataCreated />
         </ContainerCeldaAggDocument>
         <br />
         {selected === "folder" && selectedView === "grid" ? (
@@ -59,7 +58,7 @@ const ContainerDocuFile = () => {
           <></>
         )}
       </ContainerThreeRegister>
-  
+
       <ContainerFilesSection>
         <ContainerFile />
       </ContainerFilesSection>
@@ -83,9 +82,11 @@ export default ContainerDocuFile;
 
 const DocumentContainer = styled.div`
   width: 100%;
-  padding-bottom: 2rem;
   display: flex;
   flex-wrap: wrap;
+  @media (max-width: 767px) {
+    height: 100%;
+  }
 `;
 
 const ContainerThreeRegister = styled.div`
@@ -94,6 +95,14 @@ const ContainerThreeRegister = styled.div`
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    width: 30%;
+    height: 100%;
+  }
 `;
 
 const ContainerCeldaAggDocument = styled.div`
@@ -123,4 +132,8 @@ const ContainerFilesSection = styled.div`
   display: flex;
   flex-direction: column;
   width: 85%;
+  @media (max-width: 767px) {
+    width: 60%;
+    height: 100%;
+  }
 `;

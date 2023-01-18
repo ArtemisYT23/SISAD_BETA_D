@@ -1,7 +1,8 @@
 import styled from "styled-components";
 import { useDispatch } from "react-redux";
-import { setOpenModalFolderCreated } from "../../../../../redux/states/ActionCore";
+import { setOpenModalFolderCreated, setCloseContextFolder } from "../../../../../redux/states/ActionCore";
 import { getTypeFileByFolderNew } from "../../../../../redux/states/FileType";
+import { orderFolderByDesCore } from "../../../../../redux/states/Folder";
 import FolderCreated from "../ModalesFolder/FolderCreated";
 
 const FolderMenu = ({ x, y, cabinetId }) => {
@@ -11,6 +12,11 @@ const FolderMenu = ({ x, y, cabinetId }) => {
     dispatch(getTypeFileByFolderNew(index));
     dispatch(setOpenModalFolderCreated(true));
   };
+
+  const OpenSortingFolder = () => {
+    dispatch(orderFolderByDesCore());
+    dispatch(setCloseContextFolder(false));
+  }
 
   const style = () => {
     return {
@@ -40,7 +46,7 @@ const FolderMenu = ({ x, y, cabinetId }) => {
       </div>
       <FolderCreated />
       <Line />
-      <div style={styles.div}>Ordenar</div>
+      <div style={styles.div} onClick={() => OpenSortingFolder()}>Ordenar</div>
       <Line />
       <div style={{ ...styles.div }}>Filtrar</div>
       <Line />

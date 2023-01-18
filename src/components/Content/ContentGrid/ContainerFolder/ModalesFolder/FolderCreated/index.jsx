@@ -1,3 +1,4 @@
+import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Modal, TextField } from "@material-ui/core";
@@ -19,8 +20,9 @@ import {
   getDescriptionFolderNew,
   getCabinetIdFolderNew,
   getFileTypeIdFolderNew,
-  setClearDataFolderNew
+  setClearDataFolderNew,
 } from "../../../../../../redux/formData/FolderData";
+import { Tooltip } from "@material-ui/core";
 
 const useStyless = makeStyles((theme) => ({
   FolderCreated: {
@@ -29,10 +31,11 @@ const useStyless = makeStyles((theme) => ({
     backgroundColor: "white",
     border: "2px solid white",
     boxShadow: theme.shadows[2],
-    padding: "16px 32px 24px",
+    padding: "14px 24px 24px",
     top: "50%",
     left: "50%",
     transform: "translate(-50%,-50%)",
+    borderRadius: "13px",
   },
   textfield: {
     width: "100%",
@@ -53,9 +56,15 @@ const FolderCreated = () => {
   const { id, name, description, cabinetId, folderId, folderFileTypes } =
     folderData;
   const { SelectedCabinet } = cabinetCore;
+  const [fileTypeAll, setFileTypeAll] = useState([]);
 
   useEffect(() => {
     dispatch(getCabinetIdFolderNew(SelectedCabinet?.id));
+    const FilterFileType = FilesNewFolder.filter(
+      (item) => item.fileTypeName
+      !== ".PDF"
+    );
+    setFileTypeAll(FilterFileType);
   }, [FolderCreated]);
 
   const handleSubmit = async (e) => {
@@ -88,7 +97,7 @@ const FolderCreated = () => {
     <div className={styless.FolderCreated}>
       <form onSubmit={handleSubmit}>
         <div align="center">
-          <TitleModal>Crear Carpeta</TitleModal>
+          <TitleModal>Crear Carpeta Raiz</TitleModal>
         </div>
         <br />
         <TextField
@@ -109,29 +118,33 @@ const FolderCreated = () => {
         <br />
         <br />
         <TitleArchive>Tipo de Archivo</TitleArchive>
-        <div className="ContainerSelectedChech">
+        <>
           <ContainerNameCheck>
-            {FilesNewFolder ? (
-              FilesNewFolder.map(({ fileTypeId, fileTypeName }, index) => (
-                <div className="NameCeldaCheck">
-                  <input
-                    type="checkbox"
-                    onChange={ObtenerSelected}
-                    name="subject"
-                    value={fileTypeId}
-                    id={fileTypeId}
-                  />
-                  {fileTypeName}
-                </div>
+            {fileTypeAll ? (
+              fileTypeAll.map(({ fileTypeId, fileTypeName }, index) => (
+                <ContainerCeldaSelected>
+                  <ContainerCHeck>
+                    <InputCheck
+                      type="checkbox"
+                      onChange={ObtenerSelected}
+                      name="subject"
+                      value={fileTypeId}
+                      id={fileTypeId}
+                    />
+                  </ContainerCHeck>
+                  <Tooltip title={fileTypeName}>
+                    <ContainerText>{fileTypeName}</ContainerText>
+                  </Tooltip>
+                </ContainerCeldaSelected>
               ))
             ) : (
               <></>
             )}
           </ContainerNameCheck>
-        </div>
+        </>
         <br />
         <div align="right">
-          {name != "" && description != "" && folderFileTypes.length != 0 ? (
+          {name != "" && description != "" ? (
             <SaveButton>Crear</SaveButton>
           ) : (
             <></>
@@ -160,3 +173,25 @@ const FolderCreated = () => {
 };
 
 export default FolderCreated;
+
+const ContainerCeldaSelected = styled.div`
+  width: 100%;
+  display: flex;
+  padding: 0.1rem;
+`;
+
+const ContainerCHeck = styled.div`
+  width: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ContainerText = styled.div`
+  width: 240px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+`;
+
+const InputCheck = styled.input``;
