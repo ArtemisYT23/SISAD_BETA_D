@@ -81,6 +81,7 @@ export const getAllFoldersCore = () => async (dispatch, getState) => {
         type: GET_FOLDER_CORE,
         payload: { ...folderCore, folders: response.data },
       });
+      dispatch(orderFolderByAscCore());
     }
   }).catch(function (error) {
     console.log(error);
@@ -114,12 +115,26 @@ export const setFilterFoldersCore = (cabinetId) => async (dispatch, getState) =>
       ...folderCore, folderCabinet: folderFinal
     },
   });
-  dispatch(orderFolderByAscCore());
+};
+
+//filtrar carpetas por gabinetes
+export const setFilterFoldersCoreCabinet = (cabinetId,) => async (dispatch, getState) => {
+
+  const { folderCore } = getState();
+  const { folders } = folderCore;
+
+  const folderValidate = folders.filter(folder => folder.folderId == null);
+  const folderFinal = folderValidate.filter(folders => folders.cabinetId == cabinetId)
+  dispatch({
+    type: SET_FILTER_FOLDERS_CORE,
+    payload: {
+      ...folderCore, folderCabinet: folderFinal
+    },
+  });
 };
 
 //filtrar carpetas hijas por carpetas padre 
 export const setFilterFoldersFatherCore = (folderId) => async (dispatch, getState) => {
-
   const { folderCore } = getState();
   const { folders } = folderCore;
   dispatch({
@@ -129,6 +144,27 @@ export const setFilterFoldersFatherCore = (folderId) => async (dispatch, getStat
     },
   });
   dispatch(orderFolderByAscCore());
+};
+
+//Filtrar Carpeta Seleccionada global con cambio de pantalla
+export const setSelectedFolderPrimaryCore = (id) => async (dispatch, getState) => {
+  const { folderCore } = getState();
+  const { folders } = folderCore;
+  const SelectedFolder = folders.find(folders => folders.id == id);
+
+  if (SelectedFolder == undefined) {
+    dispatch({
+      type: SELECTED_ERRORS_FOLDER_CORE,
+      payload: { ...folderCore, elementError: "El Id no existe" },
+    });
+    return;
+  }
+
+  dispatch({
+    type: SELECTED_FOLDER_CORE,
+    payload: { ...folderCore, SelectedFolder },
+  });
+  dispatch(setChangeSelectView("folder"));
 };
 
 //Filtrar Carpeta Seleccionada global con cambio de pantalla
@@ -282,11 +318,11 @@ export const setActiveLoadingSpinnerFolderSearch = (bool) => async (dispatch, ge
 //Ordenar carpetas en orden ascendente
 export const orderFolderByAscCore = () => async (dispatch, getState) => {
   const { folderCore } = getState();
-  const { folderCabinet } = folderCore;
+  const { folderByFolder } = folderCore;
   dispatch({
     type: ORDER_FOLDER_BY_ASC_CORE,
     payload: {
-      ...folderCore, folderCabinet: folderCabinet.sort((a, b) => {
+      ...folderCore, folderByFolder: folderByFolder.sort((a, b) => {
         if (a.name.toLowerCase() < b.name.toLowerCase()) {
           return -1;
         }
@@ -298,11 +334,11 @@ export const orderFolderByAscCore = () => async (dispatch, getState) => {
 //Ordenar gabinetes en orden descendente
 export const orderFolderByDesCore = () => async (dispatch, getState) => {
   const { folderCore } = getState();
-  const { folderCabinet } = folderCore;
+  const { folderByFolder } = folderCore;
   dispatch({
     type: ORDER_FOLDER_BY_ASC_CORE,
     payload: {
-      ...folderCore, folderCabinet: folderCabinet.sort((a, b) => {
+      ...folderCore, folderByFolder: folderByFolder.sort((a, b) => {
         if (a.name.toLowerCase() > b.name.toLowerCase()) {
           return -1;
         }
@@ -313,7 +349,7 @@ export const orderFolderByDesCore = () => async (dispatch, getState) => {
 
 /*<------------FOLDER---------------->*/
 //traer todas las carpetas
-export const getAllFolders = (cabinetId) => async (dispatch, getState) => {
+export const getAllFolders = (cabinetId, folderId) => async (dispatch, getState) => {
   const { folderCore, sesion } = getState();
   const { TockenUser } = sesion;
   axios({
@@ -328,7 +364,7 @@ export const getAllFolders = (cabinetId) => async (dispatch, getState) => {
         type: GET_FOLDER_CORE,
         payload: { ...folderCore, folders: response.data },
       });
-      dispatch(setFilterFoldersCore(cabinetId));
+      dispatch(setFilterFoldersCoreCabinet(cabinetId));
     }
   }).catch(function (error) {
     console.log(error);
@@ -366,6 +402,8 @@ export const getAllFolderChild = (folderId) => async (dispatch, getState) => {
     })
   })
 };
+
+
 
 //Guardar nueva carpeta y actualizar estado inicial
 export const CreateFolderNew = (newFolder, cabinetId) => async (dispatch, getState) => {
@@ -413,6 +451,30 @@ export const CreateFolderChildNew = (newFolder, folderId) => async (dispatch, ge
     }).catch(function (error) {
       console.log(error);
       toast.error('Carpeta no Creada.');
+    })
+};
+
+//Actualizar Carpeta y actualizar estado inicial
+export const UpdateFolderChildCore = (newFolder, id, folderId) => async (dispatch, getState) => {
+  const { sesion } = getState();
+  const { TockenUser } = sesion;
+  axios({
+    url: `${CoreServer}folder/${id}`,
+    method: "PUT",
+    data: newFolder,
+    headers: {
+      'Content-Type': "Application/json",
+      Authorization: `Bearer ${TockenUser}`
+    },
+  })
+    .then(function (response) {
+      if (response.status == 200) {
+        toast.success('Carpeta Actualizada.');
+        dispatch(getAllFolderChild(folderId));
+      };
+    }).catch(function (error) {
+      console.log(error);
+      toast.error('Carpetas no Actualizado.');
     })
 };
 

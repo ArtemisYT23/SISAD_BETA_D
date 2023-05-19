@@ -14,6 +14,7 @@ import {
 import { getAllHistoryElementDocu } from "../../../../../../redux/states/History";
 import { setSelectedMetadataDocument } from "../../../../../../redux/states/Metadata";
 import FilesDelete from "../ModalesFile/FilesDelete";
+import { Tooltip } from "@material-ui/core";
 
 const GridFiles = ({
   element,
@@ -108,9 +109,34 @@ const GridFiles = ({
           })()}
         </ContainerDistint>
 
-        <NumberOfElementChild>{fileTypeName}</NumberOfElementChild>
-        <ElementNameDoc>{name}</ElementNameDoc>
-        <NumberOfElementChild>{description}</NumberOfElementChild>
+        <NumberOfElementChild>
+          <div>
+            <strong>
+              <Tooltip title={name}>
+                <span>{name}</span>
+              </Tooltip>
+            </strong>
+          </div>
+        </NumberOfElementChild>
+
+        <ElementNameDoc>
+          <div>
+            <strong>
+              <Tooltip title={description}>
+                <span>{description}</span>
+              </Tooltip>
+            </strong>
+          </div>
+        </ElementNameDoc>
+        <NumberOfElementChild>
+        <div>
+            <strong>
+              <Tooltip title={fileTypeName}>
+                <span> {fileTypeName}</span>
+              </Tooltip>
+            </strong>
+          </div>
+        </NumberOfElementChild>
       </GridDocContainer>
     </>
   );
@@ -162,22 +188,44 @@ const TypeFile = styled.span`
   font-size: 0.95rem;
 `;
 
-const NumberOfElementChild = styled.span`
-  color: var(--lineColor);
-  text-align: center;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+const NumberOfElementChild = styled.div`
+  div {
+    width: 150px;
+    text-align: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    align-items: center;
+    color: var(--lineColor);
+  }
+
+  span {
+    text-transform: uppercase;
+    font-size: 14px;
+  }
+  strong {
+    float: center;
+  }
 `;
 
 const ElementNameDoc = styled.h4`
-  color: var(--primaryColor);
-  font-size: 1rem;
-  padding: 0.2rem;
-  text-align: center;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  div {
+    width: 150px;
+    text-align: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    align-items: center;
+    color: var(--primaryColor);
+  }
+
+  span {
+    text-transform: uppercase;
+    font-size: 14px;
+  }
+  strong {
+    float: center;
+  }
 `;
 
 const Dropdown = styled.div`

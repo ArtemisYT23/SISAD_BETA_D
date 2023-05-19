@@ -1,36 +1,35 @@
-import styled from "styled-components";
+import { Tooltip } from "@material-ui/core";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import ElementIcon from "../../../../../Styles/IconsResourse";
-import { Options } from "./Icons";
+import styled from "styled-components";
 import {
-  setOpenModalFolderUpdate,
-  setOpenModalFolderDelete,
-  setCloseContextFolder,
   setCloseContextChild,
+  setOpenModalFolderDelete,
+  setOpenModalChildFolderUpdate,
   setOpenModalHistoryViewElement,
 } from "../../../../../redux/states/ActionCore";
+import {
+  getFileTypeByFolder,
+  getTypeFileByFolderFolder,
+} from "../../../../../redux/states/FileType";
+import {
+  setSelectedFolderChildCore,
+  setSelectedFolderUpdateCore,
+} from "../../../../../redux/states/Folder";
+import { getAllHistoryElementCore } from "../../../../../redux/states/History";
+import { getFilterIndexNameConfig } from "../../../../../redux/states/Indexes";
 import {
   getNameGlobalChange,
   setSaveElementBreackFolderChild,
 } from "../../../../../redux/states/Name";
-import { setSelectedSearchMetadataCore } from "../../../../../redux/states/View";
-import { getAllHistoryElementCore } from "../../../../../redux/states/History";
-import {
-  setSelectedFolderUpdateCore,
-  setSelectedFolderChildCore,
-} from "../../../../../redux/states/Folder";
 import { getFilesByFolderAll } from "../../../../../redux/states/Files";
-import { setFilterDocumentDocu } from "../../../../../redux/states/Document";
-import { getTypeFileByFolderFolder, getFileTypeByFolder } from "../../../../../redux/states/FileType";
-import { getFilterIndexNameConfig } from "../../../../../redux/states/Indexes";
-import { setClearMetadataSelected } from "../../../../../redux/states/Metadata";
+import ElementIcon from "../../../../../Styles/IconsResourse";
 import HistoryElement from "../../ContainerCabinet/ModalesCabinet/HistoryElement";
-import FolderUpdate from "../../ContainerFolder/ModalesFolder/FolderUpdate";
 import FolderDelete from "../../ContainerFolder/ModalesFolder/FolderDelete";
-import { Tooltip } from "@material-ui/core";
+import ChildUpdate from "../modalesChild/ChildUpdate";
+import { Options } from "./Icons";
 
-const GridChild = ({ element, name, description, id, cabinetId }) => {
+const GridChild = ({ element, name, id, cabinetId, folderId }) => {
   const dispatch = useDispatch();
   const [showMenu, setShowMenu] = useState(false);
   const { userSesion, cabinetCore } = useSelector((store) => store);
@@ -39,16 +38,13 @@ const GridChild = ({ element, name, description, id, cabinetId }) => {
   const [update, setUpdate] = useState(false);
   const [delet, setDelet] = useState(false);
 
-  const Envio = (index, name, cabinetId) => {
+  const Envio = (index, name, cabinetId, folderId) => {
     setShowMenu(false);
     dispatch(getFileTypeByFolder(index));
-    // dispatch(setFilterDocumentDocu(index));
     dispatch(setSelectedFolderChildCore(index));
     dispatch(getNameGlobalChange(name));
-    // dispatch(setSelectedSearchMetadataCore());
+    // dispatch(getFilesByFolderAll(folderId));
     dispatch(setCloseContextChild(false));
-    // dispatch(getFilesByFolderAll(index));
-    // dispatch(setClearMetadataSelected());
     cabinets.forEach((cab, i) => {
       if (cab.id === cabinetId) {
         dispatch(getFilterIndexNameConfig(cab.name));
@@ -86,7 +82,7 @@ const GridChild = ({ element, name, description, id, cabinetId }) => {
   };
 
   const AbrirModalUpdateFolder = (id) => {
-    dispatch(setOpenModalFolderUpdate(true));
+    dispatch(setOpenModalChildFolderUpdate(true));
     dispatch(getTypeFileByFolderFolder(id));
   };
 
@@ -104,7 +100,7 @@ const GridChild = ({ element, name, description, id, cabinetId }) => {
       <GridElemmentContainer
         id={id}
         onDoubleClick={() => {
-          Envio(id, name, cabinetId), Enrutamiento(name);
+          Envio(id, name, cabinetId, folderId), Enrutamiento(name);
         }}
       >
         {showMenu && (
@@ -120,7 +116,7 @@ const GridChild = ({ element, name, description, id, cabinetId }) => {
                     Actualizar
                   </DropdownItem>
 
-                  <FolderUpdate />
+                  <ChildUpdate />
                   <LineItem></LineItem>
                 </>
               ) : (

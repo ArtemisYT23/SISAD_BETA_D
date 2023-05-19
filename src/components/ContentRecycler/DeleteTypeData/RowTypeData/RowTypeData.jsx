@@ -1,7 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import "ag-grid-enterprise";
+import { AgGridReact } from "ag-grid-react";
 import { SearchFilter, RestoredElement } from "./icons";
 import LoadingSpinner from "../../../../utilities/LoadingSpinner";
 import {
@@ -13,7 +17,8 @@ const RowTypeData = () => {
   const dispatch = useDispatch();
   const { dataResult } = useSelector((store) => store);
   const { isLoadingRestored, typeDataRestored } = dataResult;
-  const [term, setTerm] = useState("");
+  const [gridApi, setGridApi] = useState({});
+  const [FileCore, setFileCore] = useState([]);
 
   useEffect(() => {
     if (typeDataRestored == "") {
@@ -21,23 +26,116 @@ const RowTypeData = () => {
     }
   }, []);
 
-  const restoredTypeDataSelected = (index) => {
-    dispatch(RestoredTypeData(index));
+  useEffect(() => {
+    typeDataRestored.map((file, i) => {
+      if (file.sequential) {
+        file.sequential = i + 1;
+        file.resource = "TIPO DE DATO";
+      } else {
+        file.sequential = i + 1;
+        file.resource = "TIPO DE DATO";
+      }
+    });
+    setFileCore(typeDataRestored);
+  }, [typeDataRestored]);
+
+  const RestoredTypeFile = (props) => {
+    const invokeParentMethod = () => {
+      dispatch(RestoredTypeData(props.node.data.id));
+    };
+
+    return (
+      <ButtonOptions onClick={invokeParentMethod}>
+        <RestoredElement x={30} y={30} />
+      </ButtonOptions>
+    );
   };
 
-  function searchingTerm(term) {
-    return function (x) {
-      return x.name.toLowerCase().includes(term) || !term;
+  const DataFiles = [
+    {
+      headerName: "Id",
+      field: "sequential",
+      pinned: "left",
+      filter: false,
+      width: 70,
+      rezisable: true,
+      sortable: true,
+    },
+    {
+      headerName: "Recurso",
+      field: "resource",
+      filter: true,
+      minWidth: 300,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Nombre",
+      field: "name",
+      filter: true,
+      minWidth: 300,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Descripcion",
+      field: "description",
+      filter: true,
+      minWidth: 300,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Restaurar",
+      field: "",
+      filter: false,
+      cellRenderer: RestoredTypeFile,
+      minWidth: 150,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: false,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+  ];
+
+  const onGridReady = (params) => {
+    setGridApi(params.api);
+  };
+
+  const defaultColDef = useMemo(() => {
+    return {
+      sortable: true,
+      flex: 1,
+      minWidth: 140,
+      filter: true,
+      resizable: true,
+      floatingFilter: true,
     };
-  }
+  }, []);
+
+  const pagination = true;
+  const paginationPageSize = 300;
+
+  const onFilterTextBoxChanged = () => {
+    gridApi.setQuickFilter(document.getElementById("filter-text-box").value);
+  };
 
   return (
     <ContainerTypeDataDelete>
       <HeadersContainer>
         <ContainerButton>
           <SearchUser
+            type="text"
+            id="filter-text-box"
             placeholder=" Buscar Tipo de Dato"
-            onChange={(e) => setTerm(e.target.value)}
+            onInput={onFilterTextBoxChanged}
           />
           <ButtonSearch>
             <SearchFilter x={22} y={22} />
@@ -50,37 +148,21 @@ const RowTypeData = () => {
         <LoadingSpinner />
       ) : (
         <TableContainer>
-          <TableRaid>
-            <table>
-              <tr>
-                <THN>N</THN>
-                <TH>Recurso</TH>
-                <TH>Nombre</TH>
-                <TH>Restaurar</TH>
-              </tr>
-
-              {typeDataRestored ? (
-                typeDataRestored.filter(searchingTerm(term)).map((type, i) => (
-                  <tr key={i}>
-                    <TD1>{i + 1}</TD1>
-                    <TD1>TIPO DE DATO</TD1>
-                    <TD1>{type.name}</TD1>
-                    <TD1>
-                      <ContentOptions>
-                        <ButtonOptions
-                          onClick={() => restoredTypeDataSelected(type.id)}
-                        >
-                          <RestoredElement x={30} y={30} />
-                        </ButtonOptions>
-                      </ContentOptions>
-                    </TD1>
-                  </tr>
-                ))
-              ) : (
-                <></>
-              )}
-            </table>
-          </TableRaid>
+          <div
+            id="myGrid"
+            style={{ width: "100%", height: "100%" }}
+            className="ag-theme-alpine"
+          >
+            <AgGridReact
+              pagination={pagination}
+              paginationPageSize={paginationPageSize}
+              onGridReady={onGridReady}
+              rowData={FileCore}
+              columnDefs={DataFiles}
+              defaultColDef={defaultColDef}
+              animateRows={true}
+            ></AgGridReact>
+          </div>
         </TableContainer>
       )}
       <Toaster
@@ -143,49 +225,11 @@ const ButtonSearch = styled.button`
 `;
 
 const TableContainer = styled.div`
-  width: 95%;
-  display: flex;
-  overflow: hidden;
-`;
-
-const TableRaid = styled.div`
-  width: 100%;
-  height: 400px;
-  overflow-y: scroll;
-`;
-
-const THN = styled.th`
-  width: 4rem;
-  height: 2rem;
-  border: 1px solid var(--whiteTrans);
-  background-color: var(--primaryColor);
-  color: var(--white);
-`;
-
-const TH = styled.th`
-  width: 12rem;
-  height: 2.1rem;
-  border: 1px solid var(--whiteTrans);
-  background-color: var(--primaryColor);
-  color: var(--white);
-`;
-
-const TD1 = styled.td`
-  font-size: 0.9rem;
-  text-align: center;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: #5f5f5f;
-  height: 2.4rem;
-  border: 1px solid #c4c4c4;
-`;
-
-const ContentOptions = styled.div`
-  width: 100px;
+  width: 97%;
+  height: 440px;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center
 `;
 
 const ButtonOptions = styled.button`

@@ -17,6 +17,7 @@ import {
   saveNameFolderSelectedUpdate,
   saveDescriptionFolderSelectedUpdate,
   saveCabinetIdFolderSelectedUpdate,
+  saveFolderIdSelectedUpdate,
   saveFileTypeFolderSelectedUpdate,
   setClearFolderDataUpdate,
 } from "../../../../../../redux/formData/FolderData";
@@ -26,7 +27,7 @@ const useStyless = makeStyles((theme) => ({
   FolderUpdate: {
     position: "absolute",
     width: "400px",
-    height: "495px",
+    height: "500px",
     backgroundColor: "white",
     border: "2px solid white",
     boxShadow: theme.shadows[2],
@@ -35,6 +36,11 @@ const useStyless = makeStyles((theme) => ({
     left: "50%",
     transform: "translate(-50%, -50%)",
     borderRadius: "13px",
+    overflowY: "scroll",
+    '&::-webkit-scrollbar': {
+      width: '0.4em'
+    }
+
   },
   textfield: {
     width: "100%",
@@ -53,13 +59,18 @@ const FolderUpdate = () => {
   const { FolderUpdate } = modalCore;
   const { FilesFolders, FilesNoSelected } = typeFileCore;
   const { SelectedUpdateFolder } = folderCore;
+  const [fileTypeAll, setFileTypeAll] = useState([]);
+  const [term, setTerm] = useState("");
+
   const {
     idUpdate,
     nameUpdate,
     DescriptionUpdate,
     CabinetIdUpdate,
+    folderIdUpdate,
     FileTypeUpdate,
   } = folderData;
+
 
   useEffect(() => {
     dispatch(saveIdFolderSelectedUpdate(SelectedUpdateFolder?.id));
@@ -70,6 +81,8 @@ const FolderUpdate = () => {
     dispatch(
       saveCabinetIdFolderSelectedUpdate(SelectedUpdateFolder?.cabinetId)
     );
+    dispatch(saveFolderIdSelectedUpdate(SelectedUpdateFolder?.folderId));
+    setFileTypeAll(FilesNoSelected);
   }, [FolderUpdate]);
 
   const handleSubmit = async (e) => {
@@ -79,23 +92,47 @@ const FolderUpdate = () => {
       name: nameUpdate,
       description: DescriptionUpdate,
       cabinetId: CabinetIdUpdate,
+      folderId: folderIdUpdate,
       folderFileTypes: FileTypeUpdate,
     };
     console.log(folderUpdate);
-    dispatch(UpdateFolderCore(folderUpdate, idUpdate, CabinetIdUpdate));
+    dispatch(UpdateFolderCore(folderUpdate, idUpdate, folderIdUpdate, CabinetIdUpdate));
     AbrirModalUpdateFolder();
   };
 
-  const ObtenerSelected = () => {
-    const checkboxes = document.querySelectorAll(
-      'input[name="subject"]:checked'
-    );
-    const SelectedFiles = [];
-    checkboxes.forEach((checkbox) => {
-      SelectedFiles.push(checkbox.value);
-    });
-    dispatch(saveFileTypeFolderSelectedUpdate(SelectedFiles));
+  const ObtenerSelected = (e) => {
+    const SelectedTypes = [];
+    const { name, checked } = e.target;
+    if (name === "allSelect") {
+      let tempUser = fileTypeAll.map((file) => {
+        return { ...file, isChecked: checked };
+      });
+      setFileTypeAll(tempUser);
+      tempUser.map((temp) => {
+        if (temp.isChecked == true) {
+          SelectedTypes.push(temp.fileTypeId);
+        }
+      });
+    } else {
+      let tempUser = fileTypeAll.map((file) =>
+        file.fileTypeName === name ? { ...file, isChecked: checked } : file
+      );
+      setFileTypeAll(tempUser);
+      tempUser.map((temp) => {
+        if (temp.isChecked == true) {
+          SelectedTypes.push(temp.fileTypeId);
+        }
+      });
+    }
+    dispatch(saveFileTypeFolderSelectedUpdate(SelectedTypes));
   };
+
+  function searchingTerm(term) {
+    return function (x) {
+      return x.fileTypeName.toLowerCase().includes(term) || !term;
+    };
+  }
+
 
   const UpdateFolder = (
     <div className={styless.FolderUpdate}>
@@ -157,20 +194,43 @@ const FolderUpdate = () => {
 
         <>
           <ContainerNameCheck>
-            {FilesNoSelected ? (
-              FilesNoSelected.map(({ fileTypeId, fileTypeName }, index) => (
-                <ContainerCeldaSelected>
+          <ContainerCeldaSearch>
+            <InputSearch
+              type="text"
+              placeholder="Buscar ..."
+              onChange={(e) => setTerm(e.target.value)}
+            />
+            {term === "" && (
+              <ContainerCeldaSelected>
+                <ContainerCHeck>
+                  <InputCheck
+                    onChange={ObtenerSelected}
+                    className="InputCheck"
+                    type="checkbox"
+                    name="allSelect"
+                  />
+                </ContainerCHeck>
+                <Tooltip title={"Seleccionar Todos"}>
+                  <ContainerText>SELECCIONAR TODOS</ContainerText>
+                </Tooltip>
+              </ContainerCeldaSelected>
+            )}
+          </ContainerCeldaSearch>
+            {fileTypeAll ? (
+              fileTypeAll.filter(searchingTerm(term)).map((file, index) => (
+                <ContainerCeldaSelected key={index}>
                   <ContainerCHeck>
                     <InputCheck
                       onChange={ObtenerSelected}
                       type="checkbox"
-                      name="subject"
-                      value={fileTypeId}
-                      id={fileTypeId}
+                      name={file.fileTypeName}
+                      value={file.fileTypeId}
+                      id={file.fileTypeId}
+                      checked={file?.isChecked || false}
                     />
                   </ContainerCHeck>
-                  <Tooltip title={fileTypeName}>
-                    <ContainerText>{fileTypeName}</ContainerText>
+                  <Tooltip title={file.fileTypeName}>
+                    <ContainerText>{file.fileTypeName}</ContainerText>
                   </Tooltip>
                 </ContainerCeldaSelected>
               ))
@@ -205,6 +265,20 @@ const FolderUpdate = () => {
 };
 
 export default FolderUpdate;
+
+const InputSearch = styled.input`
+  margin: 0.5rem 0 0.5rem 0;
+  width: 100%;
+  height: 2rem;
+  outline: none;
+`;
+
+const ContainerCeldaSearch = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0.1rem;
+`;
 
 const ContainerCeldaSelected = styled.div`
   width: 100%;

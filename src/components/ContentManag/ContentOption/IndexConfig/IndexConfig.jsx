@@ -7,9 +7,9 @@ const FileTypeConfig = () => {
   return (
     <IndexContainer>
       <Listado>
-        <InfoContainer>
+        
           <HeaderManag />
-        </InfoContainer>
+       
         <IndexContent />
       </Listado>
       <Toaster
@@ -34,7 +34,6 @@ const IndexContainer = styled.div`
   width: 100%;
   align-content: center;
   justify-content: center;
-  padding: 1rem 0 0 0;
 `;
 
 const InfoContainer = styled.div`

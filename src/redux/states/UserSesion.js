@@ -1,7 +1,9 @@
 import axios from "axios";
 import { SecurityServer } from "../../config/axios";
 import jwt_decode from "jwt-decode";
+import jwtDecode from "jwt-decode";
 import { getAllUserListSecurity } from "./UserCore";
+import toast from "react-hot-toast";
 
 const initialState = {
     RolSesion: [],
@@ -9,6 +11,8 @@ const initialState = {
     SesionUser: {},
     OptionsTocken: [],
     elementError: "",
+    hoursDuration: null,
+    passwordGenerate: null,
 };
 
 //Gestion de Usuarios
@@ -17,6 +21,8 @@ const GET_USER_INFO_DATA_SECURITY = "GET_USER_INFO_DATA_SECURITY";
 const GET_USER_SESION_SECURITY = "GET_USER_SESION_SECURITY";
 const SET_CLEAR_MEMORY_DATA_USERSESIONCORE = "SET_CLEAR_MEMORY_DATA_USERSESIONCORE";
 const SESION_OPTIONS_VALID = "SESION_OPTIONS_VALID";
+const CHANGE_PASSWORD_GENERATED = "CHANGE_PASSWORD_GENERATED";
+const CHANGE_PASSWORD_GENERATED_ERRORS = "CHANGE_PASSWORD_GENERATED_ERRORS";
 
 export default function UserSecurityReducer(state = initialState, action) {
     switch (action.type) {
@@ -25,6 +31,8 @@ export default function UserSecurityReducer(state = initialState, action) {
         case GET_USER_SESION_SECURITY:
         case SET_CLEAR_MEMORY_DATA_USERSESIONCORE:
         case SESION_OPTIONS_VALID:
+        case CHANGE_PASSWORD_GENERATED:
+        case CHANGE_PASSWORD_GENERATED_ERRORS:
             return action.payload;
         default:
             return state;
@@ -39,10 +47,24 @@ export const saveAllRolUserSecurity = () => async (dispatch, getState) => {
     const decoded = jwt_decode(token);
     // console.log(decoded);
     const TockenData = Object.values(decoded);
-    // console.log(TockenData);
+    console.log(TockenData);
+    //conversion de tiempo para el token
+    //instancia y guarda en una variable lo que decodifica del token
+    const decodedToken = jwtDecode(token);
+    //guarda el tiempo que vino en el token
+    const expirationTimestamp = decodedToken.exp;
+    //aca obtiene la hora actual y la divide para 1000
+    const currentTimestamp = Date.now() / 1000;
+    //resta el tiempo del tocken - el tiempo actual y lo divide para 60
+    const expirationMinutes = Math.floor(
+        (expirationTimestamp - currentTimestamp) / 60
+    );
+
+    const milliseconds = expirationMinutes * 60000;
+
     dispatch({
         type: SAVE_ROLL_USER_SECURITY,
-        payload: { ...userSesion, RolSesion: TockenData }
+        payload: { ...userSesion, RolSesion: TockenData, hoursDuration: milliseconds }
     })
     if (TockenData[2] == "Administrator") {
         dispatch(getAllUserListSecurity());
@@ -104,7 +126,7 @@ export const optionsValidateSecuritySesion = () => async (dispatch, getState) =>
     const OptionUser = [];
     const FinalOptions = [];
     RolSesion.forEach((rol, i) => {
-        if (i == 3) {
+        if (i == 5) {
             OptionTocken.push(rol);
         }
     });
@@ -113,6 +135,7 @@ export const optionsValidateSecuritySesion = () => async (dispatch, getState) =>
         const data = obj.split(",");
         OptionUser.push(data);
     });
+
     console.log(OptionUser);
 
     const result = OptionUser.forEach((info, i) => {
@@ -126,6 +149,37 @@ export const optionsValidateSecuritySesion = () => async (dispatch, getState) =>
         type: SESION_OPTIONS_VALID,
         payload: { ...userSesion, OptionsTocken: FinalOptions }
     })
+}
+
+//Cambio de contraseña para usuarios
+export const changePasswordByUser = (userId) => async (dispatch, getState) => {
+    const { userSesion, sesion } = getState();
+    const { TockenUser } = sesion;
+    try {
+        const response = await axios({
+            url: `${SecurityServer}auth/changepasswordbyuser/${userId}`,
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${TockenUser}`,
+            }
+        });
+        if (response.status == 200) {
+            dispatch({
+                type: CHANGE_PASSWORD_GENERATED,
+                payload: { ...userSesion, passwordGenerate: response.data }
+            })
+            toast.success("Contraseña Generada con exito");
+        }
+    } catch (error) {
+        console.log(error);
+        dispatch({
+            type: CHANGE_PASSWORD_GENERATED_ERRORS,
+            payload: { ...userSesion, passwordGenerate: null }
+        })
+        toast.success("Error al generar Contraseña")
+    }
+
+
 }
 
 //limpiar estado del cabinetcore cierre de sesion 

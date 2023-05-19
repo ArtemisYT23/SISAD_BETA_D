@@ -30,6 +30,7 @@ const GET_INDEX_FILTER_CABINET_FAILED = "GET_INDEX_FILTER_CABINET_FAILED";
 const SELECTED_ERRORS_INDEX_CORE_DELETE = "SELECTED_ERRORS_INDEX_CORE_DELETE";
 const SELECTED_INDEX_CORE_DELETE = "SELECTED_INDEX_CORE_DELETE";
 const CLEAR_INDEX_DATA_MANAGMENT = "CLEAR_INDEX_DATA_MANAGMENT";
+const CLEAR_DATA_MEMORY_INDEX = "CLEAR_DATA_MEMORY_INDEX";
 
 export default function IndexReducer(state = initialState, action) {
     switch (action.type) {
@@ -47,6 +48,7 @@ export default function IndexReducer(state = initialState, action) {
         case SELECTED_INDEX_CORE_DELETE:
         case GET_INDEX_FILTER_CABINET_FAILED:
         case CLEAR_INDEX_DATA_MANAGMENT:
+        case CLEAR_DATA_MEMORY_INDEX:
             return action.payload;
         default:
             return state;
@@ -278,6 +280,7 @@ export const getFilterIndexNameConfig = (name) => async (dispatch, getState) => 
                     Index => Index.cabinetName == name)
             }
         });
+        dispatch(getIndexCabinetAll());
     } catch (error) {
         console.log(error);
         dispatch({
@@ -371,3 +374,24 @@ export const setIndexCabinetDeleteConfig = (deleteIndex, id, Name, cabinetId) =>
             toast.error('Indice no Eliminado');
         });
 };
+
+
+//limpiar estado de cierre de sesion 
+export const setClearDataMemoryIndex = () => async (dispatch, getState) => {
+    const { indexCore } = getState();
+    dispatch({
+        type: CLEAR_DATA_MEMORY_INDEX,
+        payload: {
+            ...indexCore,
+            Indexes: [],
+            IndexNames: [],
+            IndexConfig: [],
+            IndexPreview: [],
+            IndexPreviewManag: [],
+            IndexSelected: "",
+            isLoadingIndex: false,
+        }
+    })
+}
+
+

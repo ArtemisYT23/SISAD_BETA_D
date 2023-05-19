@@ -3,7 +3,8 @@ import axios from "axios";
 import { getFileAllDocument } from "../states/Files";
 import { getAllDocumentCreated } from "../states/Document";
 import { getMetadataByCabinet } from "../states/Metadata";
-import { getFilesByFolderAll } from "../states/Files";
+import { getFilesByFolderAll, setActiveLoadingArchive } from "../states/Files";
+import { setOpenModalDownloadChargedTime, setOpenModalMasiveErrorUploader } from "../states/ActionDocumentary";
 import { DocumentServer } from "../../config/axios";
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -19,9 +20,11 @@ const initialState = {
     DocumentIdUpdate: "",
     //subida de Masiva
     FolderId: "",
+    FileTypeSelection: null,
     ExcelTemplate: null,
-    FilesZIP: null,
+    FilesZIP: [],
     isLoadingMasive: false,
+    FilesStateDetail: [],
     //Exportacion masiva
     documentIdDown: [],
     indexesDown: [],
@@ -43,7 +46,8 @@ const GET_EXCEL_FILE_MASIVE = "GET_EXCEL_FILE_MASIVE";
 const GET_ZIP_FILE_MASIVE = "GET_ZIP_FILE_MASIVE";
 const GET_CLEAR_DATA_MASIVE = "GET_CLEAR_DATA_MASIVE";
 const SPINNER_MASIVE_UPLOADER = "SPINNER_MASIVE_UPLOADER";
-
+const SAVE_DATA_DETAIL_MASSIVE_ERROR = "SAVE_DATA_DETAIL_MASSIVE_ERROR";
+const GET_FILETYPE_SELECTED_MASIVE = "GET_FILETYPE_SELECTED_MASIVE";
 //Exportacion masiva
 const GET_DATA_DOCUMENT_DOWN = "GET_DATA_DOCUMENT_DOWN";
 const SET_CLEAR_DOCUMENT_DOWN = "SET_CLEAR_DOCUMENT_DOWN";
@@ -52,6 +56,7 @@ const SET_CLEAR_DATA_INDEXID_DOWN = "SET_CLEAR_DATA_INDEXID_DOWN";
 const GET_FILETYPE_ID_DOWN = "GET_FILETYPE_ID_DOWN";
 const SET_CLEAR_DATA_FILETYPEID_DOWN = "SET_CLEAR_DATA_FILETYPEID_DOWN";
 const SET_METADATA_VALUE_CABINET = "SET_METADATA_VALUE_CABINET";
+
 
 
 export default function FileUploaderReducer(state = initialState, action) {
@@ -69,6 +74,8 @@ export default function FileUploaderReducer(state = initialState, action) {
         case GET_ZIP_FILE_MASIVE:
         case GET_CLEAR_DATA_MASIVE:
         case SPINNER_MASIVE_UPLOADER:
+        case SAVE_DATA_DETAIL_MASSIVE_ERROR:
+        case GET_FILETYPE_SELECTED_MASIVE:
         // exportacion masiva
         case GET_DATA_DOCUMENT_DOWN:
         case SET_CLEAR_DOCUMENT_DOWN:
@@ -158,7 +165,7 @@ export const setDocumentFileDocuUpdate = (DocumentId) => async (dispatch, getSta
 
 
 /*<-----------------FORMULARIO DE SUBIDA MASIVA DATOS--------> */
-//cambiar dato de folderI
+//cambiar dato de folderId
 export const setFolderMasiveSelected = (id) => async (dispatch, getState) => {
     const { uploader } = getState();
     dispatch({
@@ -167,6 +174,22 @@ export const setFolderMasiveSelected = (id) => async (dispatch, getState) => {
     })
 }
 
+//cambiar dato de FileType
+export const setFileTypeMasiveSelected = (id) => async (dispatch, getState) => {
+    const { uploader } = getState();
+    if (id == "Por Defecto") {
+        dispatch({
+            type: GET_FILETYPE_SELECTED_MASIVE,
+            payload: { ...uploader, FileTypeSelection: null }
+        })
+    }
+    if (id != "Por Defecto") {
+        dispatch({
+            type: GET_FILETYPE_SELECTED_MASIVE,
+            payload: { ...uploader, FileTypeSelection: id }
+        })
+    }
+}
 
 //obtener Excel
 export const setFileExcelTemplate = (File) => async (dispatch, getState) => {
@@ -194,6 +217,7 @@ export const clearDataSubmitMasive = () => async (dispatch, getState) => {
         payload: {
             ...uploader,
             FolderId: "",
+            FileTypeSelection: null,
             ExcelTemplate: null,
             FilesZIP: null,
         }
@@ -330,11 +354,22 @@ export const setSpinnerFileMasive = (bool) => async (dispatch, getState) => {
     })
 }
 
+//guardar respuesta de subida masiva para visualizar errores
+export const setDataDetailByMassive = (dataDetail) => async (dispatch, getState) => {
+    const { uploader } = getState();
+    dispatch({
+        type: SAVE_DATA_DETAIL_MASSIVE_ERROR,
+        payload: { ...uploader, FilesStateDetail: dataDetail }
+    })
+}
+
 /*<------------------SUBIDA MASIVA--------------> */
 export const createdSubmitFileMasive = (formFile, FolderId, CabinetId) => async (dispatch, getState) => {
+    console.log(formFile.get("FolderId"));
+    console.log(formFile.get("FileTypeId"));
     console.log(formFile.get("ExcelTemplate"));
     console.log(formFile.get("FilesZIP"));
-    dispatch(setSpinnerFileMasive(true));
+    dispatch(setOpenModalDownloadChargedTime(true));
     const { sesion } = getState();
     const { TockenUser } = sesion;
     axios({
@@ -353,12 +388,16 @@ export const createdSubmitFileMasive = (formFile, FolderId, CabinetId) => async 
             dispatch(getAllDocumentCreated(FolderId));
             dispatch(getMetadataByCabinet(CabinetId));
             dispatch(getFilesByFolderAll(FolderId));
-            dispatch(setSpinnerFileMasive(false));
+            dispatch(setOpenModalDownloadChargedTime(false));
+            if (response.data) {
+                dispatch(setOpenModalMasiveErrorUploader(true));
+                dispatch(setDataDetailByMassive(response.data));
+            }
         }
     }).catch(function (error) {
         console.log(error);
         toast.error('Error Metadata y Archivos No Subidos');
-        dispatch(setSpinnerFileMasive(false));
+        dispatch(setOpenModalDownloadChargedTime(false));
     })
 }
 
@@ -429,18 +468,22 @@ export const setMetadaValuesCabinet = (meta) => async (dispatch, getState) => {
 }
 
 //envio de datos para descarga masiva de metadata
-export const getDataDownloadMetaFiles = (DownData) => async (dispatch, getState) => {
+export const getDataDownloadMetaFiles = (DownData, CabinetId) => async (dispatch, getState) => {
     const { sesion } = getState();
     const { TockenUser } = sesion;
+    dispatch(setOpenModalDownloadChargedTime(true));
     toast.loading('Exportando ...');
     axios({
-        url: `${DocumentServer}downloadfilesbycabinet`,
+        url: `${DocumentServer}getmassivefiles`,
         method: 'PUT',
         data: DownData,
         headers: {
             "Content-Type": "Application/json",
             Authorization: `Bearer ${TockenUser}`
-        }
+        },
+        // onDownloadProgress: (progressEvent) => {
+        //     console.log(progressEvent);
+        //   }
     }).then(function (response) {
         console.log(response);
         if (response.status == 200) {
@@ -453,9 +496,13 @@ export const getDataDownloadMetaFiles = (DownData) => async (dispatch, getState)
                 }
             })
             toast.success("Archivo Descargado con Exito");
+            dispatch(setOpenModalDownloadChargedTime(false));
         }
+        dispatch(getMetadataByCabinet(CabinetId));
+
     }).catch(function (error) {
         console.log(error);
-        // toast.error(error.response.data);
+        dispatch(setOpenModalDownloadChargedTime(false));
+        toast.error("Archivo No Descargado");
     })
 }

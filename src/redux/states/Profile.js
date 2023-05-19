@@ -4,6 +4,7 @@ import toast, { Toaster } from "react-hot-toast";
 
 const initialState = {
     profile: [],
+    business: [],
     SelectedProfile: "",
     isLoadingProfile: false,
     elementError: ""
@@ -15,6 +16,9 @@ const SELECTED_PROFILE_SUCCESS = "SELECTED_PROFILE_SUCCESS";
 const SELECTED_PROFILE_ERROR = "SELECTED_PROFILE_ERROR";
 const CLEAR_PROFILE_DATA = "CLEAR_PROFILE_DATA";
 const SPINNER_ACTIVE_PROFILES = "SPINNER_ACTIVE_PROFILES";
+const CLEAR_DATA_MEMORY_PROFILE = "CLEAR_DATA_MEMORY_PROFILE";
+const GET_ALL_BUSINESS_DATA = "GET_ALL_BUSINESS_DATA";
+const GET_ALL_BUSINESS_DATA_ERRORS = "GET_ALL_BUSINESS_DATA_ERRORS";
 
 export default function ProfileReducer(state = initialState, action) {
     switch (action.type) {
@@ -24,6 +28,9 @@ export default function ProfileReducer(state = initialState, action) {
         case SELECTED_PROFILE_ERROR:
         case CLEAR_PROFILE_DATA:
         case SPINNER_ACTIVE_PROFILES:
+        case CLEAR_DATA_MEMORY_PROFILE:
+        case GET_ALL_BUSINESS_DATA:
+        case GET_ALL_BUSINESS_DATA_ERRORS:
             return action.payload;
         default:
             return state;
@@ -48,6 +55,7 @@ export const getAllProfileSecurity = () => async (dispatch, getState) => {
                     ...profileCore, profile: response.data
                 }
             })
+            dispatch(setBusinessAllData());
         }
     }).catch(function (error) {
         console.log(error);
@@ -57,6 +65,34 @@ export const getAllProfileSecurity = () => async (dispatch, getState) => {
         })
     });
 }
+
+
+//Traer todas las empresas 
+export const setBusinessAllData = () => async (dispatch, getState) => {
+    const { profileCore, sesion } = getState();
+    const { TockenUser } = sesion;
+    axios({
+        url: `${SecurityServer}business`,
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${TockenUser}`
+        }
+    }).then(function (response) {
+        if(response.status == 200) {
+            dispatch({
+                type: GET_ALL_BUSINESS_DATA,
+                payload: { ...profileCore, business: response.data}
+            })
+        }
+    }).catch(function (error) {
+        console.log(error);
+        dispatch({
+            type: GET_ALL_BUSINESS_DATA_ERRORS,
+            payLOAD: { ...profileCore, business: []}
+        })
+    })
+}
+
 
 //filtrar perfil seleccionado para actualizar
 export const setfilterProfileSelected = (id) => async (dispatch, getState) => {
@@ -214,3 +250,20 @@ export const UpdateAccessCore = (updateAccess) => async (dispatch, getState) => 
         toast.error('Error Accesos no Actualizados');
     })
 }
+
+
+//limpiar estado de cierre de sesion 
+export const setClearDataMemoryProfile = () => async (dispatch, getState) => {
+    const { profileCore } = getState();
+    dispatch({
+        type: CLEAR_DATA_MEMORY_PROFILE,
+        payload: {
+            ...profileCore,
+            profile: [],
+            SelectedProfile: "",
+            isLoadingProfile: false,
+            elementError: ""
+        }
+    })
+}
+

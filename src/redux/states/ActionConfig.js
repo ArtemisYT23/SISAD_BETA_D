@@ -34,6 +34,7 @@ const OPEN_MODAL_TYPEFILE_DELETE_CONFIG = "OPEN_MODAL_TYPEFILE_DELETE_CONFIG";
 const OPEN_MODAL_CREATED_TYPEDATA_CONFIG = "OPEN_MODAL_CREATED_TYPEDATA_CONFIG";
 const OPEN_MODAL_UPDATE_TYPEDATA_CONFIG = "OPEN_MODAL_UPDATE_TYPEDATA_CONFIG";
 const OPEN_MODAL_DELETE_TYPEDATA_CONFIG = "OPEN_MODAL_DELETE_TYPEDATA_CONFIG";
+const SET_CLEANER_MEMORY_ACTION_CONFIG = "SET_CLEANER_MEMORY_ACTION_CONFIG";
 
 //payload de tag de acciones 
 export default function ModalConfigReducer(state = initialState, action) {
@@ -53,6 +54,7 @@ export default function ModalConfigReducer(state = initialState, action) {
         case OPEN_MODAL_CREATED_TYPEDATA_CONFIG:
         case OPEN_MODAL_UPDATE_TYPEDATA_CONFIG:
         case OPEN_MODAL_DELETE_TYPEDATA_CONFIG:
+        case SET_CLEANER_MEMORY_ACTION_CONFIG:
             return action.payload;
         default:
             return state;
@@ -180,8 +182,8 @@ export const setOpenModalTypeFileDelete = (bool) => async (dispatch, getState) =
 };
 
 /*<-----------------DATATYPE-----------------> */
- //modal para guardado de nuevo tipo de dato 
- export const setOpenModalTypeDataCreated = (bool) => async (dispatch, getState) => {
+//modal para guardado de nuevo tipo de dato 
+export const setOpenModalTypeDataCreated = (bool) => async (dispatch, getState) => {
     const { modalConfig } = getState();
     dispatch({
         type: OPEN_MODAL_CREATED_TYPEDATA_CONFIG,
@@ -202,7 +204,36 @@ export const setOpenModalTypeDataUpdate = (bool) => async (dispatch, getState) =
 export const setOpenTypeDataDelete = (bool) => async (dispatch, getState) => {
     const { modalConfig } = getState();
     dispatch({
-        type:OPEN_MODAL_DELETE_TYPEDATA_CONFIG,
+        type: OPEN_MODAL_DELETE_TYPEDATA_CONFIG,
         payload: { ...modalConfig, TypeDataDelete: bool }
     });
 };
+
+
+//limpiar estado para cierre de sesion 
+export const setCleanerMemoryActionConfig = () => async (dispatch, getState) => {
+    const { filesCore } = getState();
+    dispatch({
+        type: SET_CLEANER_MEMORY_ACTION_CONFIG,
+        payload: {
+            ...filesCore,
+            IndexCreated: false,
+            IndexUpdate: false,
+            IndexDelete: false,
+            ListDataCreated: false,
+            ListDataUpdate: false,
+            ListDataDelete: false,
+            ListElementCreated: false,
+            ListElementUpdate: false,
+            ListElementDelete: false,
+            TypeFileCreated: false,
+            TypeFileUpdate: false,
+            TypeFileDelete: false,
+            TypeDataCreated: false,
+            TypeDataUpdate: false,
+            TypeDataDelete: false,
+        }
+    })
+}
+
+

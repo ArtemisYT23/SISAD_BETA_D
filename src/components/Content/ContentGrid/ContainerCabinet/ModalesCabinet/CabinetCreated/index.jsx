@@ -21,6 +21,7 @@ import {
   getDescriptionCabinetNew,
   getGroupIdCabinetNew,
   getGroupIdNullCabinetNew,
+  getConfiguracionCabinetNew,
   getFileTypesCabinetNew,
   setClearCabinetDataNew,
 } from "../../../../../../redux/formData/CabinetData";
@@ -41,6 +42,10 @@ const useStyless = makeStyles((theme) => ({
     left: "50%",
     transform: "translate(-50%,-50%)",
     borderRadius: "13px",
+    overflowY: "scroll",
+    "&::-webkit-scrollbar": {
+      width: "0.4em",
+    },
   },
   textfield: {
     width: "100%",
@@ -59,8 +64,9 @@ const CabinetCreated = () => {
   const { groups } = groupCore;
   const { TypeFileDefault, TypeFile } = typeFileCore;
   const { CabinetCreated } = modalCore;
-  const { id, name, description, groupId, fileTypes } = cabinetData;
+  const { id, name, description, groupId, viewMode, fileTypes } = cabinetData;
   const [fileTypeAll, setFileTypeAll] = useState([]);
+  const [term, setTerm] = useState("");
 
   useEffect(() => {
     const FilterFileType = TypeFile.filter((item) => item.name !== ".PDF");
@@ -73,6 +79,10 @@ const CabinetCreated = () => {
       : dispatch(getGroupIdNullCabinetNew());
   };
 
+  const handleChangeConfig = (value) => {
+    dispatch(getConfiguracionCabinetNew(value));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const gabinetes = {
@@ -80,6 +90,7 @@ const CabinetCreated = () => {
       name: name,
       description: description,
       groupId: groupId,
+      viewMode: viewMode,
       fileTypes: fileTypes,
     };
     console.log(gabinetes);
@@ -87,18 +98,42 @@ const CabinetCreated = () => {
     abrirCerrarModal();
   };
 
-  const ObtenerSelection = () => {
-    const checkboxes = document.querySelectorAll(
-      'input[name="fileOptions"]:checked'
-    );
+  const ObtenerSelection = (e) => {
     const SelectedTypes = [];
-    checkboxes.forEach((checkbox) => {
-      SelectedTypes.push(checkbox.value);
-    });
+    const { name, checked } = e.target;
+    if (name === "allSelect") {
+      let tempUser = fileTypeAll.map((file) => {
+        return { ...file, isChecked: checked };
+      });
+      setFileTypeAll(tempUser);
+      tempUser.map((temp) => {
+        if (temp.isChecked == true) {
+          SelectedTypes.push(temp.id);
+        }
+      });
+    } else {
+      let tempUser = fileTypeAll.map((file) =>
+        file.name === name ? { ...file, isChecked: checked } : file
+      );
+      setFileTypeAll(tempUser);
+      tempUser.map((temp) => {
+        if (temp.isChecked == true) {
+          SelectedTypes.push(temp.id);
+        }
+      });
+    }
     dispatch(getFileTypesCabinetNew(SelectedTypes));
   };
 
+  function searchingTerm(term) {
+    return function (x) {
+      return x.name.toLowerCase().includes(term) || !term;
+    };
+  }
+
   const Nule = 0;
+  const active = "active";
+  const inactive = "inactive";
 
   const cabinet = (
     <div className={styless.CabinetCreated}>
@@ -139,6 +174,14 @@ const CabinetCreated = () => {
         </Selected>
         <br />
         <br />
+        <TitleArchive>Configuracion Gabinete: </TitleArchive>
+        <Selected onChange={(e) => handleChangeConfig(e.target.value)}>
+          <option hidden>Selecione Configuracion</option>
+          <option value={active}>Estructura TTHH</option>
+          <option value={inactive}>Estructura Jerarquica</option>
+        </Selected>
+        <br />
+        <br />
         <TitleArchive>Tipo Archivo Por defecto</TitleArchive>
         <ContainerCheckDefault>
           {TypeFileDefault && (
@@ -159,23 +202,48 @@ const CabinetCreated = () => {
         <br />
         <TitleArchive>Tipo de Archivo</TitleArchive>
         <ContainerNameCheck>
-          {fileTypeAll ? (
-            fileTypeAll.map(({ id, name }, index) => (
+          <ContainerCeldaSearch>
+            <InputSearch
+              type="text"
+              placeholder="Buscar ..."
+              onChange={(e) => setTerm(e.target.value)}
+            />
+            {term === "" && (
               <ContainerCeldaSelected>
                 <ContainerCHeck>
                   <InputCheck
                     onChange={ObtenerSelection}
                     className="InputCheck"
                     type="checkbox"
-                    name="fileOptions"
-                    value={id}
-                    id={id}
+                    name="allSelect"
                   />
                 </ContainerCHeck>
-                <Tooltip title={name}>
-                  <ContainerText>{name}</ContainerText>
+                <Tooltip title={"Seleccionar Todos"}>
+                  <ContainerText>SELECCIONAR TODOS</ContainerText>
                 </Tooltip>
               </ContainerCeldaSelected>
+            )}
+          </ContainerCeldaSearch>
+          {fileTypeAll ? (
+            fileTypeAll.filter(searchingTerm(term)).map((file, index) => (
+              <>
+                <ContainerCeldaSelected key={index}>
+                  <ContainerCHeck>
+                    <InputCheck
+                      onChange={ObtenerSelection}
+                      className="InputCheck"
+                      type="checkbox"
+                      name={file.name}
+                      checked={file?.isChecked || false}
+                      value={file.id}
+                      id={file.id}
+                    />
+                  </ContainerCHeck>
+                  <Tooltip title={file.name}>
+                    <ContainerText>{file.name}</ContainerText>
+                  </Tooltip>
+                </ContainerCeldaSelected>
+              </>
             ))
           ) : (
             <></>
@@ -214,6 +282,20 @@ const CabinetCreated = () => {
 };
 
 export default CabinetCreated;
+
+const InputSearch = styled.input`
+  margin: 0.5rem 0 0.5rem 0;
+  width: 100%;
+  height: 2rem;
+  outline: none;
+`;
+
+const ContainerCeldaSearch = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0.1rem;
+`;
 
 const ContainerCeldaSelected = styled.div`
   width: 100%;

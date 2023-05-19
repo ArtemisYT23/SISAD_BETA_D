@@ -54,6 +54,8 @@ const ProfileCreatedPermision = () => {
     PermisionDocument,
     PermisionArchive,
     PermisionTypeFile,
+    PermisionResource,
+    PermisionByProfile,
     permissions,
   } = permisionCore;
   const { ProfileCreated } = modalSecurity;
@@ -133,7 +135,7 @@ const ProfileCreatedPermision = () => {
             <CeldaText>GRUPOS</CeldaText>
             {PermisionGroup ? (
               PermisionGroup.map((perm, i) => (
-                <CeldaContent>
+                <CeldaContent key={i}>
                   <Check>
                     <input
                       name="Permision"
@@ -297,10 +299,54 @@ const ProfileCreatedPermision = () => {
             )}
           </CeldaOption>
           <br />
+
           <CeldaOption>
             <CeldaText>ARCHIVOS</CeldaText>
             {PermisionArchive ? (
               PermisionArchive.map((perm, i) => (
+                <CeldaContent key={i}>
+                  <Check>
+                    <input
+                      name="Permision"
+                      value={perm.id}
+                      type="checkbox"
+                      onChange={ChangeSelectionPermision}
+                    />
+                  </Check>
+                  <CelText>{perm.name}</CelText>
+                </CeldaContent>
+              ))
+            ) : (
+              <></>
+            )}
+          </CeldaOption>
+          <br />
+
+          <CeldaOption>
+            <CeldaText>RECURSOS</CeldaText>
+            {PermisionResource ? (
+              PermisionResource.map((perm, i) => (
+                <CeldaContent key={i}>
+                  <Check>
+                    <input
+                      name="Permision"
+                      value={perm.id}
+                      type="checkbox"
+                      onChange={ChangeSelectionPermision}
+                    />
+                  </Check>
+                  <CelText>{perm.name}</CelText>
+                </CeldaContent>
+              ))
+            ) : (
+              <></>
+            )}
+          </CeldaOption>
+          <br />
+          <CeldaOption>
+            <CeldaText>PERFIL</CeldaText>
+            {PermisionByProfile ? (
+              PermisionByProfile.map((perm, i) => (
                 <CeldaContent key={i}>
                   <Check>
                     <input

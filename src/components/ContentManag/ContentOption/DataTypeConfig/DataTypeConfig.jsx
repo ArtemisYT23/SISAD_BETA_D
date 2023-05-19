@@ -7,9 +7,9 @@ const FileTypeConfig = () => {
   return (
     <ManagTypeContainer>
       <Listado>
-        <InfoContainer>
+     
           <HeaderManag />
-        </InfoContainer>
+     
 
         <DataTypeContent />
       </Listado>
@@ -35,7 +35,6 @@ const ManagTypeContainer = styled.div`
   width: 100%;
   align-content: center;
   justify-content: center;
-  padding: 1rem 0 0 0;
 `;
 
 const InfoContainer = styled.div`

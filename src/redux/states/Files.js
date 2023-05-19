@@ -16,6 +16,7 @@ const initialState = {
 const GET_FILES_DOCU = "GET_FILES_DOCU";
 const GET_FILES_DOCU_ERRORS = "GET_FILES_DOCU_ERRORS";
 const CLEARNER_FILES_ALL_DOCUMENT = "CLEARNER_FILES_ALL_DOCUMENT";
+const SET_FILTAR_FILETYPE_BY_DOCUMENT = "SET_FILTAR_FILETYPE_BY_DOCUMENT";
 const SELECTED_FILE_DOCUMENT = "SELECTED_FILE_DOCUMENT";
 const SELECTED_FILE_ERRORS_DOCUMENT = "SELECTED_FILE_ERRORS_DOCUMENT";
 const SET_CLEANER_FILES_DOCU = "SET_CLEANER_FILES_DOCU";
@@ -26,12 +27,16 @@ const SET_ACTIVE_SPINNER_ARCHIVE = "SET_ACTIVE_SPINNER_ARCHIVE";
 const SET_ACTIVE_SPINNER_SEARCH_FILES = "SET_ACTIVE_SPINNER_SEARCH_FILES";
 const GET_FILES_BY_DOCUMENTFILE = "GET_FILES_BY_DOCUMENTFILE";
 const GET_FILES_ERRORS_BY_DOCUMENTFILE = "GET_FILES_ERRORS_BY_DOCUMENTFILE";
+const GET_FILES_SEARCH_TEXT = "GET_FILES_SEARCH_TEXT";
+const GET_FILES_SEARCH_TEXT_ERRORS = "GET_FILES_SEARCH_TEXT_ERRORS";
+
 
 export default function FilesCoreReducer(state = initialState, action) {
     switch (action.type) {
         case GET_FILES_DOCU:
         case GET_FILES_DOCU_ERRORS:
         case CLEARNER_FILES_ALL_DOCUMENT:
+        case SET_FILTAR_FILETYPE_BY_DOCUMENT:
         case SELECTED_FILE_DOCUMENT:
         case SELECTED_FILE_ERRORS_DOCUMENT:
         case SET_CLEANER_FILES_DOCU:
@@ -42,6 +47,8 @@ export default function FilesCoreReducer(state = initialState, action) {
         case SET_ACTIVE_SPINNER_SEARCH_FILES:
         case GET_FILES_BY_DOCUMENTFILE:
         case GET_FILES_ERRORS_BY_DOCUMENTFILE:
+        case GET_FILES_SEARCH_TEXT:
+        case GET_FILES_SEARCH_TEXT_ERRORS:
             return action.payload;
         default:
             return state;
@@ -75,6 +82,18 @@ export const getFileAllDocument = (id) => async (dispatch, getState) => {
             payload: { ...filesCore, files: [] },
         });
     }
+};
+
+//Filtrar Archivos por tipos de archivos
+export const setFilterFileTypeByDocument = (fileTypeId) => async (dispatch, getState) => {
+    const { filesCore } = getState();
+    const { files } = filesCore;
+    dispatch({
+        type: SET_FILTAR_FILETYPE_BY_DOCUMENT,
+        payload: {
+            ...filesCore, files: files.filter(file => file.fileTypeId == fileTypeId)
+        }
+    })
 };
 
 //traer archivos todos por carpeta
@@ -199,11 +218,44 @@ export const setFilterFileConfiguration = (filterData) => async (dispatch, getSt
         }
     } catch (error) {
         console.log(error);
+        dispatch(setActiveLoadingFilesSearch(false));
         dispatch({
             type: GET_ALL_FILES_NAME_DATA_ERRORS_CORE,
             payload: { ...filesCore, SearchFiles: [] }
         });
     }
+}
+
+//traer archivos por metadata y tipo de archivo o cualquier parametro
+export const getFileByTextReferent = (Request) => async (dispatch, getState) => {
+    const { filesCore, sesion } = getState();
+    const { TockenUser } = sesion;
+    dispatch(setActiveLoadingFilesSearch(true));
+    axios({
+        url: `${DocumentServer}getfilesbymetadata`,
+        method: "PUT",
+        data: Request,
+        headers: {
+            Authorization: `Bearer ${TockenUser}`
+        },
+    }).then(function (response) {
+        console.log(response.data);
+        if (response.status == 200) {
+            dispatch({
+                type: GET_FILES_SEARCH_TEXT,
+                payload: { ...filesCore, SearchFiles: response.data }
+            })
+        }
+        dispatch(setChangeSelectView("searchMetaFile"));
+        dispatch(setActiveLoadingFilesSearch(false));
+    }).catch(function (error) {
+        console.log(error);
+        dispatch(setActiveLoadingFilesSearch(false));
+        dispatch({
+            type: GET_FILES_SEARCH_TEXT_ERRORS,
+            payload: { ...filesCore, SearchFiles: [] }
+        })
+    });
 }
 
 //carga de Spinner de Archivos
@@ -225,13 +277,13 @@ export const setActiveLoadingFilesSearch = (bool) => async (dispatch, getState) 
 }
 
 //traer archivos por tipo de archivos y documento
-export const getFileByDocumentFiles = ( documentId, fileFolder ) => async(dispatch, getState) => {
+export const getFileByDocumentFiles = (documentId, fileFolder) => async (dispatch, getState) => {
     console.log(documentId);
     console.log(fileFolder);
     const { filesCore, sesion } = getState();
     const { TockenUser } = sesion;
     axios({
-        url:`${DocumentServer}filebydocumentandfiletypes/${documentId}`,
+        url: `${DocumentServer}filebydocumentandfiletypes/${documentId}`,
         method: "PUT",
         data: fileFolder,
         headers: {
@@ -243,16 +295,17 @@ export const getFileByDocumentFiles = ( documentId, fileFolder ) => async(dispat
             dispatch({
                 type: GET_FILES_BY_DOCUMENTFILE,
                 payload: { ...filesCore, FilesFolderType: response.data }
-            })    
+            })
         }
     }).catch(function (error) {
         console.log(error);
         dispatch({
             type: GET_FILES_ERRORS_BY_DOCUMENTFILE,
-            payload: { ...filesCore, FilesFolderType: []}
+            payload: { ...filesCore, FilesFolderType: [] }
         })
     });
 }
+
 
 
 /*<-----------------CRUD FILES VIEW TRADITIONAL---------> */

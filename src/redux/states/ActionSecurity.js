@@ -2,6 +2,7 @@ const initialState = {
     UserCreated: false,
     UserUpdate: false,
     UserDelete: false,
+    generatePassword: false,
     //profile
     ProfileCreated: false,
     ProfileUpdate: false,
@@ -19,6 +20,7 @@ const initialState = {
 const OPEN_MODAL_CREATED_USER_DOCU = "OPEN_MODAL_CREATED_USER_DOCU";
 const OPEN_MODAL_UPDATE_USER_DOCU = "OPEN_MODAL_UPDATE_USER_DOCU";
 const OPEN_MODAL_DELETE_USER_DOCU = "OPEN_MODAL_DELETE_USER_DOCU";
+const OPEN_GENERATE_NEWPASSWORD = "OPEN_GENERATE_NEWPASSWORD";
 //perfiles
 const OPEN_MODAL_PROFILE_CREATED = "OPEN_MODAL_PROFILE_CREATED";
 const OPEN_MODAL_PROFILE_UPDATE = "OPEN_MODAL_PROFILE_UPDATE";
@@ -31,6 +33,7 @@ const OPEN_MODAL_RESOURCE_UPDATE_FOLDER = "OPEN_MODAL_RESOURCE_UPDATE_FOLDER";
 const OPEN_MODAL_RESOURCE_DELETE = "OPEN_MODAL_RESOURCE_DELETE";
 //Reset de password
 const OPEN_MODAL_RESET_PASSWORD = "OPEN_MODAL_RESET_PASSWORD";
+const SET_CLEANER_MEMORY_ACTION_SECURITY = "SET_CLEANER_MEMORY_ACTION_SECURITY";
 
 export default function ModalSecurityReducer(state = initialState, action) {
     switch (action.type) {
@@ -38,6 +41,7 @@ export default function ModalSecurityReducer(state = initialState, action) {
         case OPEN_MODAL_CREATED_USER_DOCU:
         case OPEN_MODAL_UPDATE_USER_DOCU:
         case OPEN_MODAL_DELETE_USER_DOCU:
+        case OPEN_GENERATE_NEWPASSWORD:
         //perfiles
         case OPEN_MODAL_PROFILE_CREATED:
         case OPEN_MODAL_PROFILE_UPDATE:
@@ -49,6 +53,7 @@ export default function ModalSecurityReducer(state = initialState, action) {
         case OPEN_MODAL_RESOURCE_DELETE:
         //reset de password
         case OPEN_MODAL_RESET_PASSWORD:
+        case SET_CLEANER_MEMORY_ACTION_SECURITY:
             return action.payload;
         default:
             return state;
@@ -80,6 +85,15 @@ export const setOpenModalDeleteUser = (bool) => async (dispatch, getState) => {
     dispatch({
         type: OPEN_MODAL_DELETE_USER_DOCU,
         payload: { ...modalSecurity, UserDelete: bool }
+    })
+}
+
+//generacion de nueva contraseña
+export const setChangePasswordModalGenerate = (bool) => async (dispatch, getState) => {
+    const { modalSecurity } = getState();
+    dispatch({
+        type: OPEN_GENERATE_NEWPASSWORD,
+        payload: { ...modalSecurity, generatePassword: bool },
     })
 }
 
@@ -159,3 +173,29 @@ export const setOpenModalRecuperationPassword = (bool) => async (dispatch, getSt
         payload: { ...modalSecurity, TockenResetModal: bool }
     })
 }
+
+//limpiar estado para cierre de sesion 
+export const setCleanerMemoryActionSecurity = () => async (dispatch, getState) => {
+    const { modalSecurity } = getState();
+    dispatch({
+        type: SET_CLEANER_MEMORY_ACTION_SECURITY,
+        payload: {
+            ...modalSecurity,
+            UserCreated: false,
+            UserUpdate: false,
+            UserDelete: false,
+            //profile
+            ProfileCreated: false,
+            ProfileUpdate: false,
+            ProfileDelete: false,
+            //Recursos
+            ResourceCreated: false,
+            ResourceCreatedFolder: false,
+            ResourceUpdate: false,
+            ResourceDelete: false,
+            //Reset Password
+            TockenResetModal: false,
+        }
+    })
+}
+

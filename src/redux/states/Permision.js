@@ -476,6 +476,55 @@ const initialState = {
             "type": "Files"
         }
     ],
+    PermisionResource: [
+        {
+            "id": "c34cc0ea-4dfe-4739-be66-c6b1ffd945c8",
+            "name": "Agregar Asignacion de Recurso",
+            "type": "Resource"
+        },
+        {
+            "id": "55b0fd88-f38a-41b2-8c29-fc3b6106531c",
+            "name": "Consultar Asignacion de Recurso",
+            "type": "Resource"
+        },
+        {
+            "id": "1994212d-c1df-4100-9809-cf1533932b9b",
+            "name": "Editar Asignacion de Recurso",
+            "type": "Resource"
+        },
+        {
+            "id": "823180e9-eef0-4745-9581-bd69a36d1aaf",
+            "name": "Eliminar Asignacion de Recurso",
+            "type": "Resource"
+        },
+        {
+            "id": "991060b2-5884-4033-8739-7996a0f0c0a1",
+            "name": "Restaurar Asignacion de Recurso",
+            "type": "Resource"
+        }
+    ],
+    PermisionByProfile: [
+        {
+            "id": "8010c223-00dc-41a7-8a4f-6c9ed44c9e61",
+            "name": "Crear Perfiles",
+            "type": "Profile"
+        },
+        {
+            "id": "5ded8d15-32c7-449d-b96d-5957f5fc389c",
+            "name": "Editar Perfiles",
+            "type": "Profile"
+        },
+        {
+            "id": "4c3dbfaa-c990-48a7-9ddd-594d324054a3",
+            "name": "Consultar Perfiles",
+            "type": "Profile"
+        },
+        {
+            "id": "6a13b695-a223-427c-b864-d7e9337c26e2",
+            "name": "Eliminar Perfiles",
+            "type": "Profile"
+        }
+    ],
     PermisionFilter: [],
     PermisionProfile: [],
     ActionUserSelected: [],

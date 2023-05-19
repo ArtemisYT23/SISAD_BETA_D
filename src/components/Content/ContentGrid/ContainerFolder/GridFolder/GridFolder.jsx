@@ -1,60 +1,103 @@
-import styled from "styled-components";
+import { Tooltip } from "@material-ui/core";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import ElementIcon from "../../../../../Styles/IconsResourse";
-import { Options } from "./Icons";
+import styled from "styled-components";
 import {
-  setOpenModalFolderUpdate,
-  setOpenModalFolderDelete,
   setCloseContextFolder,
+  setOpenModalFolderDelete,
+  setOpenModalFolderUpdate,
   setOpenModalHistoryViewElement,
 } from "../../../../../redux/states/ActionCore";
+import {
+  setFilterDocumentDocu,
+  setDetailByFolderDocument,
+} from "../../../../../redux/states/Document";
+import { getTypeFileByFolderFolder } from "../../../../../redux/states/FileType";
+import {
+  setFilterFoldersFatherCore,
+  setSelectedFolderCore,
+  setSelectedFolderUpdateCore,
+  setSelectedFolderMetadataCore,
+  setSelectedFolderPrimaryCore,
+} from "../../../../../redux/states/Folder";
+import { getAllHistoryElementCore } from "../../../../../redux/states/History";
+import { getFilterIndexNameConfig } from "../../../../../redux/states/Indexes";
+import {
+  setClearMetadataSelected,
+  getMetadataByCabinet,
+} from "../../../../../redux/states/Metadata";
 import {
   getNameGlobalChange,
   setSaveElementBreakFolder,
 } from "../../../../../redux/states/Name";
-import { setSelectedSearchMetadataCore } from "../../../../../redux/states/View";
-import { getAllHistoryElementCore } from "../../../../../redux/states/History";
-import {
-  setSelectedFolderUpdateCore,
-  setSelectedFolderCore,
-  setFilterFoldersFatherCore
-} from "../../../../../redux/states/Folder";
 import { getFilesByFolderAll } from "../../../../../redux/states/Files";
-import { setFilterDocumentDocu } from "../../../../../redux/states/Document";
-import { getTypeFileByFolderFolder } from "../../../../../redux/states/FileType";
-import { getFilterIndexNameConfig } from "../../../../../redux/states/Indexes";
-import { setClearMetadataSelected } from "../../../../../redux/states/Metadata";
+import { setSelectedSearchMetadataCore } from "../../../../../redux/states/View";
+import ElementIcon from "../../../../../Styles/IconsResourse";
 import HistoryElement from "../../ContainerCabinet/ModalesCabinet/HistoryElement";
-import FolderUpdate from "../ModalesFolder/FolderUpdate";
 import FolderDelete from "../ModalesFolder/FolderDelete";
-import { Tooltip } from "@material-ui/core";
+import FolderUpdate from "../ModalesFolder/FolderUpdate";
+import { Options } from "./Icons";
 
-const GridFolder = ({ element, name, description, id, cabinetId }) => {
+const GridFolder = ({ element, name, id, cabinetId }) => {
   const dispatch = useDispatch();
   const [showMenu, setShowMenu] = useState(false);
-  const { userSesion, cabinetCore } = useSelector((store) => store);
+  const { userSesion, cabinetCore, folderCore } = useSelector((store) => store);
   const { RolSesion, OptionsTocken } = userSesion;
-  const { cabinets } = cabinetCore;
+  const { cabinets, SelectedCabinet } = cabinetCore;
+  const { folders } = folderCore;
   const [update, setUpdate] = useState(false);
   const [delet, setDelet] = useState(false);
 
-  const Envio = (index, name, cabinetId) => {
+  const Envio = (index, name, cabinetId, viewMode) => {
+    console.log(viewMode);
     setShowMenu(false);
-    // dispatch(getTypeFileByFolderFolder(index));
-    dispatch(setFilterFoldersFatherCore(index));
-    dispatch(setFilterDocumentDocu(index));
-    dispatch(setSelectedFolderCore(index));
-    dispatch(getNameGlobalChange(name));
-    dispatch(setSelectedSearchMetadataCore());
-    dispatch(setCloseContextFolder(false));
-    // dispatch(getFilesByFolderAll(index));
-    dispatch(setClearMetadataSelected());
-    cabinets.forEach((cab, i) => {
-      if (cab.id === cabinetId) {
-        dispatch(getFilterIndexNameConfig(cab.name));
-      }
-    });
+    if (viewMode === true) {
+      const folderFather = folders.filter((folder) => folder.folderId == index);
+    console.log(folderFather);
+    if (folderFather.length > 0) {
+      dispatch(setFilterFoldersFatherCore(index));
+      dispatch(setSelectedFolderCore(index));
+      dispatch(getNameGlobalChange(name));
+      dispatch(setSelectedSearchMetadataCore());
+      dispatch(setCloseContextFolder(false));
+      cabinets.forEach((cab, i) => {
+        if (cab.id === cabinetId) {
+          dispatch(getFilterIndexNameConfig(cab.name));
+        }
+      });
+    }
+
+    if (folderFather.length <= 0) {
+      dispatch(setFilterDocumentDocu(index));
+      dispatch(getFilesByFolderAll(index));
+      dispatch(setSelectedFolderPrimaryCore(index));
+      dispatch(getNameGlobalChange(name));
+      dispatch(setSelectedSearchMetadataCore());
+      dispatch(setCloseContextFolder(false));
+      cabinets.forEach((cab, i) => {
+        if (cab.id === cabinetId) {
+          dispatch(getFilterIndexNameConfig(cab.name));
+          dispatch(getMetadataByCabinet(cab.id));
+        }
+      });
+    }
+    }
+    if (viewMode === false) {
+      dispatch(setFilterFoldersFatherCore(index));
+      dispatch(setFilterDocumentDocu(index));
+      dispatch(setSelectedFolderCore(index));
+      dispatch(getNameGlobalChange(name));
+      dispatch(setSelectedSearchMetadataCore());
+      dispatch(setCloseContextFolder(false));
+      dispatch(setClearMetadataSelected());
+      dispatch(setDetailByFolderDocument(index));
+      cabinets.forEach((cab, i) => {
+        if (cab.id === cabinetId) {
+          dispatch(getMetadataByCabinet(cab.id));
+          dispatch(getFilterIndexNameConfig(cab.name));
+        }
+      });
+    }
   };
 
   const Enrutamiento = (index) => {
@@ -105,7 +148,8 @@ const GridFolder = ({ element, name, description, id, cabinetId }) => {
       <GridElemmentContainer
         id={id}
         onDoubleClick={() => {
-          Envio(id, name, cabinetId), Enrutamiento(id);
+          Envio(id, name, cabinetId, SelectedCabinet?.viewMode),
+            Enrutamiento(id);
         }}
       >
         {showMenu && (

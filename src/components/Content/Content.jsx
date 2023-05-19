@@ -11,10 +11,10 @@ const Content = () => {
   const { selectedView } = viewCore;
   return (
     <ContentContainer>
-      <InfoContainer>
+      {/* <InfoContainer> */}
         <Header />
         <ActionChange />
-      </InfoContainer>
+      {/* </InfoContainer> */}
 
       {selectedView === "grid" ? <ContentGrid /> : <></>}
 

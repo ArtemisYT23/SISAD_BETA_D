@@ -1,12 +1,16 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import "ag-grid-enterprise";
+import { AgGridReact } from "ag-grid-react";
 import { SearchFilter, EditElement, DeleteElement } from "./icons";
 import {
   setOpenModalTypeFileCreated,
   setOpenModalTypeFileUpdate,
-  setOpenModalTypeFileDelete
+  setOpenModalTypeFileDelete,
 } from "../../../../../redux/states/ActionConfig";
 import { setSelectedTypeFileConfig } from "../../../../../redux/states/FileType";
 import FileTypeCreated from "../ModalesFileType/FileTypeCreated";
@@ -18,27 +22,150 @@ const FileTypeContent = () => {
   const dispatch = useDispatch();
   const { typeFileCore } = useSelector((store) => store);
   const { isLoadingTypeFile, TypeFile } = typeFileCore;
-  const [term, setTerm] = useState("");
+  const [gridApi, setGridApi] = useState({});
+  const [FileCore, setFileCore] = useState([]);
+
+  useEffect(() => {
+    TypeFile.map((file, i) => {
+      if (file.sequential) {
+        file.sequential = i + 1;
+      } else {
+        file.sequential = i + 1;
+      }
+    });
+    setFileCore(TypeFile);
+  }, [TypeFile]);
 
   const OpenModalFileTypeCreatedConfig = () => {
     dispatch(setOpenModalTypeFileCreated(true));
   };
 
-  const OpenModalUpdateFileType = (id) => {
-    dispatch(setSelectedTypeFileConfig(id));
-    dispatch(setOpenModalTypeFileUpdate(true));
+  const CheckIsDefault = (props) => {
+    return <input type="checkbox" checked={props.node.data.isDefault} />;
   };
 
-  const OpenModalDeleteFileType = (id) => {
-    dispatch(setSelectedTypeFileConfig(id));
-    dispatch(setOpenModalTypeFileDelete(true));
-  };
-
-  function searchingTerm(term) {
-    return function (x) {
-      return x.name.toLowerCase().includes(term) || !term;
+  const EditTypeFile = (props) => {
+    const invokeParentMethod = () => {
+      dispatch(setSelectedTypeFileConfig(props.node.data.id));
+      dispatch(setOpenModalTypeFileUpdate(true));
     };
-  }
+
+    return (
+      <ButtonOptions onClick={invokeParentMethod}>
+        <EditElement x={30} y={30} />
+      </ButtonOptions>
+    );
+  };
+
+  const DeleteTypeFile = (props) => {
+    const invokeParentMethod = () => {
+      dispatch(setSelectedTypeFileConfig(props.node.data.id));
+      dispatch(setOpenModalTypeFileDelete(true));
+    };
+
+    return (
+      <ButtonOptions onClick={invokeParentMethod}>
+        <DeleteElement x={30} y={30} />
+      </ButtonOptions>
+    );
+  };
+
+  const DataFiles = [
+    {
+      headerName: "Id",
+      field: "sequential",
+      pinned: "left",
+      filter: false,
+      width: 70,
+      rezisable: true,
+      sortable: true,
+    },
+    {
+      headerName: "Nombre",
+      field: "name",
+      filter: true,
+      minWidth: 300,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Descripcion",
+      field: "description",
+      filter: true,
+      minWidth: 300,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Por Defecto",
+      field: "",
+      filter: false,
+      cellRenderer: CheckIsDefault,
+      minWidth: 90,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: false,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+    {
+      headerName: "Editar",
+      field: "",
+      filter: false,
+      cellRenderer: EditTypeFile,
+      minWidth: 90,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: false,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+    {
+      headerName: "Eliminar",
+      field: "",
+      filter: false,
+      cellRenderer: DeleteTypeFile,
+      minWidth: 90,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: false,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+  ];
+
+  const onGridReady = (params) => {
+    setGridApi(params.api);
+  };
+
+  const defaultColDef = useMemo(() => {
+    return {
+      sortable: true,
+      flex: 1,
+      minWidth: 140,
+      filter: true,
+      resizable: true,
+      floatingFilter: true,
+    };
+  }, []);
+
+  const pagination = true;
+  const paginationPageSize = 300;
+
+  const onFilterTextBoxChanged = () => {
+    gridApi.setQuickFilter(document.getElementById("filter-text-box").value);
+  };
 
   return (
     <ContainerIndex>
@@ -48,8 +175,10 @@ const FileTypeContent = () => {
             Nuevo
           </NewIndex>
           <SearchUser
+            type="text"
+            id="filter-text-box"
             placeholder=" Buscar Tipo de Archivo"
-            onChange={(e) => setTerm(e.target.value)}
+            onInput={onFilterTextBoxChanged}
           />
           <ButtonSearch>
             <SearchFilter x={22} y={22} />
@@ -63,56 +192,26 @@ const FileTypeContent = () => {
         <LoadingSpinner />
       ) : (
         <TableContainer>
-          <TableRaid>
-            <Table>
-              <tr>
-                <THN>N</THN>
-                <TH>Nombre</TH>
-                <TH>Descripcion</TH>
-                <TH>Por Defecto</TH>
-                <TH>Editar / Eliminar</TH>
-              </tr>
-
-              {TypeFile ? (
-                TypeFile.filter(searchingTerm(term)).map((file, i) => (
-                  <tr key={i}>
-                    <TD1>{i + 1}</TD1>
-                    <TD1>{file.name}</TD1>
-                    <TD1>{file.description}</TD1>
-                    <TD1>
-                      <input type="checkbox" checked={file.isDefault} />
-                    </TD1>
-                    <TD1>
-                      <ContentOptions>
-                        <ContainerEdit>
-                          <ButtonOptions
-                            onClick={() => OpenModalUpdateFileType(file.id)}
-                          >
-                            <EditElement x={30} y={30} />
-                          </ButtonOptions>
-                        </ContainerEdit>
-
-                        <ContainerDelete
-                          onClick={() => OpenModalDeleteFileType(file.id)}
-                        >
-                          <ButtonOptions>
-                            <DeleteElement x={30} y={30} />
-                          </ButtonOptions>
-                        </ContainerDelete>
-                      </ContentOptions>
-                    </TD1>
-                  </tr>
-                ))
-              ) : (
-                <></>
-              )}
-            </Table>
-          </TableRaid>
+          <div
+            id="myGrid"
+            style={{ width: "100%", height: "100%" }}
+            className="ag-theme-alpine"
+          >
+            <AgGridReact
+              pagination={pagination}
+              paginationPageSize={paginationPageSize}
+              onGridReady={onGridReady}
+              rowData={FileCore}
+              columnDefs={DataFiles}
+              defaultColDef={defaultColDef}
+              animateRows={true}
+            ></AgGridReact>
+          </div>
         </TableContainer>
       )}
 
       <FileTypeCreated />
-      <FileTypeUpdate/>
+      <FileTypeUpdate />
       <FileTypeDelete />
 
       <Toaster
@@ -139,7 +238,7 @@ const ContainerIndex = styled.div`
   overflow: hidden;
   margin: 1rem 0 0 0;
   @media (max-width: 767px) {
-    height: 100%;
+    height: 600px;
   }
 `;
 
@@ -154,7 +253,7 @@ const ContainerButton = styled.div`
   display: flex;
   justify-content: flex-start;
   @media (max-width: 767px) {
-   width: 96%;
+    width: 96%;
   }
 `;
 
@@ -165,7 +264,7 @@ const SearchUser = styled.input`
   border: 1px solid #f68a20;
   color: #5d5c5c;
   @media (max-width: 767px) {
-   width: 60%;
+    width: 60%;
   }
 `;
 
@@ -198,68 +297,14 @@ const ContainerSelect = styled.div`
   width: 35%;
   display: flex;
   justify-content: flex-end;
-   @media (max-width: 767px) {
-   display: none;
+  @media (max-width: 767px) {
+    display: none;
   }
 `;
 
 const TableContainer = styled.div`
-  width: 95%;
-  display: flex;
-  overflow: hidden;
-`;
-
-const TableRaid = styled.div`
-  width: 100%;
-  height: 400px;
-  overflow-y: scroll;
-`;
-
-const Table = styled.table`
-
-`;
-
-const THN = styled.th`
-  width: 4rem;
-  height: 2rem;
-  border: 1px solid var(--whiteTrans);
-  background-color: var(--primaryColor);
-  color: var(--white);
-`;
-
-const TH = styled.th`
-  width: 12rem;
-  height: 2.1rem;
-  border: 1px solid var(--whiteTrans);
-  background-color: var(--primaryColor);
-  color: var(--white);
-`;
-
-const TD1 = styled.td`
-  font-size: 0.9rem;
-  text-align: center;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: #5f5f5f;
-  height: 2.4rem;
-  border: 1px solid #c4c4c4;
-`;
-
-const ContentOptions = styled.div`
-  display: flex;
-   width: 100px;
-`;
-
-const ContainerEdit = styled.div`
-  display: flex;
-  width: 50%;
-  justify-content: center;
-  align-items: center;
-`;
-
-const ContainerDelete = styled.div`
-  width: 50%;
+  width: 97%;
+  height: 440px;
   display: flex;
   justify-content: center;
   align-items: center;

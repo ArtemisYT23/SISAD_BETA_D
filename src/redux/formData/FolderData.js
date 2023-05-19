@@ -13,6 +13,7 @@ const initialState = {
     nameUpdate: "",
     DescriptionUpdate: "",
     CabinetIdUpdate: "",
+    folderIdUpdate: null,
     FileTypeUpdate: []
 }
 
@@ -27,6 +28,7 @@ const SAVE_UPDATE_IDFOLDER = "SAVE_UPDATE_IDFOLDER";
 const SAVE_UPDATE_NAMEFOLDER = "SAVE_UPDATE_NAMEFOLDER";
 const SAVE_UPDATE_DESCRIPTIONFOLDER = "SAVE_UPDATE_DESCRIPTIONFOLDER";
 const SAVE_UPDATE_CABINETFOLDER = "SAVE_UPDATE_CABINETFOLDER";
+const SAVE_UPDATE_FOLDERID = "SAVE_UPDATE_FOLDERID";
 const SAVE_UPDATE_FILETYPE_FOLDER = "SAVE_UPDATE_FILETYPE_FOLDER";
 const CLEAR_DATA_FOLDER_UPDATE = "CLEAR_DATA_FOLDER_UPDATE";
 
@@ -43,6 +45,7 @@ export default function FolderDataReducer(state = initialState, action) {
         case SAVE_UPDATE_NAMEFOLDER:
         case SAVE_UPDATE_DESCRIPTIONFOLDER:
         case SAVE_UPDATE_CABINETFOLDER:
+        case SAVE_UPDATE_FOLDERID:
         case SAVE_UPDATE_FILETYPE_FOLDER:
         case CLEAR_DATA_FOLDER_UPDATE:
             return action.payload;
@@ -150,6 +153,15 @@ export const saveCabinetIdFolderSelectedUpdate = (cabinetId) => async (dispatch,
     })
 }
 
+//guardar folderId para actualizar carpeta
+export const saveFolderIdSelectedUpdate = (folderId) => async (dispatch, getState) => {
+    const { folderData } = getState();
+    dispatch({
+        type: SAVE_UPDATE_FOLDERID,
+        payload: { ...folderData, folderIdUpdate: folderId }
+    })
+}
+
 //guardar fileType de carpeta seleccionada para actualizar
 export const saveFileTypeFolderSelectedUpdate = (fileType) => async (dispatch, getState) => {
     const { folderData } = getState();
@@ -170,6 +182,7 @@ export const setClearFolderDataUpdate = () => async (dispatch, getState) => {
             nameUpdate: "",
             DescriptionUpdate: "",
             CabinetIdUpdate: "",
+            folderIdUpdate: null,
             FileTypeUpdate: []
         }
     })

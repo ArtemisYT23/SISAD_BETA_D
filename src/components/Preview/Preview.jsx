@@ -16,13 +16,13 @@ const Preview = () => {
 export default Preview;
 
 const ContentPreview = styled.div`
-  width: 37%;
+  width: 25%;
   height: 100vh;
-  position: sticky;
+  position: absolute;
+  background-color: #fff;
+  left: 75%;
   display: ${(props) => (props.modal ? "flex" : "none")};
-  top: 0;
-  left: 0;
-  overflow: scroll-y;
+
   @media (max-width: 767px) {
     width: 100%;
     position: absolute;

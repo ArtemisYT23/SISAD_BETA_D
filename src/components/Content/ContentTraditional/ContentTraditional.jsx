@@ -6,7 +6,7 @@ const ContentTraditional = () => {
   const { selected, selectedSearch, selectedView } = viewCore;
   return (
     <>
-      {selected === "" || selected === "cabinet" || selected === "folder" ? (
+      {selected === "" || selected === "cabinet" || selected === "folder" || selected == "folderChild" ? (
         <ContainerMetadata />
       ) : (
         <></>

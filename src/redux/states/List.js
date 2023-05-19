@@ -25,6 +25,7 @@ const GET_ALL_ELEMENTLIST_CONFIG = "GET_ALL_ELEMENTLIST_CONFIG";
 const GET_ALL_ELEMENTLIST_ERROR_CONFIG = "GET_ALL_ELEMENTLIST_ERROR_CONFIG";
 const SET_SELECTED_ELEMENT_LIST_ITEM = "SET_SELECTED_ELEMENT_LIST_ITEM";
 const SET_SELECTED_ELEMENT_LIST_ITEM_ERRORS = "SET_SELECTED_ELEMENT_LIST_ITEM_ERRORS";
+const CLEAR_DATA_MEMORY_LIST = "CLEAR_DATA_MEMORY_LIST";
 
 export default function ListReducer(state = initialState, action) {
     switch (action.type) {
@@ -39,6 +40,7 @@ export default function ListReducer(state = initialState, action) {
         case GET_ALL_ELEMENTLIST_ERROR_CONFIG:
         case SET_SELECTED_ELEMENT_LIST_ITEM:
         case SET_SELECTED_ELEMENT_LIST_ITEM_ERRORS:
+        case CLEAR_DATA_MEMORY_LIST:
             return action.payload;
         default:
             return state;
@@ -346,3 +348,22 @@ export const DeleteElementListConfig = (DeleteEle, id, listId) => async (dispatc
         toast.error('Elemento no Eliminado');
     });
 }
+
+//limpiar estado de cierre de sesion 
+export const setClearDataMemoryList = () => async (dispatch, getState) => {
+    const { listCore } = getState();
+    dispatch({
+        type: CLEAR_DATA_MEMORY_LIST,
+        payload: {
+            ...listCore,
+            ListData: [],
+            SelectedList: "",
+            //elementos
+            ElementList: [],
+            ElementFilterList: [],
+            selectedElement: "",
+            elementError: "",
+        }
+    })
+}
+

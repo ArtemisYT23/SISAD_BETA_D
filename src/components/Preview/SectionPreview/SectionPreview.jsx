@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setOpenDetalleModal } from "../../../redux/states/ActionDocumentary";
 import "./Styles/Container.css";
+import { Tooltip } from "@material-ui/core";
+import styled from "styled-components";
 
 const SectionPreview = () => {
   const dispatch = useDispatch();
@@ -50,7 +52,9 @@ const SectionPreview = () => {
           X
         </div>
         <div className="Title-Header">
-          <h1>{SelectedFile?.name}</h1>
+          <Tooltip title={SelectedFile?.name || "cargando"}>
+            <h1>{SelectedFile?.name}</h1>
+          </Tooltip>
         </div>
       </div>
       <div className="Main">
@@ -127,9 +131,16 @@ const SectionPreview = () => {
               <div className="dos">
                 {SelectedMetadata ? (
                   SelectedMetadata.values.map((meta, index) => (
-                    <div className="Container-Celda-Meta">
-                      <span className="Celda-Meta">{meta}</span>
-                    </div>
+                    <Tooltip title={meta}>
+                      <div className="Container-Celda-Meta">
+                        {meta.slice(0, 8) == "https://" && (
+                          <ImgContent src={meta} alt="sin foto" />
+                        )}
+                        {meta.slice(0, 8) != "https://" && (
+                          <span className="Celda-Meta">{meta}</span>
+                        )}
+                      </div>
+                    </Tooltip>
                   ))
                 ) : (
                   <>NO DISPONIBLE</>
@@ -152,15 +163,17 @@ const SectionPreview = () => {
                 <div className="TableDataSeguiment">
                   <div className="ContentNameSeguiment">{index + 1}</div>
                   <div className="ContentNameSeguiment">
-                    {histo.resourceType}
+                    {histo?.resourceType}
                   </div>
                   <div className="ContentNameSeguiment">
-                    {histo.resourceName}
+                    {histo?.resourceName}
                   </div>
-                  <div className="ContentNameSeguiment">{histo.optionName}</div>
-                  <div className="ContentNameSeguiment">{histo.userName}</div>
                   <div className="ContentNameSeguiment">
-                    {histo.dateOcurred}
+                    {histo?.optionName}
+                  </div>
+                  <div className="ContentNameSeguiment">{histo?.userName}</div>
+                  <div className="ContentNameSeguiment">
+                    {histo?.dateOcurred}
                   </div>
                 </div>
               </div>
@@ -175,3 +188,8 @@ const SectionPreview = () => {
 };
 
 export default SectionPreview;
+
+const ImgContent = styled.img`
+  width: 50px;
+  height: 50px;
+`;

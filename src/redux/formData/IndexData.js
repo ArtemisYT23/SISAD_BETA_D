@@ -154,19 +154,36 @@ export const getListNameNullCabinetNew = () => async (dispatch, getState) => {
 //guardar si es requerido o no un indice
 export const getRequiredIndexNew = (bool) => async (dispatch, getState) => {
     const { indexData } = getState();
-    dispatch({
-        type: GET_REQUIRED_INDEX_NEW,
-        payload: { ...indexData, required: bool }
-    })
+    if (bool == "activo") {
+        dispatch({
+            type: GET_REQUIRED_INDEX_NEW,
+            payload: { ...indexData, required: true }
+        })
+    }
+    if (bool != "activo") {
+        dispatch({
+            type: GET_REQUIRED_INDEX_NEW,
+            payload: { ...indexData, required: false }
+        })
+    }
 }
 
 //guardar si es unico o no el indice
 export const getUniqueIndexNew = (bool) => async (dispatch, getState) => {
     const { indexData } = getState();
-    dispatch({
-        type: GET_UNIQUE_INDEX_NEW,
-        payload: { ...indexData, unique: bool }
-    })
+    if (bool == "activo") {
+        dispatch({
+            type: GET_UNIQUE_INDEX_NEW,
+            payload: { ...indexData, unique: true }
+        })
+    }
+
+    if (bool != "activo") {
+        dispatch({
+            type: GET_UNIQUE_INDEX_NEW,
+            payload: { ...indexData, unique: false }
+        })
+    }
 }
 
 //guardar valor minimo de indice nuevo
@@ -276,21 +293,56 @@ export const setListIdUpdateIndex = (listId) => async (dispatch, getState) => {
 }
 
 //guardar requiredUpdate de indice a actualizar
+export const setRequiredUpdateIndexData = (bool) => async (dispatch, getState) => {
+    const { indexData } = getState();
+        dispatch({
+            type: REQUIRED_UPDATE_DATA_INDEX,
+            payload: { ...indexData, requiredUpdate: bool }
+        })
+}
+
+//guardar requiredUpdate de indice a actualizar
 export const setRequiredUpdateIndex = (bool) => async (dispatch, getState) => {
     const { indexData } = getState();
-    dispatch({
-        type: REQUIRED_UPDATE_DATA_INDEX,
-        payload: { ...indexData, requiredUpdate: bool }
-    })
+    if (bool == "activo" || bool == true) {
+        dispatch({
+            type: REQUIRED_UPDATE_DATA_INDEX,
+            payload: { ...indexData, requiredUpdate: true }
+        })
+    }
+
+    if (bool != "activo" || bool == false) {
+        dispatch({
+            type: REQUIRED_UPDATE_DATA_INDEX,
+            payload: { ...indexData, requiredUpdate: false }
+        })
+    }
+}
+
+//guardar uniqueUpdate de indice a actualizar
+export const setUniqueUpdateIndexData = (bool) => async (dispatch, getState) => {
+    const { indexData } = getState();
+        dispatch({
+            type: UNIQUE_UPDATE_DATA_INDEX,
+            payload: { ...indexData, uniqueUpdate: bool }
+        })
 }
 
 //guardar uniqueUpdate de indice a actualizar
 export const setUniqueUpdateIndex = (bool) => async (dispatch, getState) => {
     const { indexData } = getState();
-    dispatch({
-        type: UNIQUE_UPDATE_DATA_INDEX,
-        payload: { ...indexData, uniqueUpdate: bool }
-    })
+    if (bool == "activo" || bool == true) {
+        dispatch({
+            type: UNIQUE_UPDATE_DATA_INDEX,
+            payload: { ...indexData, uniqueUpdate: true }
+        })
+    }
+    if (bool != "activo" || bool == false) {
+        dispatch({
+            type: UNIQUE_UPDATE_DATA_INDEX,
+            payload: { ...indexData, uniqueUpdate: false }
+        })
+    }
 }
 
 //guardar minValueUpdate de indice a actualizar 

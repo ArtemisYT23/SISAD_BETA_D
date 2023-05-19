@@ -38,7 +38,7 @@ const useStyless = makeStyles((theme) => ({
     left: "50%",
     borderRadius: "13px",
     "&::-webkit-scrollbar": {
-      width: "0.4em",
+      display: "0.4em",
     },
     transform: "translate(-50%,-50%)",
   },
@@ -138,42 +138,44 @@ const FilesPreview = () => {
           <TableRaid>
             <table>
               <tr>
-                <THN>Tipo</THN>
-                <TH>Tipo de archivo</TH>
-                <TH>Nombre</TH>
-                <THN>Editar</THN>
-                <THN>Eliminar</THN>
+                <THN>
+                  <span>Extension</span>
+                </THN>
+                <THN>
+                  <span>Tipo de archivo</span>
+                </THN>
+                <THN>
+                  <span>Nombre</span>
+                </THN>
+                <THN>
+                  <span>Editar</span>
+                </THN>
+                <THN>
+                  <span>Eliminar</span>
+                </THN>
               </tr>
 
               {Select ? (
-                Select.map(
-                  (
-                    {
-                      id,
-                      name,
-                      description,
-                      file,
-                      fileTypeId,
-                      documentId,
-                      fileTypeName,
-                      extension,
-                    },
-                    index
-                  ) => (
-                    <tr key={id}>
-                      <TD1>{extension}</TD1>
+                Select.map(({ id, name, fileTypeName, extension }) => (
+                  <tr key={id}>
+                    <TD1>
+                      <span>{extension}</span>
+                    </TD1>
 
-                      <TD1>{fileTypeName}</TD1>
-                      <TD1>{name}</TD1>
-                      <TD1 onClick={() => OpenModalUpdateFile(id)}>
-                        <EditIconFile x={25} y={25} />
-                      </TD1>
-                      <TD1 onClick={() => OpenModalDeleteFile(id)}>
-                        <DeleteIconFile x={25} y={25} />
-                      </TD1>
-                    </tr>
-                  )
-                )
+                    <TD1>
+                      <span>{fileTypeName}</span>
+                    </TD1>
+                    <TD1>
+                      <span>{name}</span>
+                    </TD1>
+                    <TD1 onClick={() => OpenModalUpdateFile(id)}>
+                      <EditIconFile x={25} y={25} />
+                    </TD1>
+                    <TD1 onClick={() => OpenModalDeleteFile(id)}>
+                      <DeleteIconFile x={25} y={25} />
+                    </TD1>
+                  </tr>
+                ))
               ) : (
                 <></>
               )}
@@ -206,9 +208,21 @@ const FilesPreview = () => {
         <TableContainer>
           <TableRaid>
             <table>
-              <TH2>Cargados</TH2>
-              <TH2>Tipo de documento</TH2>
-              <TH2>Acciones</TH2>
+              <TH2>
+                <div>
+                  <span>Cargados</span>
+                </div>
+              </TH2>
+              <TH2>
+                <div>
+                  <span>Tipo de documento</span>
+                </div>
+              </TH2>
+              <TH2>
+                <div>
+                  <span>Acciones</span>
+                </div>
+              </TH2>
 
               {FilesFolders ? (
                 FilesFolders.map(({ fileTypeId, fileTypeName }, index) => (
@@ -276,40 +290,50 @@ const TableRaid = styled.div`
   width: 100%;
   height: 370px;
   overflow-y: scroll;
+  ::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const THN = styled.th`
-  width: 6rem;
-  height: 2rem;
   border: 1px solid var(--whiteTrans);
   background-color: var(--primaryColor);
   color: var(--white);
+  width: 110px;
+  height: 30px;
+  span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 `;
 
 const TH2 = styled.th`
-  width: 9rem;
-  height: 2.1rem;
-  border: 1px solid var(--whiteTrans);
-  background-color: var(--primaryColor);
-  color: var(--white);
-`;
-
-const TH = styled.th`
-  width: 4rem;
-  height: 2.1rem;
-  border: 1px solid var(--whiteTrans);
-  background-color: var(--primaryColor);
-  color: var(--white);
-`;
+  div {
+    width: 175px;
+    height: 30px;
+    border: 1px solid var(--whiteTrans);
+    background-color: var(--primaryColor);
+    color: var(--white);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+ `;
 
 const TD1 = styled.td`
   font-size: 0.9rem;
   text-align: center;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
   color: #5f5f5f;
-  height: 2.4rem;
   border: 1px solid #c4c4c4;
   border-radius: 13px;
+  div {
+    width: 130px;
+    border: 1px solid var(--whiteTrans);
+    background-color: var(--primaryColor);
+    color: var(--white);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 `;

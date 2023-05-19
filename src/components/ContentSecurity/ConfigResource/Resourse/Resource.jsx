@@ -1,13 +1,18 @@
-import { useEffect, useState } from "react";
+import { useState, useMemo, useEffect } from "react";
+import styled from "styled-components";
+import { useDispatch, useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import "ag-grid-enterprise";
+import { AgGridReact } from "ag-grid-react";
+
 import {
   setOpenModalCreatedResource,
   setOpenModalUpdateResource,
   setOpenModalDeleteResource,
   setOpenModalUpdateResourceFolder,
 } from "../../../../redux/states/ActionSecurity";
-import { useDispatch, useSelector } from "react-redux";
-import styled from "styled-components";
 import LoadingSpinner from "../../../../utilities/LoadingSpinner";
 import HeaderSecurity from "../../HeaderSecurity/HeaderSecurity";
 import { setSelectedUserCore } from "../../../../redux/states/UserCore";
@@ -23,30 +28,21 @@ const Resource = () => {
   const { userCore, resourceCore } = useSelector((store) => store);
   const { ResourcePermision, isLoadingResource } = resourceCore;
   const { UserList } = userCore;
-  const [term, setTerm] = useState("");
-  const [data, setData] = useState([]);
-
-  const OpenModalCreatedResource = () => {
-    dispatch(setOpenModalCreatedResource(true));
-  };
-
-  function searchingTerm(term) {
-    return function (x) {
-      return x.name.includes(term) || !term;
-    };
-  }
+  const [gridApi, setGridApi] = useState({});
+  const [resourseData, setResourseData] = useState([]);
 
   useEffect(() => {
     // console.log(ResourcePermision);
     const User = [];
-    UserList?.forEach((index, i) => {
+    UserList?.forEach((index) => {
       ResourcePermision?.forEach((resour, i) => {
         if (index.id == resour.userId) {
           const filterUser = {
             id: index.id,
             name: index.userName,
-          };
 
+          };
+          console.log(i);
           User.push(filterUser);
         }
       });
@@ -56,22 +52,131 @@ const Resource = () => {
     const array = User.filter((o) =>
       hash[o.id] ? false : (hash[o.id] = true)
     );
-    setData(array);
+    setResourseData(array);
   }, [ResourcePermision]);
+
+  const OpenModalCreatedResource = () => {
+    dispatch(setOpenModalCreatedResource(true));
+  };
 
   const Title = "Gestion de Recursos";
   const SubTitle = "Listado del Recursos del sistema y asignaciones";
 
-  const OpenModalUpdateCabinet = (index) => {
-    dispatch(setOpenModalUpdateResource(true));
+  const UpdateCabinet = (props) => {
+    const invokeParentMethod = () => {
+      dispatch(setSelectedUserCore(props.node.data.id));
+      dispatch(setOpenModalUpdateResource(true));
+    };
+
+    return (
+      <ButtonOptions onClick={invokeParentMethod}>
+        <EditElement x={30} y={30} />
+      </ButtonOptions>
+    );
   };
 
-  const OpenModalUpdateFolder = (index) => {
-    dispatch(setOpenModalUpdateResourceFolder(true));
+  const UpdateFolder = (props) => {
+    const invokeParentMethod = () => {
+      dispatch(setSelectedUserCore(props.node.data.id));
+      dispatch(setOpenModalUpdateResourceFolder(true));
+    };
+
+    return (
+      <ButtonOptions onClick={invokeParentMethod}>
+        <EditElement x={30} y={30} />
+      </ButtonOptions>
+    );
   };
 
-  const OpenModalDeleteResource = (index) => {
-    dispatch(setOpenModalDeleteResource(true));
+  const DeleteResource = (props) => {
+    const invokeParentMethod = () => {
+      dispatch(setSelectedUserCore(props.node.data.id));
+      dispatch(setOpenModalDeleteResource(true));
+    };
+
+    return (
+      <ButtonOptions onClick={invokeParentMethod}>
+        <DeleteElement x={30} y={30} />
+      </ButtonOptions>
+    );
+  };
+
+  const DataResource = [
+    {
+      headerName: "Nombre",
+      field: "name",
+      filter: true,
+      minWidth: 300,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Editar Gabinete",
+      field: "",
+      filter: false,
+      cellRenderer: UpdateCabinet,
+      minWidth: 90,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: false,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+    {
+      headerName: "Editar Carpetas",
+      field: "",
+      filter: false,
+      cellRenderer: UpdateFolder,
+      minWidth: 90,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: false,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+    {
+      headerName: "Eliminar Recurso",
+      field: "",
+      filter: false,
+      cellRenderer: DeleteResource,
+      minWidth: 90,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: false,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+  ];
+
+  const onGridReady = (params) => {
+    setGridApi(params.api);
+  };
+
+  const defaultColDef = useMemo(() => {
+    return {
+      sortable: true,
+      flex: 1,
+      minWidth: 140,
+      filter: true,
+      resizable: true,
+      floatingFilter: true,
+    };
+  }, []);
+  const pagination = true;
+  const paginationPageSize = 300;
+
+  const onFilterTextBoxChanged = () => {
+    gridApi.setQuickFilter(document.getElementById("filter-text-box").value);
   };
 
   return (
@@ -86,8 +191,10 @@ const Resource = () => {
             </NewIndex>
           </Tooltip>
           <SearchUser
-            placeholder=" Buscar Usuario"
-            onChange={(e) => setTerm(e.target.value)}
+            type="text"
+            id="filter-text-box"
+            placeholder=" Buscar Tipo de Archivo"
+            onInput={onFilterTextBoxChanged}
           />
           <ButtonSearch>
             <SearchFilter x={22} y={22} />
@@ -101,76 +208,21 @@ const Resource = () => {
         <LoadingSpinner />
       ) : (
         <TableContainer>
-          <TableRaid>
-            <table>
-              <tr>
-                <THN>N</THN>
-                <TH>USUARIO</TH>
-                <TH>EDITAR GABINETES</TH>
-                <TH>EDITAR CARPETAS</TH>
-                <THD>ELIMINAR</THD>
-              </tr>
-
-              {data ? (
-                data?.filter(searchingTerm(term)).map((index, i) => (
-                  <tr key={i}>
-                    <TD1>{i + 1}</TD1>
-                    <TD1>{index.name}</TD1>
-                    <TD1>
-                      <ContentOptions>
-                        <Tooltip title="Editar">
-                          <ContainerEdit>
-                            <ButtonOptions
-                              onClick={() => {
-                                OpenModalUpdateCabinet(index.id),
-                                  dispatch(setSelectedUserCore(index.id));
-                              }}
-                            >
-                              <EditElement x={30} y={30} />
-                            </ButtonOptions>
-                          </ContainerEdit>
-                        </Tooltip>
-                      </ContentOptions>
-                    </TD1>
-                    <TD1>
-                      <ContentOptions>
-                        <Tooltip title="Editar">
-                          <ContainerEdit>
-                            <ButtonOptions
-                              onClick={() => {
-                                OpenModalUpdateFolder(index.id),
-                                  dispatch(setSelectedUserCore(index.id));
-                              }}
-                            >
-                              <EditElement x={30} y={30} />
-                            </ButtonOptions>
-                          </ContainerEdit>
-                        </Tooltip>
-                      </ContentOptions>
-                    </TD1>
-                    <TD1>
-                      <ContentOptions>
-                        <Tooltip title="Eliminar">
-                          <ContainerDelete
-                            onClick={() => {
-                              OpenModalDeleteResource(index.id),
-                                dispatch(setSelectedUserCore(index.id));
-                            }}
-                          >
-                            <ButtonOptions>
-                              <DeleteElement x={30} y={30} />
-                            </ButtonOptions>
-                          </ContainerDelete>
-                        </Tooltip>
-                      </ContentOptions>
-                    </TD1>
-                  </tr>
-                ))
-              ) : (
-                <></>
-              )}
-            </table>
-          </TableRaid>
+           <div
+            id="myGrid"
+            style={{ width: "100%", height: "100%" }}
+            className="ag-theme-alpine"
+          >
+            <AgGridReact
+              pagination={pagination}
+              paginationPageSize={paginationPageSize}
+              onGridReady={onGridReady}
+              rowData={resourseData}
+              columnDefs={DataResource}
+              defaultColDef={defaultColDef}
+              animateRows={true}
+            ></AgGridReact>
+          </div>
         </TableContainer>
       )}
 
@@ -213,7 +265,7 @@ const ContainerButton = styled.div`
   display: flex;
   justify-content: flex-start;
   @media (max-width: 767px) {
-   width: 96%;
+    width: 96%;
   }
 `;
 
@@ -238,7 +290,7 @@ const SearchUser = styled.input`
   border: 1px solid #f68a20;
   color: #5d5c5c;
   @media (max-width: 767px) {
-   width: 70%;
+    width: 70%;
   }
 `;
 
@@ -257,14 +309,16 @@ const ContainerSearch = styled.div`
   width: 50%;
   display: flex;
   @media (max-width: 767px) {
-   display: none;
+    display: none;
   }
 `;
 
 const TableContainer = styled.div`
-  width: 100%;
+  width: 97%;
+  height: 440px;
   display: flex;
-  overflow: hidden;
+  justify-content: center;
+  align-items: center;
 `;
 
 const TableRaid = styled.div`
@@ -331,3 +385,7 @@ const ButtonOptions = styled.button`
   background: none;
   cursor: pointer;
 `;
+
+
+
+

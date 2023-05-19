@@ -1,7 +1,11 @@
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
-import { Toaster } from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import toast, { Toaster } from "react-hot-toast";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import "ag-grid-enterprise";
+import { AgGridReact } from "ag-grid-react";
 import { Tooltip } from "@material-ui/core";
 import HeaderSecurity from "../../HeaderSecurity/HeaderSecurity";
 import { DeleteElement, EditElement, SearchFilter } from "./icons";
@@ -22,25 +26,120 @@ const PermisionContent = () => {
   const dispatch = useDispatch();
   const { profileCore } = useSelector((store) => store);
   const { profile, isLoadingProfile } = profileCore;
-  const [term, setTerm] = useState("");
+  const [gridApi, setGridApi] = useState({});
+  const [profileData, setProfileData] = useState([]);
+
+  useEffect(() => {
+    profile.map((file, i) => {
+      if (file.sequential) {
+        file.sequential = i + 1;
+      } else {
+        file.sequential = i + 1;
+      }
+    });
+    setProfileData(profile);
+  }, [profile]);
 
   const OpenModalPermisionCreatedConfig = () => {
     dispatch(openModalProfileCreated(true));
   };
 
-  const UpdateUserRow = (id) => {
-    dispatch(getProfilePermisionCore(id));
-  };
 
-  const DeleteUserRow = (id) => {
-    dispatch(getProfilePermisionCoreDelete(id));
-  };
-
-  function searchingTerm(term) {
-    return function (x) {
-      return x.name.toLowerCase().includes(term) || !term;
+  const EditProfile = (props) => {
+    const invokeParentMethod = () => {
+      dispatch(getProfilePermisionCore(props.node.data.id));
     };
-  }
+
+    return (
+      <ButtonOptions onClick={invokeParentMethod}>
+        <EditElement x={30} y={30} />
+      </ButtonOptions>
+    );
+  };
+
+  const DeleteProfile = (props) => {
+    const invokeParentMethod = () => {
+      dispatch(getProfilePermisionCoreDelete(props.node.data.id));
+    };
+
+    return (
+      <ButtonOptions onClick={invokeParentMethod}>
+        <DeleteElement x={30} y={30} />
+      </ButtonOptions>
+    );
+  };
+
+  const DataProfile = [
+    {
+      headerName: "Id",
+      field: "sequential",
+      pinned: "left",
+      filter: false,
+      width: 70,
+      rezisable: true,
+      sortable: true,
+    },
+    {
+      headerName: "Nombre",
+      field: "name",
+      filter: true,
+      minWidth: 300,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Editar",
+      field: "",
+      filter: false,
+      cellRenderer: EditProfile,
+      minWidth: 90,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: false,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+    {
+      headerName: "Eliminar",
+      field: "",
+      filter: false,
+      cellRenderer: DeleteProfile,
+      minWidth: 90,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: false,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+  ];
+
+  const onGridReady = (params) => {
+    setGridApi(params.api);
+  };
+
+  const defaultColDef = useMemo(() => {
+    return {
+      sortable: true,
+      flex: 1,
+      minWidth: 140,
+      filter: true,
+      resizable: true,
+      floatingFilter: true,
+    };
+  }, []);
+  const pagination = true;
+  const paginationPageSize = 300;
+
+  const onFilterTextBoxChanged = () => {
+    gridApi.setQuickFilter(document.getElementById("filter-text-box").value);
+  };
 
   const Title = "Gestion de Perfil";
   const SubTitle =
@@ -59,8 +158,10 @@ const PermisionContent = () => {
           </Tooltip>
 
           <SearchUser
-            placeholder=" Buscar Perfil"
-            onChange={(e) => setTerm(e.target.value)}
+             type="text"
+             id="filter-text-box"
+             placeholder=" Buscar Tipo de Archivo"
+             onInput={onFilterTextBoxChanged}
           />
 
           <ButtonSearch>
@@ -75,48 +176,21 @@ const PermisionContent = () => {
         <LoadingSpinner />
       ) : (
         <TableContainer>
-          <TableRaid>
-            <table>
-              <tr>
-                <THN>Id</THN>
-                <TH>Nombre</TH>
-                <TH>Acciones</TH>
-              </tr>
-
-              {profile ? (
-                profile.filter(searchingTerm(term)).map((profile, i) => (
-                  <tr key={i}>
-                    <TD1>{i + 1}</TD1>
-                    <TD1>{profile.name}</TD1>
-                    <TD1>
-                      <ContentOptions>
-                        <Tooltip title="Editar">
-                          <ContainerEdit>
-                            <ButtonOptions
-                              onClick={() => UpdateUserRow(profile.id)}
-                            >
-                              <EditElement />
-                            </ButtonOptions>
-                          </ContainerEdit>
-                        </Tooltip>
-                        <Tooltip title="Eliminar">
-                          <ContainerDelete
-                            onClick={() => DeleteUserRow(profile.id)}
-                          >
-                            <ButtonOptions>
-                              <DeleteElement />
-                            </ButtonOptions>
-                          </ContainerDelete>
-                        </Tooltip>
-                      </ContentOptions>
-                    </TD1>
-                  </tr>
-                ))
-              ) : (
-                <></>
-              )}
-            </table>
-          </TableRaid>
+           <div
+            id="myGrid"
+            style={{ width: "100%", height: "100%" }}
+            className="ag-theme-alpine"
+          >
+            <AgGridReact
+              pagination={pagination}
+              paginationPageSize={paginationPageSize}
+              onGridReady={onGridReady}
+              rowData={profileData}
+              columnDefs={DataProfile}
+              defaultColDef={defaultColDef}
+              animateRows={true}
+            ></AgGridReact>
+          </div>
         </TableContainer>
       )}
 
@@ -158,7 +232,7 @@ const ContainerButton = styled.div`
   display: flex;
   justify-content: flex-start;
   @media (max-width: 767px) {
-   width: 96%;
+    width: 96%;
   }
 `;
 
@@ -183,7 +257,7 @@ const SearchUser = styled.input`
   border: 1px solid #f68a20;
   color: #5d5c5c;
   @media (max-width: 767px) {
-   width: 70%;
+    width: 70%;
   }
 `;
 
@@ -202,14 +276,16 @@ const ContainerSearch = styled.div`
   width: 50%;
   display: flex;
   @media (max-width: 767px) {
-   display: none;
+    display: none;
   }
 `;
 
 const TableContainer = styled.div`
-  width: 100%;
+  width: 97%;
+  height: 440px;
   display: flex;
-  overflow: hidden;
+  justify-content: center;
+  align-items: center;
 `;
 
 const TableRaid = styled.div`

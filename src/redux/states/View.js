@@ -3,9 +3,12 @@ const initialState = {
     //cambio de pantallas
     selected: "",
     //cambio de vistas
-    selectedView: "grid",
+    selectedView: "list",
     //cambio de Search
     selectedSearch: "",
+    //Seleccion de iconos de cambio vista
+    push: "GridView",
+    pushed: "TraditionalViewInactive",
 }
 
 //tag de acciones
@@ -23,6 +26,9 @@ const VIEW_GROUP_MANTENIMIENT_TRADITIONAL = "VIEW_GROUP_MANTENIMIENT_TRADITIONAL
 const SELECTED_INITIAL_CORE = "SELECTED_INITIAL_CORE";
 const SELECTED_SEARCH_SELECTED_CORE = "SELECTED_SEARCH_SELECTED_CORE";
 const SET_CLEAR_MEMORY_DATA_VIEWCORE = "SET_CLEAR_MEMORY_DATA_VIEWCORE";
+//cambio de iconos para la vistas
+const SELECTED_CHANGE_ICON_VIEW_GRID = "SELECTED_CHANGE_ICON_VIEW_GRID";
+const SELECTED_CHANGE_ICON_VIEW_TRADITIONAL = "SELECTED_CHANGE_ICON_VIEW_TRADITIONAL";
 
 //payload de acciones
 export default function ViewReducer(state = initialState, action) {
@@ -41,6 +47,8 @@ export default function ViewReducer(state = initialState, action) {
         case SELECTED_INITIAL_CORE:
         case SELECTED_SEARCH_SELECTED_CORE:
         case SET_CLEAR_MEMORY_DATA_VIEWCORE:
+        case SELECTED_CHANGE_ICON_VIEW_GRID:
+        case SELECTED_CHANGE_ICON_VIEW_TRADITIONAL:
             return action.payload;
         default:
             return state;
@@ -84,6 +92,26 @@ export const getAllViewGridAndTraditional = () => async (dispatch, getState) => 
         payload: { ...viewCore, selectedView: "grid" },
     });
 };
+
+/*<---------SELECCION PARA ICONO DE VISTAS------> */
+//grid
+export const setChangeIconViewGrid = (view) => async (dispatch, getState) => {
+    const { viewCore } = getState();
+    dispatch({
+        type: SELECTED_CHANGE_ICON_VIEW_GRID,
+        payload: { ...viewCore, push: view }
+    })
+}
+
+//traditional
+export const setChangeIconViewTraditional = (view) => async (dispatch, getState) => {
+    const { viewCore } = getState();
+    dispatch({
+        type: SELECTED_CHANGE_ICON_VIEW_TRADITIONAL,
+        payload: { ...viewCore, pushed: view }
+    })
+}
+
 
 /*<----------------------CAMBIO DE SEARCH-------------------------> */
 
@@ -140,8 +168,13 @@ export const setClearMemoryDataViewCore = () => async (dispatch, getState) => {
         payload: {
             ...viewCore,
             selected: "",
+            //cambio de vistas
             selectedView: "grid",
+            //cambio de Search
             selectedSearch: "",
+            //Seleccion de iconos de cambio vista
+            push: "GridViewInactive",
+            pushed: "",
         }
     })
 }

@@ -1,29 +1,26 @@
-import styled from "styled-components";
-import { OptionsIcon } from "./icons";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { PublicRoutes, PrivateRoutes } from "../../../models/routes";
+import styled from "styled-components";
+import logout from "../../../../assets/Img/Core/logout.png";
+import settings from "../../../../assets/Img/Core/settings.png";
+import user from "../../../../assets/Img/Core/user.png";
+import { PrivateRoutes, PublicRoutes } from "../../../models/routes";
+import { setOpenDetalleModal } from "../../../redux/states/ActionDocumentary";
+import { setSelectedCabinetCore } from "../../../redux/states/Cabinet";
+import { setSelectedGroupCore } from "../../../redux/states/Group";
 import {
   closeSesionCleaningState,
+  getNameGlobalChangeCleaner,
   setClearElementBreak,
   setClearElementFolderBreak,
   setClearElementGroupBreak,
-  getNameGlobalChangeCleaner,
 } from "../../../redux/states/Name";
 import {
   setSelectedNullCore,
   setSelectedSearchNullCore,
 } from "../../../redux/states/View";
-import { setSelectedGroupCore } from "../../../redux/states/Group";
-import { setSelectedCabinetCore } from "../../../redux/states/Cabinet";
-import { setOpenDetalleModal } from "../../../redux/states/ActionDocumentary";
-import { Tooltip } from "@material-ui/core";
 import "../../../Styles/Headers/Header.css";
-import user from "../../../../assets/Img/Core/user.png";
-import help from "../../../../assets/Img/Core/question.png";
-import settings from "../../../../assets/Img/Core/settings.png";
-import logout from "../../../../assets/Img/Core/logout.png";
 
 const HeaderManag = () => {
   const dispatch = useDispatch();
@@ -79,11 +76,11 @@ const HeaderManag = () => {
   const RouteFolder = () => {};
 
   const handleUrl = () => {
-    navigate(`/private/${PrivateRoutes.DASHBOARD}`)
-  }
+    navigate(`/private/${PrivateRoutes.DASHBOARD}`);
+  };
 
   const handleUrl1 = () => {
-    navigate(`/private/${PrivateRoutes.DASHBOARD}/Profile`)
+    navigate(`/private/${PrivateRoutes.DASHBOARD}/Profile`);
   };
 
   return (
@@ -108,10 +105,6 @@ const HeaderManag = () => {
                 <img src={settings}></img>
                 <a> {"Configuraciones"} </a>
               </li>
-              {/* <li className="dropdownItem">
-                <img src={help}></img>
-                <a> {"Ayuda"} </a>
-              </li> */}
               <li onClick={() => CerrarSesion()} className="dropdownItem">
                 <img src={logout}></img>
                 <a> {"Cerrar Sesion"} </a>
@@ -123,40 +116,26 @@ const HeaderManag = () => {
       <HeaderUP>
         <NameContainer>
           {NameManagmentSelected ? (
-            <TextName>{NameManagmentSelected}</TextName>
+            <Title>
+              <h1>{NameManagmentSelected}</h1>
+            </Title>
           ) : (
-            <TextName>SISAD CLOUD</TextName>
+            <Title>
+              <h1>SISAD CLOUD</h1>
+            </Title>
           )}
         </NameContainer>
         <OptionContainer>
           <ContentText>
-            <TextName>{RolSesion[1]}</TextName>
+            <TextName>
+              <h1>{RolSesion[1]}</h1>
+            </TextName>
           </ContentText>
           <Perfiles onClick={() => ActiveMenu()}>
             <Avatar src={DataUser?.photoUrl} />
           </Perfiles>
         </OptionContainer>
       </HeaderUP>
-      <HeaderDOWN>
-        <LineBreack onClick={() => RouteInitial()}>.../</LineBreack>
-        {breackcompGroup != null && (
-          <LineBreack onClick={() => RouteGroup(breackcompGroup?.id)}>
-            {breackcompGroup?.name}
-            <label>/</label>
-          </LineBreack>
-        )}
-        {breackcomp && (
-          <LineBreack onClick={() => RouteCabinet(breackcomp?.id)}>
-            {breackcomp?.name}
-          </LineBreack>
-        )}
-        {breackcompFolder != null && (
-          <LineBreack onClick={() => RouteFolder()}>
-            <label>/</label>
-            {breackcompFolder}
-          </LineBreack>
-        )}
-      </HeaderDOWN>
     </HeaderContainer>
   );
 };
@@ -190,10 +169,27 @@ const ContentText = styled.div`
   text-align: center;
 `;
 
-const TextName = styled.h1`
-  font-size: 1.5rem;
-  margin: 1rem 0 1.5rem 0;
-  color: var(--primaryColor);
+const Title = styled.div`
+  width: 250px;
+  display: flex;
+  text-align: justify;
+  h1 {
+    font-size: 25px;
+    color: var(--primaryColor);
+  }
+`;
+
+const TextName = styled.div`
+  width: 80px;
+  display: flex;
+  text-align: justify;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  h1 {
+    font-size: 25px;
+    color: var(--primaryColor);
+  }
 `;
 
 const OptionContainer = styled.div`

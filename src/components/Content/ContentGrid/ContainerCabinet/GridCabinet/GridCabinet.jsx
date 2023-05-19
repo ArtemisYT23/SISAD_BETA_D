@@ -47,7 +47,7 @@ const GridCabinet = ({
     dispatch(getNameGlobalChange(name));
     dispatch(setSelectedCabinetCore(index));
     dispatch(setFilterFoldersCore(index));
-    dispatch(getMetadataByCabinet(index));
+    // dispatch(getMetadataByCabinet(index));
   };
 
   const Enrutamiento = (path) => {
@@ -169,7 +169,9 @@ const GridCabinet = ({
       <ContainerItem>
         <ElementIcon element={element} />
         <br />
+        <Tooltip title={name}>
         <ElementName>{name}</ElementName>
+        </Tooltip>
       </ContainerItem>
     </GridElemmentContainer>
   );

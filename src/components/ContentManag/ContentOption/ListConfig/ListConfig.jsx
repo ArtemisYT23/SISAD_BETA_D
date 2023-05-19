@@ -7,9 +7,8 @@ const ListConfig = () => {
   return (
     <ManagContainer>
       <Listado>
-        <InfoContainer>
-          <HeaderManag />
-        </InfoContainer>
+        <HeaderManag />
+
         <ListManagment />
       </Listado>
 
@@ -31,7 +30,6 @@ const ListConfig = () => {
 export default ListConfig;
 
 const ManagContainer = styled.div`
-  padding: 1rem 0 0 0;
   display: flex;
   width: 100%;
   align-content: center;

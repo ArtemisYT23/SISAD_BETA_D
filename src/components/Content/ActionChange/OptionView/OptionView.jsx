@@ -1,10 +1,12 @@
 import styled from "styled-components";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import NavBarIcon from "./Icons";
 import {
   getAllViewListAndTraditional,
   getAllViewGridAndTraditional,
+  setChangeIconViewGrid,
+  setChangeIconViewTraditional,
 } from "../../../../redux/states/View";
 import { setCleanerModalCore } from "../../../../redux/states/ActionCore";
 import { setClearDataActiveDocumentary } from "../../../../redux/states/ActionDocumentary";
@@ -12,8 +14,10 @@ import { Tooltip } from "@material-ui/core";
 
 const OptionView = () => {
   const dispatch = useDispatch();
-  const [push, setPush] = useState("GridViewInactive");
-  const [pushed, setPushed] = useState("");
+  const { viewCore } = useSelector((store) => store);
+  const { push, pushed } = viewCore;
+  // const [push, setPush] = useState("GridViewInactive");
+  // const [pushed, setPushed] = useState("");
 
   const ChangeOptionViewList = () => {
     dispatch(getAllViewListAndTraditional());
@@ -28,13 +32,13 @@ const OptionView = () => {
   };
 
   const ActiveGrid = () => {
-    setPushed("TraditionalView");
-    setPush("GridViewInactive");
+    dispatch(setChangeIconViewTraditional("TraditionalView"));
+    dispatch(setChangeIconViewGrid("GridViewInactive"));
   };
 
   const ActiveTraditional = () => {
-    setPush("GridView");
-    setPushed("TraditionalViewInactive");
+    dispatch(setChangeIconViewGrid("GridView"));
+    dispatch(setChangeIconViewTraditional("TraditionalViewInactive"));
   };
 
   return (

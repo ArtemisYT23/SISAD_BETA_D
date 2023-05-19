@@ -60,7 +60,7 @@ export const ContainerCheckDefault = styled.div`
 
 export const ContainerNameCheck = styled.div`
   width: 100%;
-  height: 100px;
+  height: 200px;
   overflow-y: scroll;
   display: flex;
   flex-direction: column;
@@ -146,7 +146,7 @@ export const TitleLable = styled.label`
 `;
 export const InputData = styled.input`
   width: 100%;
-  height: 2em;
+  height: 2.5rem;
   text-align: center;
   color: var(--primaryColor);
   border: 1px solid var(--primaryColor);

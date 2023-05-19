@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import "ag-grid-enterprise";
+import { AgGridReact } from "ag-grid-react";
 import { SearchFilter, EditElement, DeleteElement } from "./icons";
 import {
   setOpenModalTypeDataCreated,
@@ -18,27 +22,149 @@ const DataTypeContent = () => {
   const dispatch = useDispatch();
   const { typeDataCore } = useSelector((store) => store);
   const { isLoadingDataType, TypeData } = typeDataCore;
-  const [term, setTerm] = useState("");
+  const [gridApi, setGridApi] = useState({});
+  const [DataCore, setDataCore] = useState([]);
+
+  useEffect(() => {
+    TypeData.map((file, i) => {
+      if (file.sequential) {
+        file.sequential = i + 1;
+      } else {
+        file.sequential = i + 1;
+      }
+    });
+    console.log(TypeData);
+    setDataCore(TypeData);
+  }, [TypeData]);
 
   const OpenModalDataTypeCreatedConfig = () => {
     dispatch(setOpenModalTypeDataCreated(true));
   };
 
-  const OpenModalUpdateDataType = (id) => {
-    dispatch(setSelectedTypeDataConfig(id));
-    dispatch(setOpenModalTypeDataUpdate(true));
-  };
-
-  const OpenModalDeleteDataType = (id) => {
-    dispatch(setSelectedTypeDataConfig(id));
-    dispatch(setOpenTypeDataDelete(true));
-  };
-
-  function searchingTerm(term) {
-    return function (x) {
-      return x.name.toLowerCase().includes(term) || !term;
+  const EditTypeData = (props) => {
+    const invokeParentMethod = () => {
+      dispatch(setSelectedTypeDataConfig(props.node.data.id));
+      dispatch(setOpenModalTypeDataUpdate(true));
     };
-  }
+
+    return (
+      <ButtonOptions onClick={invokeParentMethod}>
+        <EditElement x={30} y={30} />
+      </ButtonOptions>
+    );
+  };
+
+  const DeleteTypeData = (props) => {
+    const invokeParentMethod = () => {
+      dispatch(setSelectedTypeDataConfig(props.node.data.id));
+      dispatch(setOpenTypeDataDelete(true));
+    };
+
+    return (
+      <ButtonOptions onClick={invokeParentMethod}>
+        <DeleteElement x={30} y={30} />
+      </ButtonOptions>
+    );
+  };
+
+  const ActiveData = (props) => {
+    return (
+      <input type="checkbox" checked={true} />
+    );
+  };
+
+  const DataType = [
+    {
+      headerName: "Id",
+      field: "sequential",
+      pinned: "left",
+      filter: false,
+      width: 70,
+      rezisable: true,
+      sortable: true,
+    },
+    {
+      headerName: "Nombre",
+      field: "name",
+      filter: true,
+      minWidth: 300,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: true,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+    {
+      headerName: "Estado",
+      field: "",
+      filter: false,
+      cellRenderer: ActiveData,
+      minWidth: 300,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: false,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+    {
+      headerName: "Editar",
+      field: "",
+      filter: false,
+      cellRenderer: EditTypeData,
+      minWidth: 90,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: false,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+    {
+      headerName: "Eliminar",
+      field: "",
+      filter: false,
+      cellRenderer: DeleteTypeData,
+      minWidth: 90,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: false,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+  ];
+
+  const onGridReady = (params) => {
+    setGridApi(params.api);
+  };
+
+  const defaultColDef = useMemo(() => {
+    return {
+      sortable: true,
+      flex: 1,
+      minWidth: 140,
+      filter: true,
+      resizable: true,
+      floatingFilter: true,
+    };
+  }, []);
+
+  const pagination = true;
+  const paginationPageSize = 300;
+
+  const onFilterTextBoxChanged = () => {
+    gridApi.setQuickFilter(document.getElementById("filter-text-box").value);
+  };
 
   return (
     <ContainerIndex>
@@ -48,8 +174,10 @@ const DataTypeContent = () => {
             Nuevo
           </NewIndex>
           <SearchUser
-            placeholder=" Buscar Tipo de Dato"
-            onChange={(e) => setTerm(e.target.value)}
+            type="text"
+            id="filter-text-box"
+            placeholder=" Buscar Tipo de Archivo"
+            onInput={onFilterTextBoxChanged}
           />
           <ButtonSearch>
             <SearchFilter x={22} y={22} />
@@ -63,51 +191,21 @@ const DataTypeContent = () => {
         <LoadingSpinner />
       ) : (
         <TableContainer>
-          <TableRaid>
-            <table>
-              <tr>
-                <THN>N</THN>
-                <TH>Nombre</TH>
-                <TH>Estado</TH>
-                <TH>Editar</TH>
-                <TH>Eliminar</TH>
-              </tr>
-
-              {TypeData ? (
-                TypeData.filter(searchingTerm(term)).map((data, i) => (
-                  <tr key={i}>
-                    <TD1>{i + 1}</TD1>
-                    <TD1>{data.name}</TD1>
-                    <TD1>
-                      <input type="checkbox" checked={true} />
-                    </TD1>
-                    <TD1>
-                      <ContentOptions>
-                        <ContainerEdit>
-                          <ButtonOptions
-                            onClick={() => OpenModalUpdateDataType(data.id)}
-                          >
-                            <EditElement x={30} y={30} />
-                          </ButtonOptions>
-                        </ContainerEdit>
-                      </ContentOptions>
-                    </TD1>
-                    <TD1>
-                      <ContainerDelete
-                        onClick={() => OpenModalDeleteDataType(data.id)}
-                      >
-                        <ButtonOptions>
-                          <DeleteElement x={30} y={30} />
-                        </ButtonOptions>
-                      </ContainerDelete>
-                    </TD1>
-                  </tr>
-                ))
-              ) : (
-                <></>
-              )}
-            </table>
-          </TableRaid>
+          <div
+            id="myGrid"
+            style={{ width: "100%", height: "100%" }}
+            className="ag-theme-alpine"
+          >
+            <AgGridReact
+              pagination={pagination}
+              paginationPageSize={paginationPageSize}
+              onGridReady={onGridReady}
+              rowData={DataCore}
+              columnDefs={DataType}
+              defaultColDef={defaultColDef}
+              animateRows={true}
+            ></AgGridReact>
+          </div>
         </TableContainer>
       )}
 
@@ -151,7 +249,7 @@ const ContainerButton = styled.div`
   display: flex;
   justify-content: flex-start;
   @media (max-width: 767px) {
-   width: 96%;
+    width: 96%;
   }
 `;
 
@@ -162,7 +260,7 @@ const SearchUser = styled.input`
   border: 1px solid #f68a20;
   color: #5d5c5c;
   @media (max-width: 767px) {
-   width: 60%;
+    width: 60%;
   }
 `;
 
@@ -196,62 +294,13 @@ const ContainerSelect = styled.div`
   display: flex;
   justify-content: flex-end;
   @media (max-width: 767px) {
-   display: none;
+    display: none;
   }
 `;
 
 const TableContainer = styled.div`
-  width: 100%;
-  display: flex;
-  overflow: hidden;
-`;
-
-const TableRaid = styled.div`
-  width: 100%;
-  height: 400px;
-  overflow-y: scroll;
-`;
-
-const THN = styled.th`
-  width: 6rem;
-  height: 2rem;
-  border: 1px solid var(--whiteTrans);
-  background-color: var(--primaryColor);
-  color: var(--white);
-`;
-
-const TH = styled.th`
-  width: 14rem;
-  height: 2.1rem;
-  border: 1px solid var(--whiteTrans);
-  background-color: var(--primaryColor);
-  color: var(--white);
-`;
-
-const TD1 = styled.td`
-  font-size: 0.9rem;
-  text-align: center;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: #5f5f5f;
-  height: 2.4rem;
-  border: 1px solid #c4c4c4;
-`;
-
-const ContentOptions = styled.div`
-  display: flex;
-`;
-
-const ContainerEdit = styled.div`
-  display: flex;
-  width: 100%;
-  justify-content: center;
-  align-items: center;
-`;
-
-const ContainerDelete = styled.div`
-  width: 100%;
+  width: 97%;
+  height: 440px;
   display: flex;
   justify-content: center;
   align-items: center;

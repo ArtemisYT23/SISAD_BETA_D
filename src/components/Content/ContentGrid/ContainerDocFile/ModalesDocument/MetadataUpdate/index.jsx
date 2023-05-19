@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
 import { Modal } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -10,7 +11,10 @@ import {
 } from "../../../../../../Styles/ModalesStyles/modalStyle";
 import { setOpenModalMetadataUpdate } from "../../../../../../redux/states/ActionDocumentary";
 import { updateMetaDocument } from "../../../../../../redux/states/Document";
-import { setClearMetadataSelected } from "../../../../../../redux/states/Metadata";
+import {
+  setClearMetadataSelected,
+  setMetadataUpdateForValue,
+} from "../../../../../../redux/states/Metadata";
 import ItemUpdateMeta from "./ItemUpdateMeta/ItemUpdateMeta";
 
 const useStyless = makeStyles((theme) => ({
@@ -27,10 +31,9 @@ const useStyless = makeStyles((theme) => ({
     transform: "translate(-50%,-50%)",
     borderRadius: "13px",
     overflowY: "scroll",
-    '&::-webkit-scrollbar': {
-      width: '0.4em'
-    }
-
+    "&::-webkit-scrollbar": {
+      width: "0.4em",
+    },
   },
   textfield: {
     width: "100%",
@@ -48,38 +51,70 @@ const UpdateMetadata = () => {
   const { SelectedCabinet } = cabinetCore;
   const { MetadataUpdate } = modalDocumentary;
   const { IndexConfig } = indexCore;
-  const { metaDocument } = metaCore;
+  const { metaDocument, DocumentMetadataUpdate } = metaCore;
   const { SelectedDocument } = documentary;
-  const [dataIndex, setDataIndex] = useState([]);
 
   useEffect(() => {
-    let NewMetaIndex = [];
-    metaDocument.forEach((meta, i) => {
-      IndexConfig.forEach((index, i) => {
-        if (meta.indexId == index.id) {
-          const data = {
-            id: meta.id,
-            value: meta.value,
-            documentId: meta.documentId,
-            indexId: meta.indexId,
-            name: index.name,
-            dataTypeId: index.dataTypeId,
-            listId: index.listId,
-          };
-          NewMetaIndex = [...NewMetaIndex, data];
+    const IndexMeta = [];
+    const IndexSort = IndexConfig.sort((a, b) => {
+      if (a.position < b.position) {
+        return -1;
+      }
+    });
+
+    IndexSort.map((index, i) => {
+      const meta = {
+        id: uuidv4(),
+        value: null,
+        indexId: index?.id,
+        name: index.name,
+        dataTypeId: index.dataTypeId,
+        listId: index.listId,
+        maxValue: index.maxValue,
+      };
+      IndexMeta.push(meta);
+    });
+   
+    IndexMeta.map((index) => {
+      metaDocument?.map((meta, i) => {
+        if (meta.indexId == index.indexId) {
+          index.id = meta.id;
+          index.value = meta.value;
+
+          return index;
         }
       });
     });
-    setDataIndex(NewMetaIndex);
-    // console.log(NewMetaIndex);
-  }, [metaDocument]);
+    dispatch(setMetadataUpdateForValue(IndexMeta));
+  }, [MetadataUpdate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // const documentId = [];
+    // metaDocument.map((meta, i) => {
+    //   documentId.push(meta.documentId);
+    // });
+    const MetadataUpdateNew = [];
+    DocumentMetadataUpdate.map((docum, i) => {
+      const obj = {
+        id: docum.id,
+        value: docum.value,
+        indexId: docum.indexId,
+      };
+      MetadataUpdateNew.push(obj);
+    });
+
+    const dataSubmit = {
+      documentId: SelectedDocument?.id,
+      metadata: MetadataUpdateNew,
+    };
+
+    // console.log(dataSubmit);
     dispatch(
       updateMetaDocument(
-        metaDocument,
-        SelectedDocument?.id,
+        dataSubmit,
+        SelectedDocument?.folderId,
         SelectedCabinet?.id
       )
     );
@@ -92,7 +127,7 @@ const UpdateMetadata = () => {
         <div align="center">
           <TitleModal>Actualizar Perfil Metadata</TitleModal>
         </div>
-        {dataIndex?.map((item) => (
+        {DocumentMetadataUpdate?.map((item) => (
           <ItemUpdateMeta
             id={item.id}
             name={item.name}
@@ -100,6 +135,7 @@ const UpdateMetadata = () => {
             dataTypeId={item.dataTypeId}
             listId={item.listId}
             value={item.value}
+            maxValue={item.maxValue}
           />
         ))}
         <br />

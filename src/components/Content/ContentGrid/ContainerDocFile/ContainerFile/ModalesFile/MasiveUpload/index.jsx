@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setOpenModalMasiveUploader } from "../../../../../../../redux/states/ActionDocumentary";
 import {
   setFolderMasiveSelected,
+  setFileTypeMasiveSelected,
   setFileExcelTemplate,
   setFileZipTemplate,
   createdSubmitFileMasive,
@@ -16,11 +17,13 @@ import {
 import {
   TitleModal,
   TitleArchive,
+  Selected,
   SaveButton,
   CancelButton,
 } from "../../../../../../../Styles/ModalesStyles/modalStyle";
 import LoadingSpinner from "../../../../../../../utilities/LoadingSpinner";
 import { DocumentServer } from "../../../../../../../config/axios";
+import { Dropdown } from "primereact/dropdown";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 
@@ -48,15 +51,23 @@ const useStyless = makeStyles((theme) => ({
 const MasiveUploader = () => {
   const dispatch = useDispatch();
   const styless = useStyless();
-  const { modalDocumentary, folderCore, sesion, uploader, cabinetCore } =
-    useSelector((store) => store);
+  const {
+    modalDocumentary,
+    folderCore,
+    sesion,
+    uploader,
+    cabinetCore,
+    typeFileCore,
+  } = useSelector((store) => store);
+  const { TypeFile } = typeFileCore;
   const { SelectedFolder } = folderCore;
   const { SelectedCabinet } = cabinetCore;
-  const { FolderId, isLoadingMasive } = uploader;
+  const { FolderId, isLoadingMasive, FilesZIP, FileTypeSelection } = uploader;
   const { modalMasive } = modalDocumentary;
   const { TockenUser } = sesion;
   const inputRef = useRef(null);
   const [progress, setProgress] = useState(0);
+  const [selectedFileType, setSelectedFileType] = useState(null);
 
   useEffect(() => {
     if (modalMasive != false) {
@@ -64,33 +75,19 @@ const MasiveUploader = () => {
     }
   }, [modalMasive]);
 
-  const onZipUpdate = (metadata) => {
-    setProgress(metadata.percent);
+  const onZipUpdate = (count) => {
+    setProgress(count);
   };
 
-  const throttledZipUpdate = throttle(onZipUpdate, 50);
-
-  const onZip = () => {
-    const zip = new JSZip();
-    const files = Array.from(inputRef.current.files);
-
-    files.forEach((file) => {
-      zip.file(file.webkitRelativePath, file);
-    });
-    zip
-      .generateAsync({ type: "blob" }, throttledZipUpdate)
-      .then(function (content) {
-        console.log(content);
-        dispatch(setFileZipTemplate(content));
-        // const formData = new FormData();
-        // formData.append("folderzip", content);
-        // console.log("ready to send to server", content);
-      })
-      .catch((e) => console.log(e));
-  };
+  const throttledZipUpdate = throttle(onZipUpdate);
 
   const setFile = (e) => {
-    onZip();
+    const files = Array.from(inputRef.current.files);
+
+    files.forEach((file, i) => {
+      throttledZipUpdate(i + 1);
+    });
+    dispatch(setFileZipTemplate(files));
   };
 
   const setFileExcel = (e) => {
@@ -134,10 +131,15 @@ const MasiveUploader = () => {
     e.preventDefault();
     const formFile = new FormData();
     uploader.FolderId && formFile.append("FolderId", uploader.FolderId);
+    uploader.FileTypeSelection && formFile.append("FileTypeId", uploader.FileTypeSelection);
     uploader.ExcelTemplate &&
       formFile.append("ExcelTemplate", uploader.ExcelTemplate);
-    uploader.FilesZIP && formFile.append("FilesZIP", uploader.FilesZIP);
-    console.log(SelectedCabinet?.id);
+
+    FilesZIP?.forEach((file, i) => {
+      formFile.append("FilesZIP", file);
+    });
+
+    // console.log(SelectedCabinet?.id);
     dispatch(createdSubmitFileMasive(formFile, FolderId, SelectedCabinet?.id));
     abrirCerrarModal();
   };
@@ -148,71 +150,89 @@ const MasiveUploader = () => {
     setProgress(0);
   };
 
+  const handleChange = (value) => {
+    dispatch(setFileTypeMasiveSelected(value))
+  };
+
   return (
     <div className={styless.container}>
       <Modal open={modalMasive} onClose={abrirCerrarModal}>
-        {isLoadingMasive ? (
+        {/* {isLoadingMasive ? (
           <LoadingSpinner />
-        ) : (
-          <div className={styless.modalMasive}>
-            <form onSubmit={handleSubmit}>
-              <div align="center">
-                <TitleModal>Subida Masiva De Registros</TitleModal>
-              </div>
-              <br />
-              <br />
-              <TitleArchive>Archivo Excel: </TitleArchive>
-              <Space />
-              <TitleArchive>Plantilla: </TitleArchive>
-              <DownLoad
-                onClick={(e) => DownloadPlantilla(e, SelectedFolder?.id)}
-              >
-                Descargar{" "}
-              </DownLoad>
-              <br />
-              <br />
-              <ContainerFiles>
-                <input
-                  type="file"
-                  accept=".xlsx, .xlsm, .xltx, xlsb"
-                  onInput={(e) => setFileExcel(e)}
-                />
-              </ContainerFiles>
-              <br />
-              <br />
+        ) : ( */}
+        <div className={styless.modalMasive}>
+          <form onSubmit={handleSubmit}>
+            <div align="center">
+              <TitleModal>Subida Masiva De Registros</TitleModal>
+            </div>
+            <br />
+            <br />
+            <TitleArchive>Archivo Excel: </TitleArchive>
+            <Space />
+            <TitleArchive>Plantilla: </TitleArchive>
+            <DownLoad onClick={(e) => DownloadPlantilla(e, SelectedFolder?.id)}>
+              Descargar{" "}
+            </DownLoad>
+            <br />
+            <br />
+            <ContentSelect>
+              <Selected onChange={(e) => handleChange(e.target.value)}>
+                <option value="Por Defecto">Por Defecto</option>
+                {TypeFile ? (
+                  TypeFile.map((file, i) => (
+                    <option key={i} value={file.id}>
+                      {file.name}
+                    </option>
+                  ))
+                ) : (
+                  <></>
+                )}
+              </Selected>
+            </ContentSelect>
+            <br />
+            <br />
+            <ContainerFiles>
+              <input
+                type="file"
+                accept=".xlsx, .xlsm, .xltx, xlsb"
+                onInput={(e) => setFileExcel(e)}
+              />
+            </ContainerFiles>
+            <br />
+            <br />
 
-              <TitleArchive>Seleccione Carpeta De Archivos: </TitleArchive>
-              <br />
-              <br />
-              <progress
-                className={styless.textfield}
-                max="100"
-                value={progress}
-              >
-                {progress?.toFixed(2)}%{" "}
-              </progress>
-              <span>{progress}%</span>
-              <br />
-              <br />
-              <ContainerFiles>
-                <input
-                  ref={inputRef}
-                  type="file"
-                  webkitdirectory="true"
-                  onInput={(e) => setFile(e)}
-                />
-              </ContainerFiles>
-              <br />
+            <TitleArchive>Seleccione Carpeta De Archivos: </TitleArchive>
+            <br />
+            <br />
+            <progress
+              className={styless.textfield}
+              max="100"
+              value={(progress / progress) * 100}
+            >
+              {progress}
+            </progress>
+            <span>{(progress / progress) * 100}%</span>
+            <br />
+            <br />
+            <ContainerFiles>
+              <input
+                ref={inputRef}
+                type="file"
+                onInput={(e) => setFile(e)}
+                multiple
+              />
+            </ContainerFiles>
+            <br />
 
-              <div align="right">
-                <SaveButton>Crear</SaveButton>
-                <CancelButton onClick={() => abrirCerrarModal()}>
-                  Cancelar
-                </CancelButton>
-              </div>
-            </form>
-          </div>
-        )}
+            <div align="right">
+              <SaveButton>Crear</SaveButton>
+              <CancelButton onClick={() => abrirCerrarModal()}>
+                Cancelar
+              </CancelButton>
+            </div>
+          </form>
+        </div>
+        {/* )} */}
       </Modal>
     </div>
   );
@@ -236,4 +256,9 @@ const DownLoad = styled.button`
 
 const Space = styled.span`
   margin: 0 4rem 0 0;
+`;
+
+const ContentSelect = styled.div`
+  width: 100%;
+  height: 2rem;
 `;

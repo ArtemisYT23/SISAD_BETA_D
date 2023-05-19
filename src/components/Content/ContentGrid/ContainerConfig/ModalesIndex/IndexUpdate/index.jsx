@@ -16,6 +16,8 @@ import {
   setMaxValueUpdateIndex,
   setXmlReferenceUpdateIndex,
   setClearUpdateIndex,
+  setUniqueUpdateIndexData,
+  setRequiredUpdateIndexData
 } from "../../../../../../redux/formData/IndexData";
 import {
   TitleModal,
@@ -30,6 +32,7 @@ const useStyless = makeStyles((theme) => ({
   IndexUpdate: {
     position: "absolute",
     width: "400px",
+    height: "505px",
     backgroundColor: "white",
     border: "2px solid white",
     boxShadow: theme.shadows[2],
@@ -38,6 +41,10 @@ const useStyless = makeStyles((theme) => ({
     left: "50%",
     transform: "translate(-50%, -50%)",
     borderRadius: "13px",
+    overflowY: "scroll",
+    "&::-webkit-scrollbar": {
+      width: "0.4em",
+    },
   },
   textfield: {
     width: "100%",
@@ -85,8 +92,8 @@ const IndexUpdate = () => {
     dispatch(setPositionUpdateIndex(IndexSelected?.position));
     dispatch(setDataTypeIdUpdateIndex(IndexSelected?.dataTypeId));
     dispatch(setListIdUpdateIndex(IndexSelected?.listId));
-    dispatch(setRequiredUpdateIndex(IndexSelected?.required));
-    dispatch(setUniqueUpdateIndex(IndexSelected?.unique));
+    dispatch(setRequiredUpdateIndexData(IndexSelected?.required));
+    dispatch(setUniqueUpdateIndexData(IndexSelected?.unique));
     dispatch(setMinValueUpdateIndex(IndexSelected?.minValue));
     dispatch(setMaxValueUpdateIndex(IndexSelected?.maxValue));
     dispatch(setXmlReferenceUpdateIndex(IndexSelected?.xmlReference));
@@ -95,20 +102,25 @@ const IndexUpdate = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const formIndex = {
-        id: idUpdate,
-        name: nameUpdate,
-        description: descriptionUpdate,
-        position: position,
-        dataTypeId: dataTypeIdUpdate,
-        listId: listIdUpdate,
-        required: requiredUpdate,
-        unique: uniqueUpdate,
-        minValue: minValueUpdate,
-        maxValue: maxValueUpdate,
-        xmlReference: xmlReferenceUpdate
+      id: idUpdate,
+      name: nameUpdate,
+      description: descriptionUpdate,
+      position: position,
+      dataTypeId: dataTypeIdUpdate,
+      listId: listIdUpdate,
+      required: requiredUpdate,
+      unique: uniqueUpdate,
+      minValue: minValueUpdate,
+      maxValue: maxValueUpdate,
+      xmlReference: xmlReferenceUpdate,
     };
     console.log(formIndex);
-    dispatch(setIndexCabinetUpdateConfig(formIndex, idUpdate, UpdateSelectedCabinet?.name)
+    dispatch(
+      setIndexCabinetUpdateConfig(
+        formIndex,
+        idUpdate,
+        UpdateSelectedCabinet?.name
+      )
     );
     OpenModalUpdateIndex();
   };
@@ -116,6 +128,9 @@ const IndexUpdate = () => {
   const handleChange = (value) => {
     dispatch(setListIdUpdateIndex(value));
   };
+
+  const active = "activo";
+  const inactive = "inactivo";
 
   const bodyIndexUpdate = (
     <div className={styless.IndexUpdate}>
@@ -261,7 +276,47 @@ const IndexUpdate = () => {
             )}
           </select>
         )} */}
+        <TitleArchive>Requerido:</TitleArchive>
+        <Selected
+          onChange={(e) => dispatch(setRequiredUpdateIndex(e.target.value))}
+        >
+          {requiredUpdate == true && (
+            <option hidden>True</option>
+          )}
+          {requiredUpdate == false && (
+            <option hidden>False</option>
+          )}
+          
+          <option value={inactive}>False</option>
+          <option value={active}>True</option>
+        </Selected>
 
+        <br />
+        <br />
+
+        {dataTypeIdUpdate != "b737b512-582c-4d55-ac2d-f623a5862982" &&
+        dataTypeIdUpdate != "a8af3021-06f4-4317-98eb-0f083a14064e" &&
+        dataTypeIdUpdate != "544748f6-ad99-46ed-96f2-d7c943539ac8" &&
+        dataTypeIdUpdate != "228763cb-6a95-47e9-bda7-a3cae8c4ef14" ? (
+          <>
+            <TitleArchive>Unico:</TitleArchive>
+            <Selected
+              onChange={(e) => dispatch(setUniqueUpdateIndex(e.target.value))}
+            >
+              {uniqueUpdate ? (
+                <option hidden>True</option>
+              ) : (
+                <option hidden>False</option>
+              )}
+              <option value={inactive}>False</option>
+              <option value={active}>True</option>
+            </Selected>
+          </>
+        ) : (
+          <></>
+        )}
+
+        <br />
         <br />
         <div align="right">
           <SaveButton>Actualizar</SaveButton>

@@ -33,8 +33,15 @@
   justify-content: center;
   align-items: center;
   width: 80%;
-  font-size: 0.7rem;
   color: white;
+}
+
+.Title-Header > h1 {
+  width: 210px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  font-size: 19px;
 }
 
 .Main {
@@ -164,7 +171,6 @@
 }
 
 .dos .Celda-Meta {
-  display: flex;
   font-size: 1rem;
   width: 100%;
   overflow: hidden;
@@ -180,7 +186,6 @@
   align-items: center;
 }
 
-
 .ContainerSeguiment {
   display: flex;
   width: 100%;
@@ -188,24 +193,24 @@
   flex-direction: column;
 }
 
-.ContainerDataName{
+.ContainerDataName {
   display: flex;
   width: 100%;
   padding: 0 0 2rem 0;
 }
 
-.TableNameSeguiment{
+.TableNameSeguiment {
   width: 50%;
 }
 
-.TableDataSeguiment{
+.TableDataSeguiment {
   width: 50%;
   background-color: aqua;
 }
 
-.ContentDataSeguiment{
+.ContentDataSeguiment {
   border: 1px solid #fff;
-  padding: .5rem;
+  padding: 0.5rem;
   display: flex;
   justify-content: initial;
   color: white;
@@ -213,9 +218,9 @@
   height: 2.5rem;
 }
 
-.ContentNameSeguiment{
+.ContentNameSeguiment {
   border: 1px solid #f68a20;
-  padding: .5rem;
+  padding: 0.5rem;
   display: flex;
   justify-content: center;
   color: #f68a20;

@@ -12,6 +12,11 @@ const initialState = {
     modalFiles: false,
     modalMasive: false,
     modalDownload: false,
+    modalDownloadUnit: false,
+    modalFilesSearch: false,
+    ChargedDownload: false,
+    ModalErrorMasive: false,
+    ModalLogout: false,
 };
 
 const OPEN_MODAL_UPLOAD_FILE_DOCU = "OPEN_MODAL_UPLOAD_FILE_DOCU";
@@ -29,6 +34,11 @@ const SET_OPEN_MODALFILES_METADATA_DOCU = "SET_OPEN_MODALFILES_METADATA_DOCU";
 const SET_CLEAR_DATA_ACTION_DOCUMENT = "SET_CLEAR_DATA_ACTION_DOCUMENT";
 const SET_OPEN_MODAL_MASIVE_UPLOADER = "SET_OPEN_MODAL_MASIVE_UPLOADER";
 const SET_OPEN_MODAL_DOWNLOAD_MASIVE = "SET_OPEN_MODAL_DOWNLOAD_MASIVE";
+const SET_OPEN_MODAL_DOWNLOAD_MASIVE_UNIT = "SET_OPEN_MODAL_DOWNLOAD_MASIVE_UNIT";
+const OPEN_MODAL_SEARCH_FILES = "OPEN_MODAL_SEARCH_FILES";
+const SET_OPEN_MODAL_DOWNLOAD_CHARGED = "SET_OPEN_MODAL_DOWNLOAD_CHARGED";
+const SET_OPEN_MODAL_MASIVE_ERROR_UPLOADER_DETAILS = "SET_OPEN_MODAL_MASIVE_ERROR_UPLOADER_DETAILS";
+const SET_OPEN_LOGOUT_ALERT = "SET_OPEN_LOGOUT_ALERT";
 
 export default function ModalDocumentaryReducer(state = initialState, action) {
     switch (action.type) {
@@ -46,11 +56,24 @@ export default function ModalDocumentaryReducer(state = initialState, action) {
         case SET_CLEAR_DATA_ACTION_DOCUMENT:
         case SET_OPEN_MODAL_MASIVE_UPLOADER:
         case SET_OPEN_MODAL_DOWNLOAD_MASIVE:
+        case SET_OPEN_MODAL_DOWNLOAD_MASIVE_UNIT:
+        case OPEN_MODAL_SEARCH_FILES:
+        case SET_OPEN_MODAL_DOWNLOAD_CHARGED:
+        case SET_OPEN_MODAL_MASIVE_ERROR_UPLOADER_DETAILS:
+        case SET_OPEN_LOGOUT_ALERT:
             return action.payload;
         default:
             return state;
     }
 };
+/*<-----------------Search---------------------->*/
+export const setOpenModalSearchFiles = (bool) => async (dispatch, getState) => {
+    const { modalDocumentary } = getState();
+    dispatch({
+        type: OPEN_MODAL_SEARCH_FILES,
+        payload: { ...modalDocumentary, modalFilesSearch: bool }
+    });
+}
 
 /*<-------------------Files-------------------->*/
 //Modal subir Archivo Nuevo
@@ -171,6 +194,15 @@ export const setOpenModalMasiveUploader = (bool) => async (dispatch, getState) =
     })
 }
 
+/*<-----------------------------Modal para reporte de errores en subida masiva------------------------------> */
+export const setOpenModalMasiveErrorUploader = (bool) => async (dispatch, getState) => {
+    const { modalDocumentary } = getState();
+    dispatch({
+        type: SET_OPEN_MODAL_MASIVE_ERROR_UPLOADER_DETAILS,
+        payload: { ...modalDocumentary, ModalErrorMasive: bool }
+    })
+}
+
 /*<-----------Modal para Descarga masiva----------------->*/
 export const setOpenModalDownloadMasive = (bool) => async (dispatch, getState) => {
     const { modalDocumentary } = getState();
@@ -180,6 +212,33 @@ export const setOpenModalDownloadMasive = (bool) => async (dispatch, getState) =
     })
 }
 
+/*<-----------Modal para Descarga masiva Individual----------------->*/
+export const setOpenModalDownloadMasiveUnit = (bool) => async (dispatch, getState) => {
+    const { modalDocumentary } = getState();
+    dispatch({
+        type: SET_OPEN_MODAL_DOWNLOAD_MASIVE_UNIT,
+        payload: { ...modalDocumentary, modalDownloadUnit: bool }
+    })
+}
+
+
+/*<---------------------Modal para descarga de archivos---------------------> */
+export const setOpenModalDownloadChargedTime = (bool) => async (dispatch, getState) => {
+    const { modalDocumentary } = getState();
+    dispatch({
+        type: SET_OPEN_MODAL_DOWNLOAD_CHARGED,
+        payload: { ...modalDocumentary, ChargedDownload: bool }
+    })
+}
+
+/*<-----------------Modal para cierre de sesion alerta---------------> */
+export const setOpenLogoutAlert = (bool) => async (dispatch, getState) => {
+    const { modalDocumentary } = getState();
+    dispatch({
+        type: SET_OPEN_LOGOUT_ALERT,
+        payload: { ...modalDocumentary, ModalLogout: bool }
+    })
+}
 
 //limpiar datos para cierre de sesion
 export const setClearDataActiveDocumentary = () => async (dispatch, getState) => {
@@ -198,6 +257,10 @@ export const setClearDataActiveDocumentary = () => async (dispatch, getState) =>
             modalPreview: false,
             modalFiles: false,
             modalMasive: false,
+            modalDownloadUnit: false,
+            modalFilesSearch: false,
+            ChargedDownload: false,
+            ModalLogout: false,
         }
     })
 }

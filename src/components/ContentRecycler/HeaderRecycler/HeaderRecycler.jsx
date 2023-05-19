@@ -3,7 +3,7 @@ import { OptionsIcon } from "./icons";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { PublicRoutes } from "../../../models/routes";
+import { PublicRoutes, PrivateRoutes } from "../../../models/routes";
 import { closeSesionCleaningState } from "../../../redux/states/Name";
 import { Tooltip } from "@material-ui/core";
 import "../../../Styles/Headers/Header.css";
@@ -40,51 +40,61 @@ const HeaderRecycler = () => {
     navigate(`/${PublicRoutes.LOGIN}`);
   };
 
+  const handleUrl = () => {
+    navigate(`/private/${PrivateRoutes.DASHBOARD}`);
+  };
+
+  const handleUrl1 = () => {
+    navigate(`/private/${PrivateRoutes.DASHBOARD}/Profile`);
+  };
+
   return (
     <HeaderContainer onClick={() => changeStateDrop()}>
       {showMenu && (
         <>
-        <div className={`dropdown-menu ${showMenu ? "active" : "inactive"}`}>
-          <h3>
-          <ContainerUser>
-            <AvataDrop src={photo} />
-          </ContainerUser>
-            {RolSesion[1]}
-            <br />
-            <span>{RolSesion[2]}</span>
-          </h3>
-          <ul>
-            <li className="dropdownItem">
-              <img src={user}></img>
-              <a> {"Mi Perfil"} </a>
-            </li>
-            <li className="dropdownItem">
-              <img src={settings}></img>
-              <a> {"Configuraciones"} </a>
-            </li>
-            <li className="dropdownItem">
-              <img src={help}></img>
-              <a> {"Ayuda"} </a>
-            </li>
-            <li onClick={() => CerrarSesion()} className="dropdownItem">
-              <img src={logout}></img>
-              <a> {"Cerrar Sesion"} </a>
-            </li>
-          </ul>
-        </div>
-      </>
+          <div className={`dropdown-menu ${showMenu ? "active" : "inactive"}`}>
+            <h3>
+              <ContainerUser>
+                <AvataDrop src={photo} />
+              </ContainerUser>
+              {RolSesion[1]}
+              <br />
+              <span>{RolSesion[2]}</span>
+            </h3>
+            <ul>
+              <li className="dropdownItem" onClick={() => handleUrl()}>
+                <img src={user}></img>
+                <a> {"Mi Perfil"} </a>
+              </li>
+              <li className="dropdownItem" onClick={() => handleUrl1()}>
+                <img src={settings}></img>
+                <a> {"Configuraciones"} </a>
+              </li>
+              <li onClick={() => CerrarSesion()} className="dropdownItem">
+                <img src={logout}></img>
+                <a> {"Cerrar Sesion"} </a>
+              </li>
+            </ul>
+          </div>
+        </>
       )}
       <HeaderUP>
         <NameContainer>
           {NameGlobalSelected ? (
-            <TextName>{NameGlobalSelected}</TextName>
+            <Title>
+              <h1>{NameGlobalSelected}</h1>
+            </Title>
           ) : (
-            <TextName>SISAD CLOUD</TextName>
+            <Title>
+              <h1>SISAD CLOUD</h1>
+            </Title>
           )}
         </NameContainer>
         <OptionContainer>
-        <ContentText>
-            <TextName>{RolSesion[1]}</TextName>
+          <ContentText>
+            <TextName>
+              <h1>{RolSesion[1]}</h1>
+            </TextName>
           </ContentText>
           <Perfiles onClick={() => ActiveMenu()}>
             <Avatar src={photo} />
@@ -98,7 +108,7 @@ const HeaderRecycler = () => {
 export default HeaderRecycler;
 
 const HeaderContainer = styled.div`
-  width: 90%;
+  width: 100%;
   height: 4.8rem;
   border-bottom: 1px solid var(--lineColor);
 `;
@@ -124,12 +134,28 @@ const ContentText = styled.div`
   text-align: center;
 `;
 
-const TextName = styled.h1`
-  font-size: 1.5rem;
-  margin: 1rem 0 1.5rem 0;
-  color: var(--primaryColor);
+const Title = styled.div`
+  width: 250px;
+  display: flex;
+  text-align: justify;
+  h1 {
+    font-size: 25px;
+    color: var(--primaryColor);
+  }
 `;
 
+const TextName = styled.div`
+  width: 80px;
+  display: flex;
+  text-align: justify;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  h1 {
+    font-size: 25px;
+    color: var(--primaryColor);
+  }
+`;
 
 const OptionContainer = styled.div`
   display: flex;
@@ -174,5 +200,5 @@ const ContainerUser = styled.div`
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: .5rem;
+  padding: 0.5rem;
 `;

@@ -44,7 +44,7 @@ const ContainerChild = () => {
   return (
     <>
       {ContextChild ? (
-        <ChildContext x={x} y={y} cabinetId={SelectedCabinet?.id} />
+        <ChildContext x={x} y={y} cabinetId={SelectedCabinet?.id} viewMode={SelectedCabinet?.viewMode}/>
       ) : (
         <></>
       )}
@@ -56,13 +56,14 @@ const ContainerChild = () => {
         }}
       >
         {selected === "folderChild" && selectedView != "list" ? (
-          folderByFolder.map(({ id, name, description, cabinetId }, index) => (
+          folderByFolder.map(({ id, name, description, cabinetId, folderId }, index) => (
             <GridChild
               key={index}
               id={id}
               cabinetId={cabinetId}
               name={name}
               description={description}
+              folderId={folderId}
               element="folder"
             />
           ))
@@ -98,6 +99,12 @@ const DocumentContainer = styled.div`
   padding-bottom: 2rem;
   display: flex;
   flex-wrap: wrap;
+  width: 98%;
+  height: 500px;
+  overflow-y: scroll;
+  ::-webkit-scrollbar {
+    width: 0.5em;
+  }
   @media (max-width: 767px) {
     width: 100%;
     justify-content: space-around;

@@ -41,7 +41,7 @@ const useStyless = makeStyles((theme) => ({
   },
 }));
 
-const CabinetDelete = ({ id }) => {
+const CabinetDelete = () => {
   const styless = useStyless();
   const dispatch = useDispatch();
   const { modalCore, cabinetCore, cabinetData } = useSelector((store) => store);

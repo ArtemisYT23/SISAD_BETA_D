@@ -15,6 +15,7 @@ const initialState = {
     FolderCreated: false,
     ChildCreated: false,
     FolderUpdate: false,
+    ChildFolderUpdate: false,
     FolderDelete: false,
     //historial de elemento
     HistoryElementView: false,
@@ -43,6 +44,7 @@ const OPEN_MODAL_DELETE_CABINET_CORE = "OPEN_MODAL_DELETE_CABINET_CORE";
 const OPEN_MODAL_CREATE_FOLDER_CORE = "OPEN_MODAL_CREATE_FOLDER_CORE";
 const OPEN_MODAL_CHILD_CREATED_CORE = "OPEN_MODAL_CHILD_CREATED_CORE";
 const OPEN_MODAL_UPDATE_FOLDER_CORE = "OPEN_MODAL_UPDATE_FOLDER_CORE";
+const OPEN_MODAL_CHILD_UPDATE_FOLDER = "OPEN_MODAL_CHILD_UPDATE_FOLDER";
 const OPEN_MODAL_DELETE_FOLDER_CORE = "OPEN_MODAL_DELETE_FOLDER_CORE";
 const SET_CLOSE_MENUCONTEXT_CHILD = "SET_CLOSE_MENUCONTEXT_CHILD";
 const SET_OPEN_MODAL_HISTORYVIEW_CORE = "SET_OPEN_MODAL_HISTORYVIEW_CORE";
@@ -75,6 +77,7 @@ export default function ActionReducer(state = initialState, action) {
         case OPEN_MODAL_CREATE_FOLDER_CORE:
         case OPEN_MODAL_CHILD_CREATED_CORE:
         case OPEN_MODAL_UPDATE_FOLDER_CORE:
+        case OPEN_MODAL_CHILD_UPDATE_FOLDER:
         case OPEN_MODAL_DELETE_FOLDER_CORE:
         case SET_CLOSE_MENUCONTEXT_CHILD:
         case SET_OPEN_MODAL_HISTORYVIEW_CORE:
@@ -199,7 +202,7 @@ export const setOpenModalFolderCreated = (bool) => async (dispatch, getState) =>
 export const setOpenModalChildCreated = (bool) => async (dispatch, getState) => {
     const { modalCore } = getState();
     dispatch({
-        type: OPEN_MODAL_CHILD_CREATED_CORE,    
+        type: OPEN_MODAL_CHILD_CREATED_CORE,
         payload: { ...modalCore, ChildCreated: bool }
     })
 }
@@ -212,6 +215,15 @@ export const setOpenModalFolderUpdate = (bool) => async (dispatch, getState) => 
         payload: { ...modalCore, FolderUpdate: bool }
     });
 };
+
+//modal para actualizar carpeta hija
+export const setOpenModalChildFolderUpdate = (bool) => async (dispatch, getState) => {
+    const { modalCore } = getState();
+    dispatch({
+        type: OPEN_MODAL_CHILD_UPDATE_FOLDER,
+        payload: { ...modalCore, ChildFolderUpdate: bool }
+    })
+}
 
 //Modal para Borrar Carpeta
 export const setOpenModalFolderDelete = (bool) => async (dispatch, getState) => {
@@ -274,7 +286,7 @@ export const filterSetConfigFile = (bool) => async (dispatch, getState) => {
     const { modalCore } = getState();
     dispatch({
         type: SET_CONFIG_FILE_TYPE,
-        payload: { ...modalCore, isFilterFileType: bool}
+        payload: { ...modalCore, isFilterFileType: bool }
     })
 }
 
@@ -288,17 +300,31 @@ export const setCleanerModalCore = () => async (dispatch, getState) => {
             ...modalCore,
             ContextGroup: false,
             ContextFolder: false,
+            ContextChild: false,
             ContextMantentGroup: false,
+            //modales grupos
             GroupCreated: false,
             GroupUpdate: false,
             GroupDelete: false,
+            //modales gabinetes
             CabinetCreated: false,
             CabinetUpdate: false,
             CabinetDelete: false,
+            //modales carpetas
             FolderCreated: false,
+            ChildCreated: false,
             FolderUpdate: false,
+            ChildFolderUpdate: false,
             FolderDelete: false,
+            //historial de elemento
             HistoryElementView: false,
+            //apertura de menu laterales
+            isOpenCore: true,
+            isOpenManag: false,
+            isOpenSecurity: false,
+            isOpenRestored: false,
+            //Cambio para Configuracion de busqueda (Filtros)
+            isFilterFileType: false,
         }
     })
 }

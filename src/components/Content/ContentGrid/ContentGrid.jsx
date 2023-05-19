@@ -7,6 +7,7 @@ import ContainerDocFile from "./ContainerDocFile/ContainerDocFile";
 import ContainerConfig from "./ContainerConfig/ContainerConfig";
 import ContainerSearch from "./ContainerSearch/ContainerSearch";
 import ContainerGroupMantent from "./ContainerGroupMantent/ContainerGroupMantent";
+import ContainerMetaFile from "./ContainerMetaFile";
 
 function ContentGrid() {
   const { viewCore, userSesion } = useSelector((store) => store);
@@ -44,6 +45,12 @@ function ContentGrid() {
 
       {selected === "search" && selectedView === "grid" ? (
         <ContainerSearch />
+      ) : (
+        <></>
+      )}
+
+      {selected === "searchMetaFile" && selectedView === "grid" ? (
+        <ContainerMetaFile />
       ) : (
         <></>
       )}

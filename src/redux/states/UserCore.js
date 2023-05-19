@@ -105,6 +105,7 @@ export const setClearMemoryDataUserCore = () => async (dispatch, getState) => {
             UserList: [],
             isLoadingUser: false,
             SelectionUser: "",
+            UserData: [],
             ElementError: "",
         }
     })

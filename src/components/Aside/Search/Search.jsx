@@ -76,10 +76,6 @@ const Search = () => {
   const [Search, setSearch] = useState("");
   const [fileName, setFileName] = useState("");
   const [Grupos, setGrupos] = useState(true);
-  const [validate, setValidateTypes] = useState(false);
-  const [selected, setSelected] = useState({
-    select: [],
-  });
 
   const setOptionsGroup = (id, name) => {
     dispatch(setFilterGroupsCore(id, name));
@@ -102,20 +98,6 @@ const Search = () => {
     dispatch(setOpenDetalleModal(false));
     dispatch(getIndexAllCabinetPreview(id));
     dispatch(setFolderChildCore());
-  };
-
-  const setOptionsFolder = (id, name, cabinetId) => {
-    // dispatch(setSelectedFolderCore(id));
-    // dispatch(getTypeFileByFolderFolder(id));
-    // dispatch(setFilterDocumentDocu(id));
-    // dispatch(getFilesByFolderAll(id));
-    // dispatch(getNameGlobalChange(name));
-    // dispatch(setSaveElementBreakFolder(id));
-    // dispatch(setSelectedSearchTreeCore());
-    // dispatch(setClearMetadataSelected());
-    // dispatch(getMetadataByCabinet(cabinetId));
-    // dispatch(setCloseContextFolder(false));
-    // dispatch(setOpenDetalleModal(false));
   };
 
   const BusquedaGlobal = (name) => {
@@ -337,10 +319,7 @@ const Search = () => {
               folderCabinet
                 .filter(searchingForm(form))
                 .map(({ id, name, cabinetId }) => (
-                  <div
-                    key={id}
-                    // onClick={() => setOptionsFolder(id, name, cabinetId)}
-                  >
+                  <div key={id}>
                     <ItemFolder
                       index={id}
                       id={id}

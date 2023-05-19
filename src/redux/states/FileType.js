@@ -1,5 +1,5 @@
 import axios from "axios";
-import { CoreServer } from "../../config/axios";
+import { CoreServer, DocumentServer } from "../../config/axios";
 import { getTypeDataConfig } from "./DataType";
 import { getListDataConfig } from "./List";
 import { getAllDeleteFileTypeRestored } from "../formData/ResourceData";
@@ -14,6 +14,7 @@ const initialState = {
     FilesNewFolder: [],
     FilesFolders: [],
     FilesNoSelected: [],
+    CountFileType: [],
     //acciones
     SelectedTypeFile: "",
 }
@@ -32,6 +33,12 @@ const GET_FILETYPE_ALL_FOLDER_NO_SELECTED = "GET_FILETYPE_ALL_FOLDER_NO_SELECTED
 const GET_FILETYPE_ALL_FOLDER_NO_SELECTED_ERRORS = "GET_FILETYPE_ALL_FOLDER_NO_SELECTED_ERRORS";
 const SELECTED_TYPEFILE_CONFIG = "SELECTED_TYPEFILE_CONFIG";
 const SELECTED_ERRORS_TYPE_FILE_CONFIG = "SELECTED_ERRORS_TYPE_FILE_CONFIG";
+const GET_ALL_FILETYPE_DOCUMENT = "GET_ALL_FILETYPE_DOCUMENT";
+const GET_ALL_FILETYPE_DOCUMENT_ERRORS = "GET_ALL_FILETYPE_DOCUMENT_ERRORS";
+const CLEAR_MEMORY_DATA_FILETYPE = "CLEAR_MEMORY_DATA_FILETYPE";
+const GET_ALL_FILETYPE_DOCUMENT_JERARQUIQUE = "GET_ALL_FILETYPE_DOCUMENT_JERARQUIQUE";
+const GET_ALL_FILETYPE_DOCUMENT_JERARQUIQUE_ERRORS = "GET_ALL_FILETYPE_DOCUMENT_JERARQUIQUE_ERRORS";
+const GET_ALL_DOCUMEN_BY_FILETYPE = "GET_ALL_DOCUMEN_BY_FILETYPE";
 
 //payload de tag de acciones
 export default function FileTypeReducer(state = initialState, action) {
@@ -50,6 +57,12 @@ export default function FileTypeReducer(state = initialState, action) {
         case GET_FILETYPE_ALL_FOLDER_NO_SELECTED_ERRORS:
         case SELECTED_TYPEFILE_CONFIG:
         case SELECTED_ERRORS_TYPE_FILE_CONFIG:
+        case GET_ALL_FILETYPE_DOCUMENT:
+        case GET_ALL_FILETYPE_DOCUMENT_ERRORS:
+        case CLEAR_MEMORY_DATA_FILETYPE:
+        case GET_ALL_FILETYPE_DOCUMENT_JERARQUIQUE:
+        case GET_ALL_FILETYPE_DOCUMENT_JERARQUIQUE_ERRORS:
+        case GET_ALL_DOCUMEN_BY_FILETYPE:
             return action.payload;
         default:
             return state;
@@ -217,31 +230,6 @@ export const getTypeFileByFolderFolder = (id) => async (dispatch, getState) => {
     }
 }
 
-//tipos de archivos existentes para carpeta
-export const getFileTypeByFolder = (id) => async (dispatch, getState) => {
-    const { typeFileCore, sesion } = getState();
-    const { TockenUser } = sesion;
-    try {
-        const res = await axios({
-            url: `${CoreServer}FolderFileType/GetNamesByFolder/${id}`,
-            headers: {
-                Authorization: `Bearer ${TockenUser}`
-            }
-        });
-        if (res.status == 200) {
-            dispatch({
-                type: GET_FILETYPE_ALL_FOLDER_CONFIG,
-                payload: { ...typeFileCore, FilesFolders: res.data }
-            });
-        }
-    } catch (error) {
-        dispatch({
-            type: SELECTED_INDEX_CABINET_ERROR_CONFIG,
-            payload: { ...typeFileCore, FilesFolders: [] }
-        });
-    }
-}
-
 //tipos de archivos existentes no seleccionados
 export const getTypeFileByFolderNoSelected = (id) => async (dispatch, getState) => {
     const { typeFileCore, sesion } = getState();
@@ -268,6 +256,32 @@ export const getTypeFileByFolderNoSelected = (id) => async (dispatch, getState) 
     }
 }
 
+//tipos de archivos existentes para carpeta
+export const getFileTypeByFolder = (id) => async (dispatch, getState) => {
+    console.log(id);
+    const { typeFileCore, sesion } = getState();
+    const { TockenUser } = sesion;
+    try {
+        const res = await axios({
+            url: `${CoreServer}FolderFileType/GetNamesByFolder/${id}`,
+            headers: {
+                Authorization: `Bearer ${TockenUser}`
+            }
+        });
+        if (res.status == 200) {
+            dispatch({
+                type: GET_FILETYPE_ALL_FOLDER_CONFIG,
+                payload: { ...typeFileCore, FilesFolders: res.data }
+            });
+        }
+    } catch (error) {
+        dispatch({
+            type: SELECTED_INDEX_CABINET_ERROR_CONFIG,
+            payload: { ...typeFileCore, FilesFolders: [] }
+        });
+    }
+}
+
 //Filtrar Tipo de archivo seleccionado 
 export const setSelectedTypeFileConfig = (id) => async (dispatch, getState) => {
     const { typeFileCore } = getState();
@@ -288,6 +302,72 @@ export const setSelectedTypeFileConfig = (id) => async (dispatch, getState) => {
 }
 
 
+//Traer Contador de tipos de Archivos por documento existente
+export const setCountFileTypeByDocumentJerarquique = (index) => async (dispatch, getState) => {
+    const { typeFileCore, sesion } = getState();
+    const { TockenUser } = sesion;
+    try {
+        const res = await axios({
+            url: `${CoreServer}FolderFileType/GetNamesByFolder/${index}`,
+            headers: {
+                Authorization: `Bearer ${TockenUser}`
+            }
+        });
+        if (res.status == 200) {
+            // console.log(res.data);
+            dispatch({
+                type: GET_ALL_FILETYPE_DOCUMENT_JERARQUIQUE,
+                payload: { ...typeFileCore, FilesFolders: res.data }
+            });
+            dispatch(setCountFileTypeByDocument(index));
+        }
+    } catch (error) {
+        dispatch({
+            type: GET_ALL_FILETYPE_DOCUMENT_JERARQUIQUE_ERRORS,
+            payload: { ...typeFileCore, FilesFolders: [] }
+        });
+    }
+}
+
+
+//Traer Contador de tipos de Archivos por documento existente
+export const setCountFileTypeByDocument = (index, value) => async (dispatch, getState) => {
+    console.log(index);
+    const obj = '00000000-0000-0000-0000-000000000000';
+    const { typeFileCore, sesion } = getState();
+    const { TockenUser } = sesion;
+    try {
+        const response = await axios({
+            url: `${DocumentServer}getalldocumentcountFileType/${obj}/${index}/0/${value || 20000}`,
+            headers: {
+                Authorization: `Bearer ${TockenUser}`,
+            }
+        });
+        console.log(response.status);
+        if (response.status == 200) {
+            dispatch({
+                type: GET_ALL_FILETYPE_DOCUMENT,
+                payload: { ...typeFileCore, CountFileType: response.data }
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        dispatch({
+            type: GET_ALL_FILETYPE_DOCUMENT_ERRORS,
+            payload: { ...typeFileCore, CountFileType: [] },
+        });
+    }
+}
+
+//guardar state de CountFileType
+export const setCountFileDocument = (valueData) => async (dispatch, getState) => {
+    const { typeFileCore } = getState();
+    dispatch({
+        type: GET_ALL_DOCUMEN_BY_FILETYPE,
+        payload: { ...typeFileCore, CountFileType: valueData}
+    })
+
+}
 
 
 
@@ -361,3 +441,25 @@ export const DeleteTypeFileConfig = (update, id) => async (dispatch, getState) =
         toast.error('Tipo de Archivo no Eliminado');
     });
 };
+
+//limpiar estado de historial de documentos
+export const clearDataMemoryFiletype = () => async (dispatch, getState) => {
+    const { typeFileCore } = getState();
+    dispatch({
+        type: CLEAR_MEMORY_DATA_FILETYPE,
+        payload: {
+            ...typeFileCore,
+            TypeFile: [],
+            TypeFileDefault: [],
+            isLoadingTypeFile: false,
+            FilesCabinets: [],
+            FilesNoCabinets: [],
+            FilesNewFolder: [],
+            FilesFolders: [],
+            FilesNoSelected: [],
+            CountFileType: [],
+            //acciones
+            SelectedTypeFile: "",
+        }
+    })
+}

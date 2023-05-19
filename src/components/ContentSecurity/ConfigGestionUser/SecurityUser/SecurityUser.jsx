@@ -1,11 +1,16 @@
-import { useEffect, useState } from "react";
-import { Toaster } from "react-hot-toast";
-import { useDispatch, useSelector } from "react-redux";
+import { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
+import { useDispatch, useSelector } from "react-redux";
+import toast, { Toaster } from "react-hot-toast";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import "ag-grid-enterprise";
+import { AgGridReact } from "ag-grid-react";
 import {
   setOpenModalCreatedUser,
   setOpenModalDeleteUser,
   setOpenModalUpdateUser,
+  setChangePasswordModalGenerate
 } from "../../../../redux/states/ActionSecurity";
 import { setSelectedUserCore } from "../../../../redux/states/UserCore";
 import LoadingSpinner from "../../../../utilities/LoadingSpinner";
@@ -13,17 +18,25 @@ import HeaderSecurity from "../../HeaderSecurity/HeaderSecurity";
 import UserCreated from "../ModalesUser/UserCreated";
 import UserDelete from "../ModalesUser/UserDelete";
 import UserUpdate from "../ModalesUser/UserUpdate";
+import GeneratePassword from "../ModalesUser/GeneratePassword";
 import { DeleteElement, EditElement, SearchFilter } from "./icons";
 import { Tooltip } from "@material-ui/core";
 
 const SecurityUser = () => {
   const dispatch = useDispatch();
-  const [tableData, setTableData] = useState([]);
-  const [term, setTerm] = useState("");
   const { userCore } = useSelector((store) => store);
   const { UserList, isLoadingUser } = userCore;
+  const [gridApi, setGridApi] = useState({});
+  const [tableData, setTableData] = useState([]);
 
   useEffect(() => {
+    UserList.map((file, i) => {
+      if (file.sequential) {
+        file.sequential = i + 1;
+      } else {
+        file.sequential = i + 1;
+      }
+    });
     setTableData(UserList);
   }, [UserList]);
 
@@ -31,23 +44,158 @@ const SecurityUser = () => {
     dispatch(setOpenModalCreatedUser(true));
   };
 
-  const UpdateUserRow = (id) => {
-    dispatch(setSelectedUserCore(id));
-    // dispatch(getUserDataSecurity(id));
-    dispatch(setOpenModalUpdateUser(true));
-  };
-
-  const DeleteUserRow = (id) => {
-    dispatch(setSelectedUserCore(id));
-    // dispatch(getUserDataSecurity(id));
-    dispatch(setOpenModalDeleteUser(true));
-  };
-
-  function searchingTerm(term) {
-    return function (x) {
-      return x.userName.includes(term) || !term;
+  const EditPassword = (props) => {
+    const invokeParentMethod = () => {
+      dispatch(setSelectedUserCore(props.node.data.id));
+      dispatch(setChangePasswordModalGenerate(true));
     };
+
+    return (
+      <ButtonOptions onClick={invokeParentMethod}>
+        <EditElement x={30} y={30} />
+      </ButtonOptions>
+    );
   }
+
+  const EditTypeFile = (props) => {
+    const invokeParentMethod = () => {
+      dispatch(setSelectedUserCore(props.node.data.id));
+      dispatch(setOpenModalUpdateUser(true));
+    };
+
+    return (
+      <ButtonOptions onClick={invokeParentMethod}>
+        <EditElement x={30} y={30} />
+      </ButtonOptions>
+    );
+  };
+
+  const DeleteTypeFile = (props) => {
+    const invokeParentMethod = () => {
+      dispatch(setSelectedUserCore(props.node.data.id));
+      dispatch(setOpenModalDeleteUser(true));
+    };
+
+    return (
+      <ButtonOptions onClick={invokeParentMethod}>
+        <DeleteElement x={30} y={30} />
+      </ButtonOptions>
+    );
+  };
+
+  const DataUser = [
+    {
+      headerName: "Id",
+      field: "sequential",
+      pinned: "left",
+      filter: false,
+      width: 70,
+      rezisable: true,
+      sortable: true,
+    },
+    {
+      headerName: "Nombre",
+      field: "userName",
+      filter: true,
+      minWidth: 300,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Email",
+      field: "email",
+      filter: true,
+      minWidth: 300,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Perfil",
+      field: "profileName",
+      filter: true,
+      minWidth: 300,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Empresa",
+      field: "businessName",
+      filter: true,
+      minWidth: 300,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Cambio Contraseña",
+      field: "",
+      filter: false,
+      cellRenderer: EditPassword,
+      width: 150,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: false,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+    {
+      headerName: "Editar",
+      field: "",
+      filter: false,
+      cellRenderer: EditTypeFile,
+      minWidth: 90,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: false,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+    {
+      headerName: "Eliminar",
+      field: "",
+      filter: false,
+      cellRenderer: DeleteTypeFile,
+      minWidth: 90,
+      rezisable: true,
+      sortable: true,
+      floatingFilter: false,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+  ];
+
+  const onGridReady = (params) => {
+    setGridApi(params.api);
+  };
+
+  const defaultColDef = useMemo(() => {
+    return {
+      sortable: true,
+      flex: 1,
+      minWidth: 140,
+      filter: true,
+      resizable: true,
+      floatingFilter: true,
+    };
+  }, []);
+  const pagination = true;
+  const paginationPageSize = 300;
+
+  const onFilterTextBoxChanged = () => {
+    gridApi.setQuickFilter(document.getElementById("filter-text-box").value);
+  };
 
   const Title = "Gestion de Seguridad";
   const SubTitle =
@@ -64,8 +212,10 @@ const SecurityUser = () => {
             </NewIndex>
           </Tooltip>
           <SearchUser
-            placeholder=" Buscar Usuario"
-            onChange={(e) => setTerm(e.target.value)}
+            type="text"
+            id="filter-text-box"
+            placeholder=" Buscar Tipo de Archivo"
+            onInput={onFilterTextBoxChanged}
           />
           <ButtonSearch>
             <SearchFilter x={22} y={22} />
@@ -79,65 +229,28 @@ const SecurityUser = () => {
         <LoadingSpinner />
       ) : (
         <TableContainer>
-          <TableRaid>
-            <table>
-              <tr>
-                <THN>Id</THN>
-                <TH>Usuario</TH>
-                <TH>Email</TH>
-                <TH>Perfil</TH>
-                <TH>Empresa</TH>
-                <TH>Estado</TH>
-                <TH>Acciones</TH>
-              </tr>
-
-              {UserList ? (
-                UserList.filter(searchingTerm(term)).map((user, i) => (
-                  <tr key={i}>
-                    <TD1>{i + 1}</TD1>
-                    <TD1>{user.userName}</TD1>
-                    <TD1>{user.email}</TD1>
-                    <TD1>{user.profileName}</TD1>
-                    <TD1>{user.businessName}</TD1>
-                    <TD1>
-                      <input type="checkbox" checked={user.opeationalState} />
-                    </TD1>
-                    <TD1>
-                      <ContentOptions>
-                        <Tooltip title="Editar">
-                          <ContainerEdit>
-                            <ButtonOptions
-                              onClick={() => UpdateUserRow(user.id)}
-                            >
-                              <EditElement />
-                            </ButtonOptions>
-                          </ContainerEdit>
-                        </Tooltip>
-
-                        <Tooltip title="Eliminar">
-                          <ContainerDelete
-                            onClick={() => DeleteUserRow(user.id)}
-                          >
-                            <ButtonOptions>
-                              <DeleteElement />
-                            </ButtonOptions>
-                          </ContainerDelete>
-                        </Tooltip>
-                      </ContentOptions>
-                    </TD1> 
-                  </tr>
-                ))
-              ) : (
-                <></>
-              )}
-            </table>
-          </TableRaid>
+          <div
+            id="myGrid"
+            style={{ width: "100%", height: "100%" }}
+            className="ag-theme-alpine"
+          >
+            <AgGridReact
+              pagination={pagination}
+              paginationPageSize={paginationPageSize}
+              onGridReady={onGridReady}
+              rowData={tableData}
+              columnDefs={DataUser}
+              defaultColDef={defaultColDef}
+              animateRows={true}
+            ></AgGridReact>
+          </div>
         </TableContainer>
       )}
 
       <UserCreated />
       <UserUpdate />
       <UserDelete />
+      <GeneratePassword />
 
       <Toaster
         position="bottom-right"
@@ -173,7 +286,7 @@ const ContainerButton = styled.div`
   display: flex;
   justify-content: flex-start;
   @media (max-width: 767px) {
-   width: 96%;
+    width: 96%;
   }
 `;
 
@@ -191,18 +304,11 @@ const NewIndex = styled.button`
   cursor: pointer;
 `;
 
-const TableRaid = styled.div`
-  width: 100%;
-  height: 450px;
-  overflow: scroll;
-  margin: .5rem;
-`;
-
 const ContainerSearch = styled.div`
   width: 50%;
   display: flex;
   @media (max-width: 767px) {
-   display: none;
+    display: none;
   }
 `;
 
@@ -213,7 +319,7 @@ const SearchUser = styled.input`
   border: 1px solid #f68a20;
   color: #5d5c5c;
   @media (max-width: 767px) {
-   width: 60%;
+    width: 60%;
   }
 `;
 
@@ -229,46 +335,9 @@ const ButtonSearch = styled.button`
 `;
 
 const TableContainer = styled.div`
-  width: 95%;
+  width: 97%;
+  height: 440px;
   display: flex;
-  overflow: hidden;
-`;
-
-const THN = styled.th`
-  width: 4rem;
-  height: 2rem;
-  border: 1px solid var(--whiteTrans);
-  background-color: var(--primaryColor);
-  color: var(--white);
-`;
-
-const TH = styled.th`
-  width: 12rem;
-  height: 2.1rem;
-  border: 1px solid var(--whiteTrans);
-  background-color: var(--primaryColor);
-  color: var(--white);
-`;
-
-const TD1 = styled.td`
-  font-size: 0.9rem;
-  text-align: center;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: #5f5f5f;
-  height: 2.4rem;
-  border: 1px solid #c4c4c4;
-`;
-
-const ContentOptions = styled.div`
-  display: flex;
-  width: 100px;
-`;
-
-const ContainerEdit = styled.div`
-  display: flex;
-  width: 50%;
   justify-content: center;
   align-items: center;
 `;
@@ -277,11 +346,4 @@ const ButtonOptions = styled.button`
   border: none;
   background: none;
   cursor: pointer;
-`;
-
-const ContainerDelete = styled.div`
-  width: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 `;

@@ -27,7 +27,8 @@ import ProfileReducer from "./states/Profile";
 import PermisionReducer from "./states/Permision";
 import OptionResourceReducer from "./states/OptionResource";
 import ResourceCoreData from "./states/ResourceCore";
-
+import AnalitycReducer from "./states/AnalitycInfo";
+import DataAnalitycReducer from "./states/AnalitycData";
 
 //formData
 import GroupDataReducer from "../redux/formData/GroupData";
@@ -85,6 +86,8 @@ const rootReducer = combineReducers({
     dataResult: ResourceDataReducer,
     resourceCore: ResourceCoreData,
     filterData: FilterReducer,
+    analitycData: AnalitycReducer,
+    analitycInfo: DataAnalitycReducer,
 });
 
 export default function generateStore() {

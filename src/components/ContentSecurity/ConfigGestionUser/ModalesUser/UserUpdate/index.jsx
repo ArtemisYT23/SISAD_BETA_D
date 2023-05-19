@@ -63,7 +63,7 @@ const UserUpdate = () => {
   );
   const { UserUpdate } = modalSecurity;
   const { SelectionUser } = userCore;
-  const { profile } = profileCore;
+  const { profile, business } = profileCore;
   const {
     idUpdate,
     userNameUpdate,
@@ -208,12 +208,15 @@ const UserUpdate = () => {
         <TitleArchive>Empresas: </TitleArchive>
         <Selected onChange={(e) => handleChangeBusinnes(e.target.value)}>
           <option hidden>{SelectionUser?.businessName}</option>
-          <option value="9aa75e2c-7258-4315-8e62-92bfc0c4c01b">
-            Comexport
-          </option>
-          <option value="33a72cf9-e989-4e3b-9f7e-388e2dcae266">
-            Centralfile
-          </option>
+          {business ? (
+            business.map(({ id, name }, index) => (
+              <option key={id} value={id}>
+                {name}
+              </option>
+            ))
+          ) : (
+            <></>
+          )}
         </Selected>
         <br />
         <br />

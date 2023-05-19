@@ -71,6 +71,7 @@ export const getAllCabinetsCore = () => async (dispatch, getState) => {
     }
   }).catch(function (error) {
     console.log(error);
+    dispatch(setActiveLoadingSpinnerCabinet(false));
     dispatch({
       type: GET_CABINET_ERROR_CORE,
       payload: { ...cabinetCore, cabinets: [], elementError: error }
@@ -325,6 +326,7 @@ export const setClearDataCabinetCore = () => async (dispatch, getState) => {
     payload: {
       ...cabinetCore,
       cabinets: [],
+      cabinetFolder: [],
       isLoadingCabinet: false,
       SelectedCabinet: "",
       UpdateSelectedCabinet: "",

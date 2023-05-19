@@ -4,9 +4,11 @@ import {
   NavBarContainer,
   NavLinkContainer,
   LogoContainer,
+  LogoContainerIcon,
   NavLinkName,
 } from "./styles/NavBarStyles";
 import NavBarIcon from "./icons";
+import logoTera from "../../../assets/Img/NavBar/CentralTera.png";
 import logotipo from "../../../assets/Img/NavBar/CentralFile.png";
 import isotipo from "../../../assets/Img/NavBar/IconCentral.png";
 import { PrivateRoutes } from "../../models";
@@ -23,20 +25,24 @@ function Navbar() {
   const [configData, setConfigData] = useState("#c4c4c4");
   const [documentary, setDocumentary] = useState("#F68A20");
   const [recicler, setRecicler] = useState("#c4c4c4");
+  const [analityc, setAnalityc] = useState("#c4c4c4");
 
   const ActiveDash = () => {
     setDashboard("#F68A20");
     setConfigData("#c4c4c4");
     setDocumentary("#c4c4c4");
     setRecicler("#c4c4c4");
+    setAnalityc("#c4c4c4");
   };
 
   const ActiveManag = () => {
     dispatch(CleaningStateManagment());
+    dispatch(CleaningStateInitial());
     setDashboard("#c4c4c4");
     setConfigData("#F68A20");
     setDocumentary("#c4c4c4");
     setRecicler("#c4c4c4");
+    setAnalityc("#c4c4c4");
   };
 
   const ActiveDocu = () => {
@@ -45,6 +51,7 @@ function Navbar() {
     setConfigData("#c4c4c4");
     setDocumentary("#F68A20");
     setRecicler("#c4c4c4");
+    setAnalityc("#c4c4c4");
   };
 
   const ActiveRecicler = () => {
@@ -52,14 +59,24 @@ function Navbar() {
     setConfigData("#c4c4c4");
     setDocumentary("#c4c4c4");
     setRecicler("#F68A20");
+    setAnalityc("#c4c4c4");
   };
+
+  const ActiveAnalityc = () => {
+    setDashboard("#c4c4c4");
+    setConfigData("#c4c4c4");
+    setDocumentary("#c4c4c4");
+    setRecicler("#c4c4c4");
+    setAnalityc("#F68A20");
+  }
 
   return (
     <NavBarContainer isActive={isActive}>
-      <LogoContainer
-        logo={!isActive ? isotipo : logotipo}
-        onClick={() => setIsActive(!isActive)}
-      />
+      {!isActive ? (
+        <LogoContainerIcon logo={isotipo} onClick={() => setIsActive(!isActive)} />
+      ) : (
+        <LogoContainer logo={logoTera} onClick={() => setIsActive(!isActive)} />
+      )}
       <Tooltip title="Configuraciones">
         <NavLinkContainer
           to={`${PrivateRoutes.DASHBOARD}`}
@@ -99,6 +116,17 @@ function Navbar() {
           {isActive ? <NavLinkName>Restauracion</NavLinkName> : <></>}
         </NavLinkContainer>
       </Tooltip>
+
+      <Tooltip title="Analitica">
+        <NavLinkContainer
+          to={`${PrivateRoutes.ANALITYC}`}
+          onClick={() => ActiveAnalityc()}
+        >
+          <NavBarIcon name="analityc" analityc={analityc} />
+          {isActive ? <NavLinkName>Analitica</NavLinkName> : <></>}
+        </NavLinkContainer>
+      </Tooltip>
+      
     </NavBarContainer>
   );
 }

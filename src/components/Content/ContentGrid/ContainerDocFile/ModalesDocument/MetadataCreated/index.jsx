@@ -12,6 +12,7 @@ import {
   CreateDocumentNew,
   setSelectedFolderDocumentNew,
   cleanerDocumentCreated,
+  CreationMetadataAndDocumentNew,
 } from "../../../../../../redux/states/Document";
 import ItemMetadata from "./ItemMetadata";
 
@@ -29,10 +30,9 @@ const useStyless = makeStyles((theme) => ({
     transform: "translate(-50%,-50%)",
     overflowY: "scroll",
     borderRadius: "13px",
-    '&::-webkit-scrollbar': {
-      width: '0.4em'
-    }
-
+    "&::-webkit-scrollbar": {
+      width: "0.4em",
+    },
   },
   textfield: {
     width: "100%",
@@ -59,47 +59,56 @@ const MetadataCreated = () => {
   const { IndexConfig } = indexCore;
   const { id, folderId } = documentary;
   const { SelectedCabinet } = cabinetCore;
-  const { SelectedFolder, SelectedFolderMeta } = folderCore;
-  const { selectedView } = viewCore;
+  const { SelectedFolder, SelectedFolderMeta, SelectedFolderChild } = folderCore;
+  const { selectedView, selected } = viewCore;
 
   useEffect(() => {
-    {
+    if(SelectedCabinet?.viewMode == true){
+      if (selected == "folderChild") {
+        dispatch(setSelectedFolderDocumentNew(SelectedFolderChild?.id));
+      }
+      if (selected == "folder") {
+        dispatch(setSelectedFolderDocumentNew(SelectedFolder?.id));
+      }
+    }
+    if(SelectedCabinet?.viewMode == false){
       selectedView != "grid"
         ? dispatch(setSelectedFolderDocumentNew(SelectedFolderMeta?.id))
         : dispatch(setSelectedFolderDocumentNew(SelectedFolder?.id));
     }
+
     if (MetadataCreated != false) {
       const IndexMeta = [];
-      IndexConfig.map((index, i) => {
+      const IndexSort = IndexConfig.sort((a, b) => {
+        if (a.position < b.position) {
+          return -1;
+        }
+      });
+
+      IndexSort.map((index, i) => {
         const meta = {
           id: uuidv4(),
-          value: "",
+          value: null,
           indexId: index?.id,
-          documentId: id,
         };
         IndexMeta.push(meta);
       });
-        console.log(IndexMeta);
-        console.log(IndexConfig);
+      console.log(IndexMeta);
+      // console.log(IndexConfig);
       dispatch(setChangeMetadataCreatedPreview(IndexMeta));
     }
   }, [MetadataCreated]);
 
   const SaveMetaDocumentary = (e) => {
     e.preventDefault();
-    const DocumentNew = {
-      id: id,
+    const formFile = {
+      documentId: id,
       folderId: folderId,
+      metadata: MetadataPreviewCreated,
     };
-    console.log(DocumentNew);
-    console.log(MetadataPreviewCreated);
+    // console.log(MetadataPreviewCreated);
     dispatch(
-      CreateDocumentNew(
-        DocumentNew,
-        MetadataPreviewCreated,
-        folderId,
-        SelectedCabinet?.id
-      )
+      CreationMetadataAndDocumentNew(formFile, folderId, SelectedCabinet?.id)
     );
     OpenModalMetadataCreated();
   };
@@ -117,6 +126,7 @@ const MetadataCreated = () => {
             name={item.name}
             dataTypeId={item.dataTypeId}
             listId={item.listId}
+            maxValue={item.maxValue}
           />
         ))}
         <br />

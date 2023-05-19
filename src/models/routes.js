@@ -8,6 +8,7 @@ export const PrivateRoutes = {
     DASHBOARD: 'Dashboard',
     DOCUMENTARY: 'Documentary',
     MANAGMENT: 'Managment',
+    ANALITYC: 'Analityc',
 
     RECICLER: "Recicler",
     

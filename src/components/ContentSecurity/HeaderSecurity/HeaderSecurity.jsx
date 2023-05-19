@@ -85,7 +85,9 @@ const HeaderSecurity = ({ Title, SubTitle }) => {
       <UserHeaderContainer>
         <OptionContainer>
           <ContentText>
-            <TextName>{RolSesion[1]}</TextName>
+            <TextName>
+              <h1>{RolSesion[1]}</h1>
+            </TextName>
           </ContentText>
           <Perfiles onClick={() => ActiveMenu()}>
             <Avatar src={photo} />
@@ -140,10 +142,17 @@ const Perfiles = styled.div`
   margin: 0 0.3rem 0 0;
 `;
 
-const TextName = styled.h1`
-  font-size: 1.5rem;
-  margin: 1rem 0 1.5rem 0;
-  color: var(--primaryColor);
+const TextName = styled.div`
+  width: 80px;
+  display: flex;
+  text-align: justify;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  h1 {
+    font-size: 25px;
+    color: var(--primaryColor);
+  }
 `;
 
 const Avatar = styled.img`

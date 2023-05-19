@@ -1,0 +1,14 @@
+.autocomplete-input .MuiOutlinedInput-root fieldset {
+  border-color: var(--primaryColor); /* Cambia el color del fieldset */
+}
+
+/*Hover color*/
+.autocomplete-input:hover .MuiOutlinedInput-root fieldset {
+  border-color: var(--primaryColor);
+}
+
+.autocomplete-input:focus-within .MuiOutlinedInput-root fieldset {
+  border-color: var(
+    --primaryColor
+  ); /* Cambia el color del fieldset cuando el componente está activo */
+}

@@ -12,7 +12,7 @@ import {
   setOpenModalMasiveUploader,
 } from "../../../../../redux/states/ActionDocumentary";
 import GridFilesDefault from "./GridFilesDefault/GridFilesDefault";
-import FilesPreview from "./ModalesFile/FilesPreview";
+import FilesPreview from "./ModalesFile/FilesPreview/FilePreview";
 import MasiveUploader from "./ModalesFile/MasiveUpload";
 import LoadingSpinner from "../../../../../utilities/LoadingSpinner";
 import { DocumentServer } from "../../../../../config/axios";
@@ -23,8 +23,15 @@ const ContainerFile = () => {
   const [Open, setOpen] = useState(false);
   const [isTrue, setIsTrue] = useState(false);
   const [activeText, setActiveText] = useState("");
-  const { filesCore, documentary, userSesion, viewCore, folderCore, sesion, typeFileCore } =
-    useSelector((store) => store);
+  const {
+    filesCore,
+    documentary,
+    userSesion,
+    viewCore,
+    folderCore,
+    sesion,
+    typeFileCore,
+  } = useSelector((store) => store);
   const { TockenUser } = sesion;
   const { files, isLoadingArchive } = filesCore;
   const { selectedView } = viewCore;
@@ -55,14 +62,16 @@ const ContainerFile = () => {
   }, []);
 
   useEffect(() => {
+    // console.log(FilesFolders);
     const FileEnablig = [];
     files.map((file, i) => {
-      FilesFolders.map((type, i) => {
-        if (file.fileTypeId == type.fileTypeId) {
+      FilesFolders.forEach((fol, i) => {
+        if (file.fileTypeId == fol.fileTypeId) {
           FileEnablig.push(file);
         }
       });
     });
+    // console.log(FileEnablig);
     setFiles(FileEnablig);
   }, [files]);
 
@@ -177,36 +186,34 @@ const ContainerFile = () => {
         ) : (
           <>
             {selectedView != "list" ? (
-              Select
-                .filter(searchingTerm(activeText))
-                .map(
-                  (
-                    {
-                      id,
-                      extension,
-                      name,
-                      description,
-                      fileTypeId,
-                      documentId,
-                      file,
-                      fileTypeName,
-                    },
-                    index
-                  ) => (
-                    <GridFiles
-                      key={index}
-                      id={id}
-                      extension={extension}
-                      fileTypeId={fileTypeId}
-                      documentId={documentId}
-                      name={name}
-                      description={description}
-                      file={file}
-                      fileTypeName={fileTypeName}
-                      element="archivos"
-                    />
-                  )
+              Select.filter(searchingTerm(activeText)).map(
+                (
+                  {
+                    id,
+                    extension,
+                    name,
+                    description,
+                    fileTypeId,
+                    documentId,
+                    file,
+                    fileTypeName,
+                  },
+                  index
+                ) => (
+                  <GridFiles
+                    key={index}
+                    id={id}
+                    extension={extension}
+                    fileTypeId={fileTypeId}
+                    documentId={documentId}
+                    name={name}
+                    description={description}
+                    file={file}
+                    fileTypeName={fileTypeName}
+                    element="archivos"
+                  />
                 )
+              )
             ) : (
               <></>
             )}

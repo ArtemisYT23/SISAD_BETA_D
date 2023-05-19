@@ -1,14 +1,13 @@
+import { useState, useMemo, useEffect } from "react";
 import styled from "styled-components";
+import { useDispatch, useSelector } from "react-redux";
+import toast, { Toaster } from "react-hot-toast";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import "ag-grid-enterprise";
+import { AgGridReact } from "ag-grid-react";
 import { Modal } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import "primeflex/primeflex.css";
-import "primeicons/primeicons.css";
-import { Column } from "primereact/column";
-import { DataTable } from "primereact/datatable";
-import "primereact/resources/primereact.css";
-import "primereact/resources/themes/lara-light-indigo/theme.css";
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { setOpenModalHistoryViewElement } from "../../../../../../redux/states/ActionCore";
 import {
   clearResourceDataCore,
@@ -22,7 +21,7 @@ const useStyless = makeStyles(() => ({
     "@media (max-width: 767px)": {
       width: "360px",
     },
-    height: "500px",
+    height: "490px",
     backgroundColor: "white",
     top: "50%",
     left: "50%",
@@ -44,124 +43,101 @@ const useStyless = makeStyles(() => ({
 const HistoryElement = () => {
   const dispatch = useDispatch();
   const styless = useStyless();
-  const [selectedCustomers, setSelectedCustomers] = useState(null);
-  const [filters, setFilters] = useState({
-    resourceType: { value: "", matchMode: "contains" },
-    resourceName: { value: "", matchMode: "contains" },
-    optionName: { value: "", matchMode: "contains" },
-    userName: { value: "", matchMode: "contains" },
-    dateOcurred: { value: "", matchMode: "contains" },
-  });
   const { modalCore, historyCore } = useSelector((store) => store);
   const { HistoryElementView } = modalCore;
   const { historyResource, isLoadingHistoryUser } = historyCore;
+  const [gridApi, setGridApi] = useState({});
+
+  const DataHistory = [
+    {
+      headerName: "Tipo De Recurso",
+      field: "resourceType",
+      filter: true,
+      minWidth: 250,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+    {
+      headerName: "Nombre Recurso",
+      field: "resourceName",
+      filter: true,
+      minWidth: 250,
+    },
+    {
+      headerName: "Usuario",
+      field: "userName",
+      filter: true,
+      minWidth: 250,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+    {
+      headerName: "Accion",
+      field: "optionName",
+      filter: true,
+      minWidth: 250,
+      cellStyle: () => ({
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }),
+    },
+    {
+      headerName: "Fecha",
+      field: "dateOcurred",
+      filter: true,
+      minWidth: 250,
+    },
+    {
+      headerName: "Ruta",
+      field: "path",
+      filter: true,
+      minWidth: 550,
+    },
+  ];
+
+  const onGridReady = (params) => {
+    setGridApi(params.api);
+  };
+
+  const defaultColDef = useMemo(() => {
+    return {
+      sortable: true,
+      flex: 1,
+      minWidth: 140,
+      filter: true,
+      resizable: true,
+      floatingFilter: true,
+    };
+  }, []);
+
+  const pagination = true;
+  const paginationPageSize = 300;
 
   const HistoryContent = (
     <div className={styless.HistoryElementView}>
       <ContentTable>
-        <ContentInfo>
-          <DataTable
-            value={historyResource}
-            paginator
-            className="tableHistory"
-            rows={5}
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            rowsPerPageOptions={[5, 15, 50]}
-            dataKey="id"
-            rowHover
-            selection={selectedCustomers}
-            onSelectionChange={(e) => setSelectedCustomers(e.value)}
-            filters={filters}
-            filterDisplay="row"
-            loading={isLoadingHistoryUser}
-            responsiveLayout="scroll"
-            globalFilterFields={[
-              "resourceType",
-              "resourceName",
-              "optionName",
-              "userName",
-              "dateOcurred",
-            ]}
-            emptyMessage="No customers found."
-            currentPageReportTemplate="Existe {first} de {last} total {totalRecords} registros"
-            size="small"
-          >
-            <Column
-              field="resourceType"
-              header="Tipo De Recurso"
-              sortable
-              filter
-              filterPlaceholder="Buscar"
-              headerStyle={{
-                color: "white",
-                fontFamily: "Arial",
-                backgroundColor: "#f68a20",
-              }}
-            />
-            <Column
-              field="resourceName"
-              header="Nombre De Recurso"
-              sortable
-              filter
-              filterPlaceholder="Buscar"
-              headerStyle={{
-                color: "white",
-                fontFamily: "Arial",
-                backgroundColor: "#f68a20",
-              }}
-            />
-            <Column
-              field="optionName"
-              header="Accion"
-              sortable
-              filter
-              filterPlaceholder="Buscar"
-              headerStyle={{
-                color: "white",
-                fontFamily: "Arial",
-                backgroundColor: "#f68a20",
-              }}
-            />
-
-            <Column
-              field="userName"
-              header="Usuario"
-              sortable
-              filter
-              filterPlaceholder="Buscar"
-              headerStyle={{
-                color: "white",
-                fontFamily: "Arial",
-                backgroundColor: "#f68a20",
-              }}
-            />
-
-            <Column
-              field="dateOcurred"
-              header="Fecha"
-              sortable
-              filter
-              filterPlaceholder="Buscar"
-              headerStyle={{
-                color: "white",
-                fontFamily: "Arial",
-                backgroundColor: "#f68a20",
-              }}
-            />
-            <Column
-              field="path"
-              header="Ruta"
-              sortable
-              filter
-              filterPlaceholder="Buscar"
-              headerStyle={{
-                color: "white",
-                fontFamily: "Arial",
-                backgroundColor: "#f68a20",
-              }}
-            />
-          </DataTable>
-        </ContentInfo>
+        <div
+          id="myGrid"
+          style={{ width: "100%", height: "100%" }}
+          className="ag-theme-alpine"
+        >
+          <AgGridReact
+            pagination={pagination}
+            paginationPageSize={paginationPageSize}
+            onGridReady={onGridReady}
+            rowData={historyResource}
+            columnDefs={DataHistory}
+            defaultColDef={defaultColDef}
+            animateRows={true}
+          ></AgGridReact>
+        </div>
       </ContentTable>
     </div>
   );
@@ -184,16 +160,8 @@ const HistoryElement = () => {
 export default HistoryElement;
 
 const ContentTable = styled.div`
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
-`;
-
-const ContentInfo = styled.div`
-  display: flex;
-  width: 1000px;
-  height: 400px;
-  overflow-y: scroll;
-  ::-webkit-scrollbar {
-    display: none;
-  }
 `;

@@ -28,6 +28,7 @@ const useStyless = makeStyles((theme) => ({
   FolderCreated: {
     position: "absolute",
     width: "400px",
+    height: "480px",
     backgroundColor: "white",
     border: "2px solid white",
     boxShadow: theme.shadows[2],
@@ -36,6 +37,11 @@ const useStyless = makeStyles((theme) => ({
     left: "50%",
     transform: "translate(-50%,-50%)",
     borderRadius: "13px",
+    overflowY: "scroll",
+    '&::-webkit-scrollbar': {
+      width: '0.4em'
+    }
+
   },
   textfield: {
     width: "100%",
@@ -57,6 +63,7 @@ const FolderCreated = () => {
     folderData;
   const { SelectedCabinet } = cabinetCore;
   const [fileTypeAll, setFileTypeAll] = useState([]);
+  const [term, setTerm] = useState("");
 
   useEffect(() => {
     dispatch(getCabinetIdFolderNew(SelectedCabinet?.id));
@@ -82,16 +89,38 @@ const FolderCreated = () => {
     OpenModalCreatedFolder();
   };
 
-  const ObtenerSelected = () => {
-    const checkboxes = document.querySelectorAll(
-      'input[name="subject"]:checked'
-    );
-    const SelectedFiles = [];
-    checkboxes.forEach((checkbox) => {
-      SelectedFiles.push(checkbox.value);
-    });
-    dispatch(getFileTypeIdFolderNew(SelectedFiles));
+  const ObtenerSelected = (e) => {
+    const SelectedTypes = [];
+    const { name, checked } = e.target;
+    if (name === "allSelect") {
+      let tempUser = fileTypeAll.map((file) => {
+        return { ...file, isChecked: checked };
+      });
+      setFileTypeAll(tempUser);
+      tempUser.map((temp) => {
+        if (temp.isChecked == true) {
+          SelectedTypes.push(temp.fileTypeId);
+        }
+      });
+    } else {
+      let tempUser = fileTypeAll.map((file) =>
+        file.fileTypeName === name ? { ...file, isChecked: checked } : file
+      );
+      setFileTypeAll(tempUser);
+      tempUser.map((temp) => {
+        if (temp.isChecked == true) {
+          SelectedTypes.push(temp.fileTypeId);
+        }
+      });
+    }
+    dispatch(getFileTypeIdFolderNew(SelectedTypes));
   };
+
+  function searchingTerm(term) {
+    return function (x) {
+      return x.fileTypeName.toLowerCase().includes(term) || !term;
+    };
+  }
 
   const FolderNew = (
     <div className={styless.FolderCreated}>
@@ -120,20 +149,43 @@ const FolderCreated = () => {
         <TitleArchive>Tipo de Archivo</TitleArchive>
         <>
           <ContainerNameCheck>
+          <ContainerCeldaSearch>
+            <InputSearch
+              type="text"
+              placeholder="Buscar ..."
+              onChange={(e) => setTerm(e.target.value)}
+            />
+            {term === "" && (
+              <ContainerCeldaSelected>
+                <ContainerCHeck>
+                  <InputCheck
+                    onChange={ObtenerSelected}
+                    className="InputCheck"
+                    type="checkbox"
+                    name="allSelect"
+                  />
+                </ContainerCHeck>
+                <Tooltip title={"Seleccionar Todos"}>
+                  <ContainerText>SELECCIONAR TODOS</ContainerText>
+                </Tooltip>
+              </ContainerCeldaSelected>
+            )}
+          </ContainerCeldaSearch>
             {fileTypeAll ? (
-              fileTypeAll.map(({ fileTypeId, fileTypeName }, index) => (
-                <ContainerCeldaSelected>
+              fileTypeAll.filter(searchingTerm(term)).map((file, index) => (
+                <ContainerCeldaSelected key={index}>
                   <ContainerCHeck>
                     <InputCheck
                       type="checkbox"
                       onChange={ObtenerSelected}
-                      name="subject"
-                      value={fileTypeId}
-                      id={fileTypeId}
+                      name={file.fileTypeName}
+                      value={file.fileTypeId}
+                      id={file.fileTypeId}
+                      checked={file?.isChecked || false}
                     />
                   </ContainerCHeck>
-                  <Tooltip title={fileTypeName}>
-                    <ContainerText>{fileTypeName}</ContainerText>
+                  <Tooltip title={file.fileTypeName}>
+                    <ContainerText>{file.fileTypeName}</ContainerText>
                   </Tooltip>
                 </ContainerCeldaSelected>
               ))
@@ -173,6 +225,20 @@ const FolderCreated = () => {
 };
 
 export default FolderCreated;
+
+const InputSearch = styled.input`
+  margin: 0.5rem 0 0.5rem 0;
+  width: 100%;
+  height: 2rem;
+  outline: none;
+`;
+
+const ContainerCeldaSearch = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0.1rem;
+`;
 
 const ContainerCeldaSelected = styled.div`
   width: 100%;

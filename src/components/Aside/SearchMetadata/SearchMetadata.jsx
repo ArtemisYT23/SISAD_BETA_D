@@ -9,43 +9,44 @@ import {
   setFolderChildCore,
 } from "../../../redux/states/Folder";
 import { getMetadataByCabinet } from "../../../redux/states/Metadata";
-import { getFilterIndexNameConfig } from "../../../redux/states/Indexes";
-import { getTypeFileByCabinet } from "../../../redux/states/FileType";
 import { getNameGlobalChange } from "../../../redux/states/Name";
+import { getFilterIndexNameConfig } from "../../../redux/states/Indexes";
 import ItemFolder from "./ItemFolder/ItemFolder";
+import LoadingSpinner from "../../../utilities/LoadingSpinner";
 
 const SearchMetadata = () => {
   const dispatch = useDispatch();
   const { cabinetCore, folderCore, documentary } = useSelector(
     (store) => store
   );
-  const { cabinetFolder, isLoadingCabinet, SelectedCabinet, cabinets } =
+  const { isLoadingCabinet, SelectedCabinet, cabinets } =
     cabinetCore;
   const { folderCabinet } = folderCore;
   const { referent } = documentary;
-  const [term, setTerm] = useState("");
 
-  const setOptionsCabinet = (index) => {
-    cabinets.forEach((cab, i) => {
-      if (cab.id == index) {
-        dispatch(setFilterFoldersCore(cab.id));
-        dispatch(setSelectedCabinetCore(cab.id));
-        // dispatch(getMetadataByCabinet(cab.id));
-        // dispatch(getFilterIndexNameConfig(cab.name));
-        // dispatch(getTypeFileByCabinet(cab.id));
-        dispatch(clearFolderMetaSelected());
-        // referent.current.api.setFilterModel(null);
-        dispatch(getNameGlobalChange(cab.name));
-        dispatch(setFolderChildCore());
-      }
-    });
+  const setOptionsCabinet = (index, viewMode) => {
+    viewMode
+      ? cabinets.forEach((cab, i) => {
+          if (cab.id == index) {
+            dispatch(getFilterIndexNameConfig(cab.name));
+            dispatch(setFilterFoldersCore(cab.id));
+            dispatch(setSelectedCabinetCore(cab.id));
+            dispatch(clearFolderMetaSelected());
+            dispatch(getNameGlobalChange(cab.name));
+            //dispatch(getMetadataByCabinet(cab.id));
+            dispatch(setFolderChildCore());
+          }
+        })
+      : cabinets.forEach((cab, i) => {
+          if (cab.id == index) {
+            dispatch(setFilterFoldersCore(cab.id));
+            dispatch(setSelectedCabinetCore(cab.id));
+            dispatch(clearFolderMetaSelected());
+            dispatch(getNameGlobalChange(cab.name));
+            dispatch(setFolderChildCore());
+          }
+        });
   };
-
-  function searchingTerm(term) {
-    return function (x) {
-      return x.name.toLowerCase().includes(term) || !term;
-    };
-  }
 
   return (
     <SearchContainer>
@@ -55,14 +56,12 @@ const SearchMetadata = () => {
         ) : (
           <List>
             <Titulo>Gabinetes</Titulo>
-            <SearchUser
-              placeholder=" Buscar Gabinete"
-              onChange={(e) => setTerm(e.target.value)}
-            />
-            {cabinetFolder ? (
-              cabinetFolder.filter(searchingTerm(term)).map((cab, i) => (
+            {cabinets ? (
+              cabinets.map((cab, i) => (
                 <div key={cab.id}>
-                  <Celda onClick={() => setOptionsCabinet(cab.id)}>
+                  <Celda
+                    onClick={() => setOptionsCabinet(cab.id, cab.viewMode)}
+                  >
                     <Icons>
                       <IconSearch element="cabinet" />
                     </Icons>
@@ -123,14 +122,6 @@ const Titulo = styled.span`
   color: var(--primaryColor);
   display: flex;
   align-items: center;
-`;
-
-const SearchUser = styled.input`
-  width: 100%;
-  height: 1.8rem;
-  outline: none;
-  border: 1px solid #f68a20;
-  color: #5d5c5c;
 `;
 
 const Celda = styled.div`

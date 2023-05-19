@@ -1,26 +1,28 @@
+import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { Modal, TextField } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { setOpenModalUploaderUnirFile } from "../../../../../../../redux/states/ActionDocumentary";
 import { StyleDragArea } from "../../../../../../../Styles/DragArea";
 import "../FilesPreview/styles/modal.css";
-import "../FilesPreview/styles/ModalUpload.css"
+import "../FilesPreview/styles/ModalUpload.css";
 import {
   getNameFileDataNewCore,
   getDescriptionFileDataNewCore,
   getFileFileDataNewCore,
   getDocumentFileDataNewCore,
-  clearFileDataNewCore
+  clearFileDataNewCore,
 } from "../../../../../../../redux/formData/FilesData";
 import { sendFileDocumentaryDocu } from "../../../../../../../redux/formData/FileData";
 import { useState } from "react";
 import { useEffect } from "react";
+import { Tooltip } from "@material-ui/core";
 
 const useStyless = makeStyles((theme) => ({
   FileUploadUnit: {
     position: "absolute",
     width: "400px",
-    height: "500px",
+    height: "470px",
     backgroundColor: "white",
     border: "2px solid white",
     boxShadow: theme.shadows[2],
@@ -31,9 +33,9 @@ const useStyless = makeStyles((theme) => ({
     left: "50%",
     transform: "translate(-50%,-50%)",
     borderRadius: "13px",
-    '&::-webkit-scrollbar': {
-      width: '0.4em'
-    }
+    "&::-webkit-scrollbar": {
+      width: "0.4em",
+    },
   },
   textfield: {
     width: "100%",
@@ -47,8 +49,9 @@ const FileUploaderCreated = () => {
   const dispatch = useDispatch();
   const styless = useStyless();
 
-  const { modalDocumentary, filesData, documentary, uploader } =
-    useSelector((store) => store);
+  const { modalDocumentary, filesData, documentary, uploader } = useSelector(
+    (store) => store
+  );
   const { NameFile } = uploader;
   const { SelectedDocument } = documentary;
   const { FileUploadUnit } = modalDocumentary;
@@ -57,8 +60,8 @@ const FileUploaderCreated = () => {
   const [value, setValue] = useState(false);
 
   useEffect(() => {
-    dispatch(getDocumentFileDataNewCore(SelectedDocument?.id))
-  },[FileUploadUnit])
+    dispatch(getDocumentFileDataNewCore(SelectedDocument?.id));
+  }, [FileUploadUnit]);
 
   const setFile = (e) => {
     const file = e.target.files[0];
@@ -73,26 +76,33 @@ const FileUploaderCreated = () => {
     filesData.name && formFile.append("Name", filesData.name);
     filesData.description &&
       formFile.append("Description", filesData.description);
-      filesData.file && formFile.append("File", filesData.file);
-      filesData.fileTypeId && formFile.append("FileTypeId", filesData.fileTypeId);
-      filesData.documentId && formFile.append("DocumentId", filesData.documentId);
-    dispatch(
-      sendFileDocumentaryDocu(formFile, filesData.documentId)
-    );
+    filesData.file && formFile.append("File", filesData.file);
+    filesData.fileTypeId && formFile.append("FileTypeId", filesData.fileTypeId);
+    filesData.documentId && formFile.append("DocumentId", filesData.documentId);
+    dispatch(sendFileDocumentaryDocu(formFile, filesData.documentId));
     OpenModalUploaderDocu();
   };
 
   const Uploader = (
     <div className={styless.FileUploadUnit}>
       <form onSubmit={SaveFileDocumentary}>
-        <h1 className="titles">Subir Archivos {NameFile}</h1>
-        
+        <Tooltip title={NameFile}>
+          <Title>
+            <div>
+              <strong>
+                <span>Subir {NameFile}</span>
+              </strong>
+            </div>
+          </Title>
+        </Tooltip>
+
         <TextField
           value={name}
           type="text"
           className={styless.textfield}
           label="Nombre"
           onChange={(e) => dispatch(getNameFileDataNewCore(e.target.value))}
+          inputProps={{ maxLength: 190 }}
         />
 
         <br />
@@ -102,13 +112,16 @@ const FileUploaderCreated = () => {
           type="text"
           className={styless.textfield}
           label="Descripcion"
-          onChange={(e) => dispatch(getDescriptionFileDataNewCore(e.target.value))}
+          onChange={(e) =>
+            dispatch(getDescriptionFileDataNewCore(e.target.value))
+          }
+          inputProps={{ maxLength: 190 }}
         />
         <br />
         <br />
-          <label>
-            <input type="checkbox" checked={value} /> Archivo Cargado
-          </label>
+        <label>
+          <input type="checkbox" checked={value} /> Archivo Cargado
+        </label>
         <div className="ContentFile">
           <br />
           <StyleDragArea>
@@ -148,3 +161,22 @@ const FileUploaderCreated = () => {
 };
 
 export default FileUploaderCreated;
+
+const Title = styled.div`
+  div {
+    width: 310px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    align-items: center;
+    color: var(--primaryColor);
+  }
+
+  span {
+    text-transform: uppercase;
+    font-size: 21px;
+  }
+  strong {
+    float: center;
+  }
+`;

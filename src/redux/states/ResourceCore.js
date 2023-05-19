@@ -11,12 +11,14 @@ const initialState = {
 const GET_ALL_RESOURCE_PERMISIONS = "GET_ALL_RESOURCE_PERMISIONS";
 const GET_PERMISION_ERROR_RESOURCE = "GET_PERMISION_ERROR_RESOURCE";
 const SET_ACTIVE_SPINNER_RESOURCE = "SET_ACTIVE_SPINNER_RESOURCE";
+const CLEAR_DATA_MEMORY_RESOURCE = "CLEAR_DATA_MEMORY_RESOURCE";
 
 export default function ResourceCoreData(state = initialState, action) {
     switch (action.type) {
         case GET_ALL_RESOURCE_PERMISIONS:
         case GET_PERMISION_ERROR_RESOURCE:
         case SET_ACTIVE_SPINNER_RESOURCE:
+        case CLEAR_DATA_MEMORY_RESOURCE:
             return action.payload;
         default:
             return state;
@@ -135,6 +137,19 @@ export const deletePermissionCabinet = (userId) => async (dispatch, getState) =>
     }).catch(function (error) {
         console.log(error)
         toast.error('Accesos No Eliminados')
+    })
+}
+
+//limpiar estado de cierre de sesion 
+export const setClearDataMemoryResource = () => async (dispatch, getState) => {
+    const { resourceCore } = getState();
+    dispatch({
+        type: CLEAR_DATA_MEMORY_RESOURCE,
+        payload: {
+            ...resourceCore,
+            ResourcePermision: [],
+            isLoadingResource: false,
+        }
     })
 }
 

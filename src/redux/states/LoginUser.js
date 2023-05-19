@@ -1,7 +1,7 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 import { SecurityServer } from "../../config/axios";
-import { getAllCabinetsCore } from "./Cabinet";
+import { getAllCabinetsCore, getCabinetFolderResource } from "./Cabinet";
 import { getTypeFileConfig } from "./FileType";
 import { getAllGroupsCore } from "./Group";
 import { getAllFoldersCore } from "./Folder";
@@ -12,9 +12,14 @@ import { setOpenModalRecuperationPassword } from "./ActionSecurity";
 import { getAllPermisionResource } from "../states/ResourceCore";
 
 // const tocken = localStorage.getItem('tocken');
+// const sesionActive = localStorage.getItem('sesionActive');
+// const sesion = JSON.parse(sesionActive);
 
 const initialState = {
-    TockenUser: "",
+    TockenUser: '',
+    SesionActive: '',
+    // TockenUser: tocken,
+    // SesionActive: sesion,
     Route: false,
     passForm: 0,
     userId: "",
@@ -30,6 +35,7 @@ const CLEAR_NUMBER_SECTION_FORM = "CLEAR_NUMBER_SECTION_FORM";
 const SET_RESET_PASSWORD_REQUEST = "SET_RESET_PASSWORD_REQUEST";
 const PING_VALIDATED_REQUEST = "PING_VALIDATED_REQUEST";
 const PING_VALIDATED_REQUEST_ERROR = "PING_VALIDATED_REQUEST_ERROR";
+const CLEAR_DATA_MEMORY_LOGIN = "CLEAR_DATA_MEMORY_LOGIN";
 
 export default function SesionReducer(state = initialState, action) {
     switch (action.type) {
@@ -41,6 +47,7 @@ export default function SesionReducer(state = initialState, action) {
         case CLEAR_NUMBER_SECTION_FORM:
         case PING_VALIDATED_REQUEST:
         case PING_VALIDATED_REQUEST_ERROR:
+        case CLEAR_DATA_MEMORY_LOGIN:
             return action.payload;
         default:
             return state;
@@ -60,9 +67,51 @@ export const setLoginUserTocken = (LoginData) => async (dispatch, getState) => {
 
         },
     }).then(function (response) {
-        // localStorage.setItem('tocken', response.data.token);
-        // const tocken = localStorage.getItem('tocken');
-        // console.log(tocken);
+        if (response.status == 200) {
+            // localStorage.setItem('tocken', response.data.token);
+            // localStorage.setItem('sesionActive', JSON.stringify(LoginData));
+            // const tocken = localStorage.getItem('tocken');
+            // const sesionActive = localStorage.getItem('sesionActive');
+            // console.log(tocken);
+            // console.log(sesionActive);
+            dispatch({
+                type: TOCKEN_USER_LOGIN_SUCCESS,
+                payload: { ...sesion, TockenUser: response.data.token, Route: response.status }
+            });
+            toast.success("ACCESO EXITOSO");
+            dispatch(saveAllRolUserSecurity());
+            dispatch(getAllGroupsCore());
+            dispatch(getAllCabinetsCore());
+            // dispatch(getCabinetFolderResource());
+            dispatch(getAllFoldersCore());
+            dispatch(getTypeFileConfig());
+            dispatch(getAllDocumentDocu());
+            dispatch(getIndexCabinetGetAllConfig());
+            dispatch(getAllPermisionResource());
+        }
+    }).catch(function (error) {
+        console.log(error);
+        dispatch({
+            type: TOCKEN_USER_LOGIN_ERROR,
+            payload: { ...sesion, TockenUser: "" }
+        })
+        toast.error(error.response?.data);
+    })
+};
+
+//Refresh de pagina 
+export const setRefreshLoginUserTocken = (LoginData) => async (dispatch, getState) => {
+    const { sesion } = getState();
+    axios({
+        url: `${SecurityServer}user/login`,
+        method: "POST",
+        data: LoginData,
+        headers: {
+            'Content-Type': "Application/json",
+            'Access-Control-Allow-Origin': '*',
+
+        },
+    }).then(function (response) {
         if (response.status == 200) {
             dispatch({
                 type: TOCKEN_USER_LOGIN_SUCCESS,
@@ -72,6 +121,7 @@ export const setLoginUserTocken = (LoginData) => async (dispatch, getState) => {
             dispatch(saveAllRolUserSecurity());
             dispatch(getAllGroupsCore());
             dispatch(getAllCabinetsCore());
+            // dispatch(getCabinetFolderResource());
             dispatch(getAllFoldersCore());
             dispatch(getTypeFileConfig());
             dispatch(getAllDocumentDocu());
@@ -93,6 +143,7 @@ export const setLoginUserTocken = (LoginData) => async (dispatch, getState) => {
 export const setClearTockenInvalidate = () => async (dispatch, getState) => {
     const { sesion } = getState();
     // localStorage.removeItem('tocken');
+    // localStorage.removeItem('sesionActive');
     dispatch({
         type: CLEAR_TOCKEN_SESION_CLOSE_SECURITY,
         payload: { sesion, TockenUser: "" },
@@ -207,5 +258,22 @@ export const changePasswordVerification = (userPass) => async (dispatch, getStat
     }).catch(function (error) {
         console.log(error);
         toast.error("Error En Cambio de Contraseña")
+    })
+}
+
+//limpiar estado de cierre de sesion 
+export const setClearDataMemoryLoginSesion = () => async (dispatch, getState) => {
+    const { sesion } = getState();
+    dispatch({
+        type: CLEAR_DATA_MEMORY_LOGIN,
+        payload: {
+            ...sesion,
+            TockenUser: '',
+            SesionActive: '',
+            Route: false,
+            passForm: 0,
+            userId: "",
+            verifyPing: false,
+        }
     })
 }

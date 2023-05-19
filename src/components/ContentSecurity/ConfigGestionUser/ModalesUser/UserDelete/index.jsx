@@ -64,6 +64,7 @@ const UserDelete = () => {
         }
       ]
     }
+    console.log(dataDelete);
       dispatch(setUserDeleteSecurity(dataDelete));
       OpenModalUserDelete();
   };

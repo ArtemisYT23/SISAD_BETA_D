@@ -15,6 +15,7 @@ import {
 import {
   setSelectedNullCore,
   setSelectedSearchNullCore,
+  setChangeSelectView
 } from "../../../redux/states/View";
 import { setSelectedGroupCore } from "../../../redux/states/Group";
 import { setSelectedCabinetCore } from "../../../redux/states/Cabinet";
@@ -24,10 +25,10 @@ import {
   clearFolderCabinet,
 } from "../../../redux/states/Folder";
 import { setOpenDetalleModal } from "../../../redux/states/ActionDocumentary";
+import { cleanerSelectedDocument } from "../../../redux/states/Document";
 import { Tooltip } from "@material-ui/core";
 import "../../../Styles/Headers/Header.css";
 import user from "../../../../assets/Img/Core/user.png";
-import help from "../../../../assets/Img/Core/question.png";
 import settings from "../../../../assets/Img/Core/settings.png";
 import logout from "../../../../assets/Img/Core/logout.png";
 
@@ -53,9 +54,9 @@ const Header = () => {
   const [showMenu, setShowMenu] = useState(false);
 
   const ActiveMenu = () => {
-    if (selectedView != "list") {
+    // if (selectedView != "list") {
       setShowMenu(!showMenu);
-    }
+    // }
   };
 
   const changeStateDrop = () => {
@@ -67,6 +68,7 @@ const Header = () => {
   const CerrarSesion = () => {
     dispatch(closeSesionCleaningState());
     navigate(`/${PublicRoutes.LOGIN}`);
+    location.reload();
   };
 
   const RouteInitial = () => {
@@ -103,7 +105,10 @@ const Header = () => {
     dispatch(setOpenDetalleModal(false));
   };
 
-  const RouteFolderChild = () => {};
+  const RouteFolderChild = () => {
+    dispatch(setChangeSelectView("folder"));
+    dispatch(cleanerSelectedDocument());
+  };
 
   const handleUrl = () => {
     navigate(`/private/${PrivateRoutes.DASHBOARD}`);
@@ -135,10 +140,6 @@ const Header = () => {
                 <img src={settings}></img>
                 <a> {"Configuraciones"} </a>
               </li>
-              {/* <li className="dropdownItem">
-                <img src={help}></img>
-                <a> {"Ayuda"} </a>
-              </li> */}
               <li onClick={() => CerrarSesion()} className="dropdownItem">
                 <img src={logout}></img>
                 <a> {"Cerrar Sesion"} </a>
@@ -150,50 +151,58 @@ const Header = () => {
       <HeaderUP>
         <NameContainer>
           {NameGlobalSelected ? (
-            <TextName>{NameGlobalSelected}</TextName>
+            <TextNameResource>
+              <h1>{NameGlobalSelected}</h1>
+            </TextNameResource>
           ) : (
-            <TextName>SISAD CLOUD</TextName>
+            <Title>
+              <h1>SISAD CLOUD</h1>
+            </Title>
           )}
         </NameContainer>
 
         <OptionContainer>
           <ContentText>
-            <TextName>{RolSesion[1]}</TextName>
+            <TextName>
+              <h1>{RolSesion[1]}</h1>
+            </TextName>
           </ContentText>
           <Perfiles onClick={() => ActiveMenu()}>
             <Avatar src={photo} />
           </Perfiles>
         </OptionContainer>
       </HeaderUP>
-      <HeaderDOWN>
-        <Tooltip title="Inicio">
-          <LineBreack onClick={() => RouteInitial()}>.REGRESAR /</LineBreack>
-        </Tooltip>
-        {breackcompGroup != null && (
-          <LineBreack onClick={() => RouteGroup(breackcompGroup?.id)}>
-            {breackcompGroup?.name}
-            <label> /</label>
-          </LineBreack>
-        )}
-        {breackcomp && (
-          <LineBreack onClick={() => RouteCabinet(breackcomp?.id)}>
-            {breackcomp?.name}
-          </LineBreack>
-        )}
-        {breackcompFolder && (
-          <LineBreack onClick={() => RouteFolder(breackcompFolder?.id)}>
-            <label> /</label>
-            {breackcompFolder?.name}
-          </LineBreack>
-        )}
+      {selectedView != "list" && (
+        <HeaderDOWN>
+          <Tooltip title="Inicio">
+            <LineBreack onClick={() => RouteInitial()}>.REGRESAR /</LineBreack>
+          </Tooltip>
+          {breackcompGroup != null && (
+            <LineBreack onClick={() => RouteGroup(breackcompGroup?.id)}>
+              {breackcompGroup?.name}
+              <label> /</label>
+            </LineBreack>
+          )}
+          {breackcomp && (
+            <LineBreack onClick={() => RouteCabinet(breackcomp?.id)}>
+              {breackcomp?.name}
+            </LineBreack>
+          )}
+          {breackcompFolder && (
+            <LineBreack onClick={() => RouteFolder(breackcompFolder?.id)}>
+              <label> /</label>
+              {breackcompFolder?.name}
+            </LineBreack>
+          )}
 
-        {breackcompFolderChild != null && (
-          <LineBreack onClick={() => RouteFolderChild()}>
-            <label> /</label>
-            {breackcompFolderChild}
-          </LineBreack>
-        )}
-      </HeaderDOWN>
+          {breackcompFolderChild != null && (
+            <LineBreack onClick={() => RouteFolderChild()}>
+              <label> /</label>
+              {breackcompFolderChild}
+            </LineBreack>
+          )}
+        </HeaderDOWN>
+      )}
     </HeaderContainer>
   );
 };
@@ -226,10 +235,36 @@ const ContentText = styled.div`
   text-align: center;
 `;
 
-const TextName = styled.h1`
-  font-size: 1.5rem;
-  margin: 1rem 0 1.5rem 0;
-  color: var(--primaryColor);
+const TextNameResource = styled.div`
+  display: flex;
+  text-align: justify;
+  h1 {
+    font-size: 25px;
+    color: var(--primaryColor);
+  }
+`;
+
+const Title = styled.div`
+  width: 250px;
+  display: flex;
+  text-align: justify;
+  h1 {
+    font-size: 25px;
+    color: var(--primaryColor);
+  }
+`;
+
+const TextName = styled.div`
+  width: 80px;
+  display: flex;
+  text-align: justify;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  h1 {
+    font-size: 25px;
+    color: var(--primaryColor);
+  }
 `;
 
 const OptionContainer = styled.div`

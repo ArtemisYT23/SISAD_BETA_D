@@ -18,7 +18,7 @@ const ContainerSearch = () => {
   const { SearchCabinet, isLoadingSearchCabinet } = cabinetCore;
   const { selectedView } = viewCore;
   return (
-    <DocumentContainer onClick={() => console.log(active)}>
+    <DocumentContainer>
       <ContainerSearchCabinet>
         <ContainerText>
           <TextTitle>Gabinetes</TextTitle>
@@ -91,7 +91,7 @@ const ContainerSearch = () => {
                     fileTypeId,
                     fileTypeName,
                     documentId,
-                    file,
+                    fileData,
                   },
                   index
                 ) => (
@@ -102,9 +102,9 @@ const ContainerSearch = () => {
                     fileTypeId={fileTypeId}
                     documentId={documentId}
                     name={name}
-                    fileTypeName={fileTypeName}
                     description={description}
-                    file={file}
+                    file={fileData}
+                    fileTypeName={fileTypeName}
                     element="archivos"
                   />
                 )

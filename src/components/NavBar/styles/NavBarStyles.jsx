@@ -26,6 +26,26 @@ const separetorContainer = styled.div`
 export const LogoContainer = styled(separetorContainer)`
   position: relative;
   background-image: url(${(props) => props.logo});
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+  &::after {
+    content: "";
+    width: 100%;
+    height: 1px;
+    background-color: var(--lineColor);
+    position: absolute;
+    bottom: 0;
+  }
+  @media (max-width: 767px) {
+    display: none;
+  }
+`;
+
+export const LogoContainerIcon = styled(separetorContainer)`
+  position: relative;
+  background-image: url(${(props) => props.logo});
   background-size: 50%;
   background-repeat: no-repeat;
   background-position: center;

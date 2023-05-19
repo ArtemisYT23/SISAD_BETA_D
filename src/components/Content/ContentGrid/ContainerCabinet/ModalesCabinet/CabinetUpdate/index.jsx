@@ -19,7 +19,9 @@ import {
   saveNameCabinetSelected,
   saveDescriptionSelected,
   saveGroupIdSelected,
+  saveConfigCabinetUpdate,
   saveFileTypeSelected,
+  changeDataCabinetUpdate,
   getGroupIdNullCabinetNew,
   setClearCabinetDataUpdate,
 } from "../../../../../../redux/formData/CabinetData";
@@ -40,6 +42,10 @@ const useStyless = makeStyles((theme) => ({
     left: "50%",
     transform: "translate(-50%, -50%)",
     borderRadius: "13px",
+    overflowY: "scroll",
+    "&::-webkit-scrollbar": {
+      width: "0.4em",
+    },
   },
   textfield: {
     width: "100%",
@@ -61,24 +67,33 @@ const CabinetUpdate = () => {
     descriptionCabinet,
     onDay,
     groupIdCabinet,
+    viewModeUpdate,
     filetypeSelected,
   } = cabinetData;
   const { CabinetUpdate } = modalCore;
   const { UpdateSelectedCabinet } = cabinetCore;
   const { groups } = groupCore;
   const { FilesCabinets, FilesNoCabinets, isLoadingTypeFile } = typeFileCore;
+  const [fileTypeAll, setFileTypeAll] = useState([]);
+  const [term, setTerm] = useState("");
 
   useEffect(() => {
     dispatch(saveIdCabinetSelected(UpdateSelectedCabinet?.id));
     dispatch(saveNameCabinetSelected(UpdateSelectedCabinet?.name));
     dispatch(saveDescriptionSelected(UpdateSelectedCabinet?.description));
     dispatch(saveGroupIdSelected(UpdateSelectedCabinet?.groupId));
+    dispatch(saveConfigCabinetUpdate(UpdateSelectedCabinet?.viewMode));
+    setFileTypeAll(FilesNoCabinets);
   }, [CabinetUpdate]);
 
   const handleChange = (value) => {
     value != 0
       ? dispatch(saveGroupIdSelected(value))
       : dispatch(getGroupIdNullCabinetNew());
+  };
+
+  const handleChangeConfig = (value) => {
+    dispatch(changeDataCabinetUpdate(value));
   };
 
   const handleSubmit = async (e) => {
@@ -88,6 +103,7 @@ const CabinetUpdate = () => {
       name: nameCabinet,
       description: descriptionCabinet,
       onDay: onDay,
+      viewMode: viewModeUpdate,
       groupId: groupIdCabinet,
       fileType: filetypeSelected,
     };
@@ -96,18 +112,42 @@ const CabinetUpdate = () => {
     abrirModalUpdateCabinet();
   };
 
-  const ObtenerCabinet = () => {
-    const checkboxes = document.querySelectorAll(
-      'input[name="fileCabinet"]:checked'
-    );
-    const SelectedCabinetFiles = [];
-    checkboxes.forEach((checkbox) => {
-      SelectedCabinetFiles.push(checkbox.value);
-    });
-    dispatch(saveFileTypeSelected(SelectedCabinetFiles));
+  const ObtenerCabinet = (e) => {
+    const SelectedTypes = [];
+    const { name, checked } = e.target;
+    if (name === "allSelect") {
+      let tempUser = fileTypeAll.map((file) => {
+        return { ...file, isChecked: checked };
+      });
+      setFileTypeAll(tempUser);
+      tempUser.map((temp) => {
+        if (temp.isChecked == true) {
+          SelectedTypes.push(temp.fileTypeId);
+        }
+      });
+    } else {
+      let tempUser = fileTypeAll.map((file) =>
+        file.fileTypeName === name ? { ...file, isChecked: checked } : file
+      );
+      setFileTypeAll(tempUser);
+      tempUser.map((temp) => {
+        if (temp.isChecked == true) {
+          SelectedTypes.push(temp.fileTypeId);
+        }
+      });
+    }
+    dispatch(saveFileTypeSelected(SelectedTypes));
   };
 
+  function searchingTerm(term) {
+    return function (x) {
+      return x.fileTypeName.toLowerCase().includes(term) || !term;
+    };
+  }
+
   const None = 0;
+  const active = "active";
+  const inactive = "inactive";
 
   const Update = (
     <div className={styless.CabinetUpdate}>
@@ -133,6 +173,19 @@ const CabinetUpdate = () => {
         />
         <br />
         <br />
+        <TitleArchive>Configuracion Gabinete: </TitleArchive>
+        <Selected onChange={(e) => handleChangeConfig(e.target.value)}>
+          {viewModeUpdate == true && (
+            <option hidden>Estructura Jerarquica</option>
+          )}
+
+          {viewModeUpdate == false && <option hidden>Estructura TTHH</option>}
+          <option value={active}>Estructura TTHH</option>
+          <option value={inactive}>Estructura Jerarquica</option>
+        </Selected>
+        <br />
+        <br />
+
         {FilesCabinets != "" ? (
           <TitleArchive>Tipo de Archivo Existente</TitleArchive>
         ) : (
@@ -176,23 +229,49 @@ const CabinetUpdate = () => {
         ) : (
           <>
             <ContainerNameCheck>
-              {FilesNoCabinets ? (
-                FilesNoCabinets.map(({ fileTypeId, fileTypeName }, index) => (
+              <ContainerCeldaSearch>
+                <InputSearch
+                  type="text"
+                  placeholder="Buscar ..."
+                  onChange={(e) => setTerm(e.target.value)}
+                />
+                {term === "" && (
                   <ContainerCeldaSelected>
                     <ContainerCHeck>
-                      <input
+                      <InputCheck
                         onChange={ObtenerCabinet}
+                        className="InputCheck"
                         type="checkbox"
-                        name="fileCabinet"
-                        value={fileTypeId}
-                        id={fileTypeId}
+                        name="allSelect"
                       />
                     </ContainerCHeck>
-
-                    <Tooltip title={fileTypeName}>
-                      <ContainerText>{fileTypeName}</ContainerText>
+                    <Tooltip title={"Seleccionar Todos"}>
+                      <ContainerText>SELECCIONAR TODOS</ContainerText>
                     </Tooltip>
                   </ContainerCeldaSelected>
+                )}
+              </ContainerCeldaSearch>
+              {fileTypeAll ? (
+                fileTypeAll.filter(searchingTerm(term)).map((file, index) => (
+                  <>
+                    <ContainerCeldaSelected key={index}>
+                      <ContainerCHeck>
+                        <input
+                          onChange={ObtenerCabinet}
+                          className="InputCheck"
+                          type="checkbox"
+                          name={file.fileTypeName}
+                          checked={file?.isChecked || false}
+                          value={file.fileTypeId}
+                          id={file.fileTypeId}
+                        />
+                      </ContainerCHeck>
+
+                      <Tooltip title={file.fileTypeName}>
+                        <ContainerText>{file.fileTypeName}</ContainerText>
+                      </Tooltip>
+                    </ContainerCeldaSelected>
+                  </>
                 ))
               ) : (
                 <></>
@@ -240,6 +319,20 @@ const CabinetUpdate = () => {
 };
 
 export default CabinetUpdate;
+
+const InputSearch = styled.input`
+  margin: 0.5rem 0 0.5rem 0;
+  width: 100%;
+  height: 2rem;
+  outline: none;
+`;
+
+const ContainerCeldaSearch = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0.1rem;
+`;
 
 const ContainerCeldaSelected = styled.div`
   width: 100%;

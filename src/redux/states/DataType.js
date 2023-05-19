@@ -15,6 +15,7 @@ const GET_ALL_TYPEDATA_ERROR_CONFIG = "GET_ALL_TYPEDATA_ERROR_CONFIG";
 const SELECTED_ERRORS_TYPEDATA_CONFIG = "SELECTED_ERRORS_TYPEDATA_CONFIG";
 const SELECTED_TYPEDATA_CONFIG = "SELECTED_TYPEDATA_CONFIG";
 const SET_ACTIVE_SPINNER_DATATYPE = "SET_ACTIVE_SPINNER_DATATYPE";
+const SET_CLEANER_MEMORY_DATATYPE = "SET_CLEANER_MEMORY_DATATYPE";
 
 export default function TypeDataReducer(state = initialState, action) {
     switch (action.type) {
@@ -23,6 +24,7 @@ export default function TypeDataReducer(state = initialState, action) {
         case SELECTED_ERRORS_TYPEDATA_CONFIG:
         case SELECTED_TYPEDATA_CONFIG:
         case SET_ACTIVE_SPINNER_DATATYPE:
+        case SET_CLEANER_MEMORY_DATATYPE:
             return action.payload;
         default:
             return state;
@@ -160,3 +162,21 @@ export const DeleteTypeDataConfig = (DeleteData, id) => async (dispatch, getStat
         toast.error('Tipo de Dato no Eliminado');
     });
 };
+
+
+//limpiar estado para cierre de sesion 
+export const setCleanerMemoryDataType = () => async (dispatch, getState) => {
+    const { typeDataCore } = getState();
+    dispatch({
+        type: SET_CLEANER_MEMORY_DATATYPE,
+        payload: {
+            ...typeDataCore,
+            TypeData: [],
+            isLoadingDataType: false,
+            SelectedTypeData: "",
+            elementError: "",
+        }
+    })
+}
+
+

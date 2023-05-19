@@ -1,9 +1,8 @@
-import { setClearTockenInvalidate } from "./LoginUser";
+import { setClearDataMemoryLoginSesion } from "./LoginUser";
 import {
     setSelectedNullCore,
     setSelectedSearchNullCore,
 } from "./View";
-import { setClearMemoryDataGroupCore } from "./Group";
 import { setClearDataCabinetCore } from "./Cabinet";
 import { clearDataFolder, clearFolderCabinet, setFolderChildCore } from "./Folder";
 import { setClearDataActiveDocumentary } from "./ActionDocumentary";
@@ -13,6 +12,19 @@ import { setClearMemoryDataViewCore } from "./View";
 import { clearSelectionOptions } from "../states/OptionsMenu";
 import { clearDataIndexManagment } from "../states/Indexes";
 import { setCleanerModalCore } from "../states/ActionCore";
+import { setClearDataMemoryResource } from "../states/ResourceCore";
+import { setClearDataMemoryProfile } from "../states/Profile";
+import { setClearDataMemoryMetadata } from "../states/Metadata";
+import { setClearDataMemoryList } from "../states/List";
+import { setClearDataMemoryIndex } from "../states/Indexes";
+import { setClearDataMemoryHistory } from "../states/History";
+import { setClearMemoryDataGroupCore } from "../states/Group";
+import { clearDataMemoryFiletype } from "../states/FileType";
+import { setCleanerFileDocu } from "../states/Files";
+import { setClearDataMemoryDocument } from "../states/Document";
+import { setCleanerMemoryDataType } from "../states/DataType";
+import { setCleanerMemoryActionSecurity } from "../states/ActionSecurity";
+import { setCleanerMemoryActionConfig } from "../states/ActionConfig";
 
 const initialState = {
     breackcompGroup: null,
@@ -39,6 +51,7 @@ const ADD_DATA_ELEMENT_FOLDER_CHILD_CORE = "ADD_DATA_ELEMENT_FOLDER_CHILD_CORE";
 const CLEAR_DATA_ELEMENT_FOLDER_SELECTED_CORE = "CLEAR_DATA_ELEMENT_FOLDER_SELECTED_CORE";
 const GET_NAME_ELEMENT_MANAGMENT_CHANGE = "GET_NAME_ELEMENT_MANAGMENT_CHANGE";
 const CLEAR_DATA_ELEMENT_FOLDER_CHILD_CORE = "CLEAR_DATA_ELEMENT_FOLDER_CHILD_CORE";
+const SET_CLEANER_MEMORY_NAME_CORE = "SET_CLEANER_MEMORY_NAME_CORE";
 
 export default function NameReducer(state = initialState, action) {
     switch (action.type) {
@@ -56,6 +69,7 @@ export default function NameReducer(state = initialState, action) {
         case CLEAR_DATA_ELEMENT_FOLDER_SELECTED_CORE:
         case GET_NAME_ELEMENT_MANAGMENT_CHANGE:
         case CLEAR_DATA_ELEMENT_FOLDER_CHILD_CORE:
+        case SET_CLEANER_MEMORY_NAME_CORE:
             return action.payload;
         default:
             return state;
@@ -197,24 +211,50 @@ export const setClearElementFolderChildBreak = () => async (dispatch, getState) 
     })
 }
 
+//limpiar estado para cierre de sesion 
+export const setCleanerMemoryNameCore = () => async (dispatch, getState) => {
+    const { nameCore } = getState();
+    dispatch({
+        type: SET_CLEANER_MEMORY_NAME_CORE,
+        payload: {
+            ...nameCore,
+            breackcompGroup: null,
+            breackcomp: null,
+            breackcompFolder: null,
+            breackcompFolderChild: null,
+            NameGlobalSelected: "",
+            NameManagmentSelected: "",
+            elementError: "",
+        }
+    })
+}
+
+
+
 
 //cierre de sesion global
 export const closeSesionCleaningState = () => async (dispatch, getState) => {
-    dispatch(setClearElementFolderBreak());
-    dispatch(setClearElementBreak());
-    dispatch(setClearElementGroupBreak());
-    dispatch(getNameGlobalChangeCleaner());
-    dispatch(setClearTockenInvalidate());
-    dispatch(setSelectedNullCore());
-    dispatch(setSelectedSearchNullCore());
-    dispatch(setClearMemoryDataGroupCore());
-    dispatch(setClearDataCabinetCore());
-    dispatch(clearDataFolder());
-    dispatch(setClearDataActiveDocumentary());
-    dispatch(setClearMemoryDataUserCore());
-    dispatch(setClearMemoryDataSesionUserCore());
+    dispatch(setClearDataMemoryLoginSesion());
     dispatch(setClearMemoryDataViewCore());
+    dispatch(setClearMemoryDataSesionUserCore());
+    dispatch(setClearMemoryDataUserCore());
+    dispatch(setClearDataMemoryResource());
+    dispatch(setClearDataMemoryProfile());
+    dispatch(setClearDataMemoryMetadata());
+    dispatch(setClearDataMemoryList());
+    dispatch(setClearDataMemoryIndex());
+    dispatch(setClearDataMemoryHistory());
+    dispatch(setClearMemoryDataGroupCore());
+    dispatch(clearDataFolder());
+    dispatch(clearDataMemoryFiletype());
+    dispatch(setCleanerFileDocu());
+    dispatch(setClearDataMemoryDocument());
+    dispatch(setCleanerMemoryDataType());
+    dispatch(setClearDataCabinetCore());
+    dispatch(setCleanerMemoryActionSecurity());
     dispatch(setCleanerModalCore());
+    dispatch(setCleanerMemoryActionConfig());
+    dispatch(setCleanerMemoryNameCore());
 }
 
 //Estados iniciales para documentary
@@ -230,6 +270,8 @@ export const CleaningStateInitial = () => async (dispatch, getState) => {
     dispatch(setClearDataActiveDocumentary());
     dispatch(setCleanerModalCore());
     dispatch(setFolderChildCore());
+    dispatch(setClearMemoryDataViewCore());
+
 }
 
 //Estados iniciales para Managment

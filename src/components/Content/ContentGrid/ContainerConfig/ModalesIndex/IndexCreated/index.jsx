@@ -19,6 +19,8 @@ import {
   getDataTypeNullCabinetNew,
   getlistNameIndexNew,
   getListNameNullCabinetNew,
+  getRequiredIndexNew,
+  getUniqueIndexNew,
   getMinValueIndexNew,
   getMaxValueIndexNew,
   setClearIndexDataNew,
@@ -28,6 +30,7 @@ const useStyless = makeStyles((theme) => ({
   IndexCreated: {
     position: "absolute",
     width: "400px",
+    height: "505px",
     backgroundColor: "white",
     border: "2px solid white",
     boxShadow: theme.shadows[2],
@@ -36,6 +39,10 @@ const useStyless = makeStyles((theme) => ({
     left: "50%",
     transform: "translate(-50%, -50%)",
     borderRadius: "13px",
+    overflowY: "scroll",
+    "&::-webkit-scrollbar": {
+      width: "0.4em",
+    },
   },
   textfield: {
     width: "100%",
@@ -106,6 +113,9 @@ const IndexCreated = () => {
 
   const Dato = 0;
   const List = 0;
+
+  const active = "activo";
+  const inactive = "inactivo";
 
   const bodyIndex = (
     <div className={styless.IndexCreated}>
@@ -243,7 +253,37 @@ const IndexCreated = () => {
             )}
           </select>
         )} */}
+        <TitleArchive>Requerido:</TitleArchive>
+        <Selected
+          onChange={(e) => dispatch(getRequiredIndexNew(e.target.value))}
+        >
+          <option hidden>False</option>
+          <option value={inactive}>False</option>
+          <option value={active}>True</option>
+        </Selected>
 
+        <br />
+        <br />
+        {dataTypeName != "LIST" &&
+        dataTypeName != "IMAGE" &&
+        dataTypeName != "IDENTITY" &&
+        dataTypeName != "BOOLEAN" ? (
+          <>
+            <TitleArchive>Unico:</TitleArchive>
+            <Selected
+              onChange={(e) => dispatch(getUniqueIndexNew(e.target.value))}
+            >
+              <option hidden>False</option>
+
+              <option value={inactive}>False</option>
+              <option value={active}>True</option>
+            </Selected>
+          </>
+        ) : (
+          <></>
+        )}
+
+        <br />
         <br />
         <div align="right">
           {name != "" &&
